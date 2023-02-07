@@ -1,0 +1,45 @@
+#preamble header {
+    /* padding-top: 10vh; */
+    padding: 2vh 0;
+    margin: 2.5% 2.5% 2.5% 345px;
+    display: block;
+    width: 95%;
+}
+
+a[href*="//"]:after {
+  font-weight: 300;
+  font-size: .85em;
+  content: "\2197"; /* top right arrow: ↗ */
+}
+
+#preamble nav {
+    max-width: 1000vw;
+    float: left;
+    text-align: center;
+}
+
+@media screen and (max-width: 768px) {
+    #preamble header {
+        margin-left: 0;
+        padding: 5vh 5vw 0 5vw;
+    }
+}
+
+@media (max-width: 600px) {
+    #preamble {
+        width: 100%;
+        padding: 0 0;
+        margin-top: 20px;
+        margin-bottom: 30px;
+        /* display: block; */
+    }
+
+    #preamble header {
+        /* display: block; */
+    }
+
+    #preamble nav {
+        /* display: inline-block; */
+        line-height: 2.5em;
+    }
+}

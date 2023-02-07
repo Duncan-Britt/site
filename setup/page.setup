@@ -1,0 +1,12 @@
+# -*- mode: org; -*-
+
+#+OPTIONS: html-style:nil
+
+# use the path from within the generated public directory:
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="/stylesheets/page.css"/>
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="/stylesheets/layout.css"/>
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="/stylesheets/color-scheme.css"/>
+#+HTML_HEAD: <base target="_blank">
+
+# JAVASCRIPTS
+#+HTML_HEAD: <script type="module" src="/javascripts/page.js"></script>

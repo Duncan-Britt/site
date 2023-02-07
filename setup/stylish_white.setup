@@ -1,0 +1,6 @@
+# -*- mode: org; -*-
+
+#+OPTIONS: html-style:nil
+
+# use the path from within the generated public directory:
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="/stylesheets/stylish_white.css"/>

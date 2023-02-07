@@ -1,0 +1,5 @@
+#+TITLE: Contact
+#+SETUPFILE: ../setup/page.setup
+
+* Email
+My initials + ru997 at gmail

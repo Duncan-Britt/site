@@ -1,0 +1,22 @@
+#+TITLE: Including Source Blocks
+#+SETUPFILE: ../../setup/theme-bigblow.setup
+
+#+begin_SRC C++ :exports both
+  #include <iostream>
+
+  int main()
+  {
+      std::cout << "Hello, World!" << std::endl;
+      return 0;
+  }
+#+end_SRC
+
+#+RESULTS:
+| Hello | World! |
+
+
+* yo
+stuff
+** more of this
+yeah
+** uh

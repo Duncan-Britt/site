@@ -1,0 +1,13 @@
+merge contact page and about page
+duncan britt -> about
+resume under about
+remove tile
+center content on pages under nav bar
+consistent colors between pages and fonts
+consistent sizes
+more consstency!
+
+nav bar could pop out more
+
+consistent link colors
+maybe the nav bar should be fixed and have a different background

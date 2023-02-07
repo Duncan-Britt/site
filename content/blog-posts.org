@@ -1,0 +1,8 @@
+#+TITLE: Blog Posts
+#+OPTIONS: html-style:nil
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="/stylesheets/page.css"/>
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="/stylesheets/layout.css"/>
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="/stylesheets/color-scheme.css"/>
+#+HTML_HEAD: <base target="_self">
+#+HTML_HEAD: <script type="module" src="/javascripts/page.js"></script>
+#+INCLUDE: ./blog/blog-archive.org :lines "3-"

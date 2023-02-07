@@ -1,0 +1,18 @@
+#+TITLE: Duncan Britt
+#+SETUPFILE: ../setup/page.setup
+
+* Computer Science Student
+
+* Skills
+- C, C++, JavaScript, Ruby
+- HTML, CSS
+- Sinatra, SQL
+- Git
+
+* Highlighted Projects
+- [[https://duncan-britt.github.io/splice-docs/][Splice]]
+- [[https://word-ladders.herokuapp.com/play][Word Ladders]]
+
+* Links
+- [[https://github.com/Duncan-Britt/][Github]]
+- [[https://www.codewars.com/users/Duncan-Britt][Code Wars]] 
