@@ -36,10 +36,10 @@
        (list "org-pages"
              :recursive nil
              :base-directory "./content"
-             :base-extension "org"
+             :base-extension "org"             
              :publishing-directory "./public"
              :publishing-function 'org-html-publish-to-html
-             :exclude ".*\~"
+             :exclude ".*\~\\|.*\.draft\.org"
              :with-author nil         ;; Don't include author name
              :with-creator nil        ;; Don't include Emacs and Org versions in footer
              :with-toc nil            ;; Don't include table of contents
@@ -53,7 +53,7 @@
              :base-extension "org"
              :publishing-directory "./public/blog"
              :publishing-function 'org-html-publish-to-html
-             :exclude ".*\~"             
+             :exclude ".*\~\\|.*\.draft\.org"
              :with-author nil         ;; Don't include author name
              :with-creator nil        ;; Don't include Emacs and Org versions in footer
              :with-toc t              ;; Include table of contents
@@ -68,7 +68,7 @@
        (list "static"
              :recursive t
              :base-directory "./content"
-             :exclude ".*\~"             
+             :exclude ".*\~"
              :base-extension "css\\|js\\|html\\|png\\|jpg\\|svg\\|webp\\|gif\\|pdf\\|mp3\\|ogg\\|swf"
              :publishing-directory "./public"
              :publishing-function 'org-publish-attachment)

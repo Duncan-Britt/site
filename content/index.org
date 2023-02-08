@@ -1,18 +1,36 @@
 #+TITLE: Duncan Britt
 #+SETUPFILE: ../setup/page.setup
 
-* Computer Science Student
+* *Computer Science Student* - Denver, CO
+I'm currently in my final semester at Arapahoe Community College before graduating with an Associate of Science and transferring to a 4 year institution.
 
-* Skills
-- C, C++, JavaScript, Ruby
-- HTML, CSS
-- Sinatra, SQL
-- Git
+* *Highlighted Projects*
+- [[https://duncan-britt.github.io/splice-docs/][Splice]]:
+  #+BEGIN_EXPORT html
+  A templating language for front-end web development - 
+  <a target="_self" href="/blog/splice/splice.html"> article</a>
+  #+END_EXPORT
+- [[https://word-ladders.herokuapp.com/play][Word Ladders]]:
+  #+BEGIN_EXPORT html
+  Software generated word-ladder puzzle game -
+  <a target="_self" href="/blog/software-generated-word-ladder-puzzles-and-web-app/software-generated-word-ladder-puzzles-and-web-app.html"> article</a>
+  #+END_EXPORT
 
-* Highlighted Projects
-- [[https://duncan-britt.github.io/splice-docs/][Splice]]
-- [[https://word-ladders.herokuapp.com/play][Word Ladders]]
-
-* Links
+* *Links*
 - [[https://github.com/Duncan-Britt/][Github]]
 - [[https://www.codewars.com/users/Duncan-Britt][Code Wars]] 
+
+* *Skills*
+#+BEGIN_EXPORT html
+<ul class="org-ul">
+<li>C, C++, JavaScript, Ruby, HTML, CSS <label>Languages</label></li>
+<li>Sinatra, SQL <label>Libraries, Frameworks & DSLs</label></li>
+<li>Git <label>Technologies & Tools</label></li>
+</ul>
+#+END_EXPORT
+
+* *Contact*
+Email: My initials + ru997 at gmail
+
+* *Resume*
+[[file:documents/Duncan_Britt_Resume.pdf][PDF Download]]

@@ -1,13 +1,21 @@
-merge contact page and about page
-duncan britt -> about
-resume under about
-remove tile
-center content on pages under nav bar
-consistent colors between pages and fonts
-consistent sizes
-more consstency!
+* DONE merge contact page and about page
+* DONE duncan britt -> about
+* DONE resume under about
+* DONE remove tile
+* DONE center content on pages under nav bar
+* TODO more consistency!
+** DONE consistent link colors
+** TODO consistent sizes
+** TODO consistent colors between pages and fonts
 
-nav bar could pop out more
+* TODO nav bar could pop out more
+* nav bar should be fixed and have a different background
 
-consistent link colors
-maybe the nav bar should be fixed and have a different background
+* DONE Enable Drafts
+
+* TODO create terminal app runner ala coder pad
+https://www.indiehackers.com/interview/growing-an-interviewing-platform-for-programmers-to-170k-mo-c95d5d0dd9
+
+* TODO Create API for adding a comment section, and use it
+
+

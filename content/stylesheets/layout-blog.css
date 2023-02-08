@@ -16,6 +16,7 @@ a[href*="//"]:after {
     max-width: 1000vw;
     float: left;
     text-align: center;
+    font-size: 1.2em;
 }
 
 @media screen and (max-width: 768px) {

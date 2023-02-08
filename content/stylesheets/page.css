@@ -8,14 +8,21 @@ body {
     font-weight: light;
     counter-reset: section;
     counter-reset: toc-section;
-    counter-increment: toc-section;    
+    counter-increment: toc-section;
 
     /* background-image: url("/images/background-tile-Tribal-Design-Frame-2.svg"); */
     /* background-image: url("/images/background-tile-1.svg"); */
     /* background-image: url("/images/vintage-tapestry-background.webp"); */
     /* background-image: url("/images/pattern-stripe-bohemian-background-white.webp"); */
-    /* background-size: 200px 100px; */    
+    /* background-size: 200px 100px; */
 }
+
+label {
+    font-size: .75em;
+}
+
+label:before {content:"[";}
+label:after {content:"]";}
 
 /* canvas { */
 /*     position: absolute; */
@@ -23,19 +30,33 @@ body {
 /*     left: 0; */
 /* } */
 
-@media (min-width: 600px) {
-    body {
-        background-image: url("/images/floral-seamless-pattern-background-geometric-ornament-for-wallpapers-and-backgrounds-black-and-white.webp");
-        background-size: 300px 300px;
-        background-repeat: repeat;
-    }
+/* @media (min-width: 600px) { */
+/*     body { */
+/*         background-image: url("/images/floral-seamless-pattern-background-geometric-ornament-for-wallpapers-and-backgrounds-black-and-white.webp"); */
+/*         background-size: 300px 300px; */
+/*         background-repeat: repeat; */
+/*     } */
+/* } */
+
+/* a, */
+/* a:visited { */
+/*     text-decoration: none; */
+/*     color: rgba(48, 63, 159, 1); */
+/* } */
+
+a{
+    color:#2980B9;
+    text-decoration:none;
+    cursor:pointer}
+
+
+a:hover,a:active{
+    outline:0;
 }
 
-a,
-a:visited {
-    text-decoration: none;
-    color: rgba(48, 63, 159, 1);
-}
+a:hover{
+    color:#3091d1}
+
 .org-bold {
     font-weight: 400;
 }
@@ -173,11 +194,14 @@ ol.org-ol {
     width: 2em;
     margin-left: -2em;
 }
+
 #content,
 #postamble {
     margin: 0 auto;
     max-width: 920px;
-    margin-top: 2.5%;
+    /* margin-top: 2.5%; */
+    /* make room for absolute positioned header */
+    margin-top: 150px;
     margin-bottom: 2.5%;
 }
 #postamble {
@@ -218,7 +242,7 @@ h4 {
     text-transform: uppercase;
 }
 h2 {
-    padding-top: 5em;
+    padding-top: 2em;
 }
 h3 {
     padding-top: 3em;
