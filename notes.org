@@ -19,3 +19,4 @@ https://www.indiehackers.com/interview/growing-an-interviewing-platform-for-prog
 * TODO Create API for adding a comment section, and use it
 
 
+* TODO get syntax highlighting for code blocks
