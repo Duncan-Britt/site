@@ -1,0 +1,25 @@
+#+TITLE: Test Draft
+#+SETUPFILE: ../../../setup/blog-post.setup
+#+DATE: <2023-02-07>
+
+#+HTML_HEAD: <script type="module" src="./test.js"></script>
+# #+HTML_HEAD: <script type="module" src="/javascripts/node_modules/three/build/three.module.js"></script>
+
+* A 3D model!
+
+#+BEGIN_EXPORT html
+<div id="test-graphic-container"></div>
+#+END_EXPORT
+
+* A 2D graph
+
+[[./images/circle.svg]]
+
+* Another 3D model
+
+#+BEGIN_EXPORT html
+<div id="test-graphic-container2"></div>
+#+END_EXPORT
+
+* An animated GIF
+[[./images/curve.gif]]

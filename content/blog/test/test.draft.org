@@ -1,3 +1,0 @@
-#+TITLE: Test Draft
-#+SETUPFILE: ../../../setup/blog-post.setup
-#+DATE: <2023-02-07>

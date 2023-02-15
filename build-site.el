@@ -50,7 +50,7 @@
        (list "blog-content"
              :recursive t
              :base-directory "./content/blog"
-             :base-extension "org"
+             :base-extension "org\\|html"
              :publishing-directory "./public/blog"
              :publishing-function 'org-html-publish-to-html
              :exclude ".*\~\\|.*\.draft\.org"
@@ -68,8 +68,8 @@
        (list "static"
              :recursive t
              :base-directory "./content"
-             :exclude ".*\~"
-             :base-extension "css\\|js\\|html\\|png\\|jpg\\|svg\\|webp\\|gif\\|pdf\\|mp3\\|ogg\\|swf"
+             :exclude ".*\~\\|.*node_modules\/.*" ;; Using CDN, excluding local node modules
+             :base-extension "css\\|js\\|html\\|png\\|jpg\\|svg\\|webp\\|gif\\|pdf\\|mp3\\|ogg\\|swf\\|stl\\|obj\\|wasm"
              :publishing-directory "./public"
              :publishing-function 'org-publish-attachment)
        ))
