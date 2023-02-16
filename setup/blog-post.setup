@@ -3,10 +3,10 @@
 #+OPTIONS: html-style:nil
 
 # use the path from within the generated public directory:
-#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="/stylesheets/htmlize.css"/>
-#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="/stylesheets/blog-post.css"/>
-#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="/stylesheets/layout-blog.css"/>
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="/stylesheets/color-scheme.css"/>
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="/stylesheets/layout-blog.css"/>
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="/stylesheets/blog-post.css"/>
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="/stylesheets/htmlize2.css"/>
 
 #+HTML_HEAD: <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
 #+HTML_HEAD: <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
