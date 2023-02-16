@@ -19,6 +19,8 @@
       org-html-head-include-default-style nil)        ;; Use our own styles      
 ;;      org-html-head "<link rel=\"stylesheet\" href=\"https://cdn.simplecss.org/simple.min.css\" />")
 
+(setq org-html-htmlize-output-type 'css)
+
 (defun read-file (filename)
   (save-excursion
     (let ((new (get-buffer-create filename)) (current (current-buffer)))

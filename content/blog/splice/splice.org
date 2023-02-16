@@ -118,11 +118,10 @@ function evaluate(expr, scope) {
 * My Process
 My original design for the syntax didn't stick. It looked like this:
 
-#+begin_SRC
+#+begin_SRC 
 <<~ each madlibs >>
   <p>The << $.adjective >> << $.noun >> << $.verb >></p>
 << end >>
-C
 #+end_SRC
 
 I got as far as making a prototype documentation site but decided I didn't love the amount of angle brackets. It wasn't much trouble to change the syntax, but even so, it goes to show that it's worthwhile to make sure you're solving the right problem before you start coding.

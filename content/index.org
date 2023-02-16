@@ -15,6 +15,8 @@ I'm currently in my final semester at Arapahoe Community College before graduati
   Software generated word-ladder puzzle game -
   <a target="_self" href="/blog/software-generated-word-ladder-puzzles-and-web-app/software-generated-word-ladder-puzzles-and-web-app.html"> article</a>
   #+END_EXPORT
+- [[https://github.com/Duncan-Britt/Assignment-Tracker#readme][Assignment Tracker]]: To-do list app with query language interface.
+- [[https://github.com/Duncan-Britt/Tic-Tac-Toe#readme][Tic-Tac-Toe]]
 
 * *Links*
 - [[https://github.com/Duncan-Britt/][Github]]
