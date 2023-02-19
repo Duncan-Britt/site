@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Splice: An HTML templating language</title>
+<meta name="generator" content="Org Mode" />
+<link rel="stylesheet" type="text/css" href="/stylesheets/color-scheme.css"/>
+<link rel="stylesheet" type="text/css" href="/stylesheets/layout-blog.css"/>
+<link rel="stylesheet" type="text/css" href="/stylesheets/blog-post.css"/>
+<link rel="stylesheet" type="text/css" href="/stylesheets/htmlize2.css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/src/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/src/readtheorg_theme/js/readtheorg.js"></script>
+</head>
+<body>
+<div id="preamble" class="status">
+<header>
+    <nav>
+        <a target="_self" href="/">About</a> -
+        <a target="_self" href="/blog-posts.html">Blog</a> |
+        <!-- <a target="_self" href="/portfolio.html">Portfolio</a> -         -->
+        <!-- <a target="_self" href="/contact.html">Contact</a> - -->
+        <!-- <a target="_self" href="/resume.html">Resume</a> | -->
+        <a target="_blank" rel="noopener noreferrer" href="https://duncan-britt.github.io/splice-docs">Splice</a> -
+        <a target="_blank" rel="noopener noreferrer" href="https://word-ladders.herokuapp.com/">Word Ladders</a>
+        <!-- <a target="_blank" rel="noopener noreferrer" href="https://github.com/Duncan-Britt/">GitHub</a> -
+             <a target="_blank" rel="noopener noreferrer" href="https://www.codewars.com/users/Duncan-Britt">Code Wars</a> -->
+    </nav>
+</header>
+</div>
+<div id="content" class="content">
+<h1 class="title">Splice: An HTML templating language</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#org767e37f">Overview</a></li>
+<li><a href="#org1aed891">Abstract Syntax Tree (AST)</a></li>
+<li><a href="#org50b350d">Lexer &amp; Parser</a></li>
+<li><a href="#org3139d8b">Generator</a></li>
+<li><a href="#orgf59cf4e">My Process</a></li>
+<li><a href="#orgaf7e089">Challenges</a></li>
+<li><a href="#org77e5c09">Open issues</a></li>
+</ul>
+</div>
+</div>
+<ul class="org-ul">
+<li><a href="https://duncan-britt.github.io/splice-docs/" target="_blank">Docs</a></li>
+<li><a href="https://github.com/Duncan-Britt/Splice-Lang" target="_blank">Repo</a></li>
+</ul>
+
+<div id="outline-container-org767e37f" class="outline-2">
+<h2 id="org767e37f">Overview</h2>
+<div class="outline-text-2" id="text-org767e37f">
+<p>
+Splice supports nesting, partial templates, iterators, conditionals, variable assignment, local scope, comments, escape characters, and escapes HTML by default. In its minified form, it is only 3.06 KB uncompressed, and has no dependencies.
+</p>
+
+<p>I've written extensively about how to use Splice, and that writing is available on the <a href="https://duncan-britt.github.io/splice-docs/" target="_blank">documentation website</a>. I will use this space to talk about the implementation of the language, design process/choices, challenges, and open issues.</p>
+</div>
+</div>
+
+<div id="outline-container-org1aed891" class="outline-2">
+<h2 id="org1aed891">Abstract Syntax Tree (AST)</h2>
+<div class="outline-text-2" id="text-org1aed891">
+<p>
+The AST for Splice begins not with a single root node, but with a collection of its children - the root node is imaginary. There are three types of nodes in the AST:
+</p>
+
+<ul class="org-ul">
+<li>text</li>
+<li>binding</li>
+<li>operator</li>
+</ul>
+
+<p>
+Text nodes and binding nodes are leaf nodes, whereas operator nodes have a body property which is a subtree. (I think of the body as just a special kind of argument that always comes last). For example, the AST for the following splice template:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-html">&lt;<span class="org-function-name">p</span>&gt;Hello, (: username :)! Here are your todos:&lt;/<span class="org-function-name">p</span>&gt;
+&lt;<span class="org-function-name">ul</span>&gt;
+  (:~ each todos as 'todo {
+  &lt;<span class="org-function-name">li</span>&gt;
+    &lt;<span class="org-function-name">h2</span>&gt;<span class="org-underline"><span class="org-bold-italic">(: todo.name :)</span></span>&lt;/<span class="org-function-name">h2</span>&gt;
+    &lt;<span class="org-function-name">p</span>&gt;(: todo.description :)&lt;/<span class="org-function-name">p</span>&gt;
+  &lt;/<span class="org-function-name">li</span>&gt;
+  }:)
+&lt;/<span class="org-function-name">ul</span>&gt;
+</pre>
+</div>
+
+<p>
+would look something like this:
+</p>
+
+
+<div id="orgeccab1b" class="figure">
+<p><img src="./images/ast.svg" alt="ast.svg" class="org-svg" />
+</p>
+<p><span class="figure-number">Figure 1: </span>An example Splice AST</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org50b350d" class="outline-2">
+<h2 id="org50b350d">Lexer &amp; Parser</h2>
+<div class="outline-text-2" id="text-org50b350d">
+<p>
+The lexer and parser work together to turn the former template into the latter AST. The job of a lexer is to split up the text of a program into relevant tokens, and the job of a parser is to create the AST from those tokens. In my program, these roles are intertwined- tokens are parsed as soon as they are identified. My lexing/parsing function takes the template and returns an AST. Within, it runs a loop which invokes a function that identifies a single token, parses it, and returns the remaining template.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-javascript"><span class="org-comment-delimiter">// </span><span class="org-comment">parse :: String -&gt; Array{Object}</span>
+<span class="org-keyword">function</span> <span class="org-function-name">parse</span>(<span class="org-variable-name">template</span>) {
+  <span class="org-keyword">const</span> <span class="org-variable-name">ast</span> = [];
+&#8203;
+  <span class="org-keyword">while</span> (template) {
+    template = parseToken(template, ast);
+  }
+&#8203;
+  <span class="org-keyword">return</span> ast;
+}
+</pre>
+</div>
+
+<p>
+When an operator body token is identified, the parser simply creates an AST from the operator body token by recursively invoking the main lexing/parsing function. The recursive nature of the lexer/parser reflects the recursive nature of the syntax tree- operator bodies are subtrees.
+</p>
+
+<p>
+#+begin<sub>SRC</sub> javascript
+// parseFunction :: String -&gt; Array{String, Object}
+function parseFunction(template) {
+  //&#x2026; code omitted for brevity
+  [ token, bodyAST ] = parseBody(template);
+  //&#x2026;
+  const expr = {
+    type: 'op',
+    name: op,
+    args: args,
+    body: bodyAST,
+  };
+  //&#x2026;
+}
+​
+// parseBody :: String -&gt; Array{String, Array{Object}}
+function parseBody(template) {
+  //&#x2026;
+  return [resultToken, parse(body)];
+}
+#+end<sub>SRC</sub>​
+</p>
+</div>
+</div>
+
+<div id="outline-container-org3139d8b" class="outline-2">
+<h2 id="org3139d8b">Generator</h2>
+<div class="outline-text-2" id="text-org3139d8b">
+<p>
+Now the hard work is done! All thats left is to turn the tree into text again. A reminder, when someone uses the compiler, they pass an object with the data to be filled into the template. That object can be thought of as the global scope for the Splice program. The job of the generator is to use the scope and the AST to render the final text output.
+</p>
+
+<p>
+The generator has knowledge of the three node types. For operator nodes, it must return the result of invoking the associated function, as all valid operators in the language have an internal function associated with them.
+</p>
+
+<p>
+Valid bindings refer to some property of the scope object, so all generator has to do is look up that property for a given binding node and return it. And of course, for text nodes, just return text!
+</p>
+
+<div class="org-src-container">
+<pre class="src src-javascript"><span class="org-comment-delimiter">// </span><span class="org-comment">evaluateAll :: Array, Object -&gt; String</span>
+<span class="org-keyword">function</span> <span class="org-function-name">evaluateAll</span>(<span class="org-variable-name">ast</span>, <span class="org-variable-name">scope</span>) {
+  <span class="org-keyword">return</span> ast.reduce((html, expr) =&gt; html + evaluate(expr, scope), <span class="org-string">""</span>);
+}
+&#8203;
+<span class="org-comment-delimiter">// </span><span class="org-comment">evaluate :: Object, Object -&gt; String</span>
+<span class="org-keyword">function</span> <span class="org-function-name">evaluate</span>(<span class="org-variable-name">expr</span>, <span class="org-variable-name">scope</span>) {
+  <span class="org-keyword">switch</span> (expr.type) {
+    <span class="org-keyword">case</span> <span class="org-string">"op"</span>:
+      <span class="org-keyword">return</span> templateFns[expr.name](scope, ...expr.args, expr.body);
+    <span class="org-keyword">case</span> <span class="org-string">"binding"</span>:
+      <span class="org-keyword">let</span> <span class="org-variable-name">value</span> = expr.chain.reduce((data, prop) =&gt; data[prop], scope[expr.name]);
+      <span class="org-keyword">if</span> (<span class="org-keyword">typeof</span> value == <span class="org-string">'string'</span>) {
+        <span class="org-keyword">return</span> expr.escape ? escapeHTML(value) : value;
+      }
+&#8203;
+      <span class="org-keyword">return</span> value;
+    <span class="org-keyword">case</span> <span class="org-string">'text'</span>:
+      <span class="org-keyword">return</span> escapeChars(expr.value);
+  }
+}
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgf59cf4e" class="outline-2">
+<h2 id="orgf59cf4e">My Process</h2>
+<div class="outline-text-2" id="text-orgf59cf4e">
+<p>
+My original design for the syntax didn't stick. It looked like this:
+</p>
+
+<pre class="example">
+&lt;&lt;~ each madlibs &gt;&gt;
+  &lt;p&gt;The &lt;&lt; $.adjective &gt;&gt; &lt;&lt; $.noun &gt;&gt; &lt;&lt; $.verb &gt;&gt;&lt;/p&gt;
+&lt;&lt; end &gt;&gt;
+</pre>
+
+<p>
+I got as far as making a prototype documentation site but decided I didn't love the amount of angle brackets. It wasn't much trouble to change the syntax, but even so, it goes to show that it's worthwhile to make sure you're solving the right problem before you start coding.
+</p>
+
+<p>
+For the implementation, I started by hardcoding a prototype AST as well as a test 'scope'- a set of data with which to test the compiler. Then I went on to writing the generator of the language. I think this was wise because it allowed me to easily modify the AST to suit the needs of the generator when I discovered something needed to change, without having to rewrite components of the parser.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgaf7e089" class="outline-2">
+<h2 id="orgaf7e089">Challenges</h2>
+<div class="outline-text-2" id="text-orgaf7e089">
+<p>
+After creating the documentation website using Splice and thinking that it was good to go, I ventured to try opening the website in Safari, and lo and behold, the site crashed immediately. I learned the hard way that not all browsers support look-behinds in regular expressions, because I had 49 of them in my Splice compiler.
+</p>
+
+<p>
+The need for these look-behinds in my regular expressions was to avoid my escape character: \. This meant that I had to replace much of the logic for tokenization without the benefit of regular expressions. On the bright side, I think the readability of my code has benefited significantly from this change.
+</p>
+
+<p>
+To do this, I wrote a helper function to do most of the heavy lifting:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-javascript"><span class="org-comment-delimiter">// </span><span class="org-comment">strTok :: String, String -&gt; String, String</span>
+<span class="org-keyword">function</span> <span class="org-function-name">strTok</span>(<span class="org-variable-name">text</span>, <span class="org-variable-name">endChars</span>, <span class="org-variable-name">chop</span> = <span class="org-constant">false</span>) {
+  <span class="org-keyword">let</span> <span class="org-variable-name">i</span> = 0;
+  <span class="org-keyword">let</span> <span class="org-variable-name">j</span> = endChars.length;
+  <span class="org-keyword">while</span> (j &lt;= text.length) {
+    <span class="org-keyword">if</span> (text.slice(i, j) == endChars &amp;&amp; text.slice(i-1, j) != <span class="org-string">'\\'</span> + endChars) {
+      <span class="org-keyword">if</span> (chop) {
+        <span class="org-keyword">return</span> [text.slice(0, i), text.slice(i + endChars.length)];
+      } <span class="org-keyword">else</span> {
+        <span class="org-keyword">return</span> [text.slice(0, i), text.slice(i)];
+      }
+    }
+    i++;
+    j++;
+  }
+  <span class="org-keyword">return</span> [text, <span class="org-string">''</span>];
+}
+</pre>
+</div>
+
+<p>
+To get a token and the remaining template it can be used like this:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-javascript">[ token, template ] = strTok(template, <span class="org-string">'(:'</span>);
+</pre>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org77e5c09" class="outline-2">
+<h2 id="org77e5c09">Open issues</h2>
+<div class="outline-text-2" id="text-org77e5c09">
+<p>
+It would be good to enable pre-compilation of the templates to enable faster performance. My idea is to have an executable that will parse the template(s) within an html file and compile the syntax tree into javascript code, and then write it to a file. The resulting js file would contain a function which contains the syntax tree written as object/array/string literals. That way there is no parsing client-side, only compilation to html.
+</p>
+
+<p>
+Some other things to work on:
+</p>
+
+<ul class="org-ul">
+<li>improving the error messages for the language</li>
+<li>writing more extensive tests</li>
+<li>enabling a user to register a helper function</li>
+<li>enable syntax highlighting for the atom text editor</li>
+</ul>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="date">Date: 2022-01-19 Wed 00:00</p>
+</div>
+</body>
+</html>

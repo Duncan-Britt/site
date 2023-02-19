@@ -34,6 +34,5 @@ export async function load_wasm(file_path) {
   const response = await fetch('grid.wasm');
   const bytes = await response.arrayBuffer();
   const { instance } = await WebAssembly.instantiate(bytes);
-
   return instance;
 }

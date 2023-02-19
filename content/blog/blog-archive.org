@@ -1,5 +1,4 @@
 #+TITLE: Blog Posts
 
-- [[file:path-finding/path-finding.org][Path Planning]]
 - [[file:splice/splice.org][Splice: An HTML templating language]]
 - [[file:software-generated-word-ladder-puzzles-and-web-app/software-generated-word-ladder-puzzles-and-web-app.org][Software Generated Word Ladder Puzzles - Web App]]
