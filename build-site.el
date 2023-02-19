@@ -39,7 +39,7 @@
              :recursive nil
              :base-directory "./content"
              :base-extension "org"             
-             :publishing-directory "./docs"
+             :publishing-directory "./public"
              :publishing-function 'org-html-publish-to-html
              :exclude ".*\~\\|.*\.draft\.org"
              :with-author nil         ;; Don't include author name
@@ -53,7 +53,7 @@
              :recursive t
              :base-directory "./content/blog"
              :base-extension "org\\|html"
-             :publishing-directory "./docs/blog"
+             :publishing-directory "./public/blog"
              :publishing-function 'org-html-publish-to-html
              :exclude ".*\~\\|.*\.draft\.org"
              :with-author nil         ;; Don't include author name
@@ -72,7 +72,7 @@
              :base-directory "./content"
              :exclude ".*\~\\|.*node_modules\/.*" ;; Using CDN, excluding local node modules
              :base-extension "css\\|js\\|html\\|png\\|jpg\\|svg\\|webp\\|gif\\|pdf\\|mp3\\|ogg\\|swf\\|stl\\|obj\\|wasm"
-             :publishing-directory "./docs"
+             :publishing-directory "./public"
              :publishing-function 'org-publish-attachment)
        ))
 
