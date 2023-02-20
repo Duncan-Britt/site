@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
 @import url("https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic|Roboto+Slab:400,700|Inconsolata:400,700");
 @import url("https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css");
 
@@ -61,7 +63,8 @@ body{
     /* font-weight:normal; */
     
     /* CHANGE */
-    font-family: "Roboto Mono", monospace;
+    /* font-family: "Roboto Mono", monospace; */
+    font-family: 'Crimson Pro', serif;
     font-size: 14px;
     font-weight: 300;
     /* color: rgba(51, 51, 51, 1); */

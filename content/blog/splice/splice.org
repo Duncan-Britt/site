@@ -62,27 +62,27 @@ function parse(template) {
 
 When an operator body token is identified, the parser simply creates an AST from the operator body token by recursively invoking the main lexing/parsing function. The recursive nature of the lexer/parser reflects the recursive nature of the syntax tree- operator bodies are subtrees.
 
-#+begin_SRC javascript
-// parseFunction :: String -> Array{String, Object}
-function parseFunction(template) {
-  //... code omitted for brevity
-  [ token, bodyAST ] = parseBody(template);
-  //...
-  const expr = {
-    type: 'op',
-    name: op,
-    args: args,
-    body: bodyAST,
-  };
-  //...
-}
-​
-// parseBody :: String -> Array{String, Array{Object}}
-function parseBody(template) {
-  //...
-  return [resultToken, parse(body)];
-}
-#+end_SRC​
+#+BEGIN_SRC javascript
+  // parseFunction :: String -> Array{String, Object}
+  function parseFunction(template) {
+    //... code omitted for brevity
+    [ token, bodyAST ] = parseBody(template);
+    //...
+    const expr = {
+      type: 'op',
+      name: op,
+      args: args,
+      body: bodyAST,
+    };
+    //...
+  }
+  ​
+  // parseBody :: String -> Array{String, Array{Object}}
+  function parseBody(template) {
+    //...
+    return [resultToken, parse(body)];
+  }
+#+END_SRC
 
 * Generator
 Now the hard work is done! All thats left is to turn the tree into text again. A reminder, when someone uses the compiler, they pass an object with the data to be filled into the template. That object can be thought of as the global scope for the Splice program. The job of the generator is to use the scope and the AST to render the final text output.
