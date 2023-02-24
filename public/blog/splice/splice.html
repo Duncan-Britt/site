@@ -38,13 +38,13 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org9a915af">Overview</a></li>
-<li><a href="#org138cc92">Abstract Syntax Tree (AST)</a></li>
-<li><a href="#orga316f0f">Lexer &amp; Parser</a></li>
-<li><a href="#orga56b388">Generator</a></li>
-<li><a href="#org254ec33">My Process</a></li>
-<li><a href="#org9bbf0ca">Challenges</a></li>
-<li><a href="#orgce61605">Open issues</a></li>
+<li><a href="#org6bc75cf">Overview</a></li>
+<li><a href="#org50044a8">Abstract Syntax Tree (AST)</a></li>
+<li><a href="#org0b2f3a7">Lexer &amp; Parser</a></li>
+<li><a href="#org3d3cf21">Generator</a></li>
+<li><a href="#orga7ab5f8">My Process</a></li>
+<li><a href="#org6632cb0">Challenges</a></li>
+<li><a href="#orgabd5624">Open issues</a></li>
 </ul>
 </div>
 </div>
@@ -53,9 +53,9 @@
 <li><a href="https://github.com/Duncan-Britt/Splice-Lang" target="_blank">Repo</a></li>
 </ul>
 
-<div id="outline-container-org9a915af" class="outline-2">
-<h2 id="org9a915af">Overview</h2>
-<div class="outline-text-2" id="text-org9a915af">
+<div id="outline-container-org6bc75cf" class="outline-2">
+<h2 id="org6bc75cf">Overview</h2>
+<div class="outline-text-2" id="text-org6bc75cf">
 <p>
 Splice supports nesting, partial templates, iterators, conditionals, variable assignment, local scope, comments, escape characters, and escapes HTML by default. In its minified form, it is only 3.06 KB uncompressed, and has no dependencies.
 </p>
@@ -64,9 +64,9 @@ Splice supports nesting, partial templates, iterators, conditionals, variable as
 </div>
 </div>
 
-<div id="outline-container-org138cc92" class="outline-2">
-<h2 id="org138cc92">Abstract Syntax Tree (AST)</h2>
-<div class="outline-text-2" id="text-org138cc92">
+<div id="outline-container-org50044a8" class="outline-2">
+<h2 id="org50044a8">Abstract Syntax Tree (AST)</h2>
+<div class="outline-text-2" id="text-org50044a8">
 <p>
 The AST for Splice begins not with a single root node, but with a collection of its children - the root node is imaginary. There are three types of nodes in the AST:
 </p>
@@ -99,7 +99,7 @@ would look something like this:
 </p>
 
 
-<div id="org3dc3e3c" class="figure">
+<div id="orgf6c5210" class="figure">
 <p><img src="./images/ast.svg" alt="ast.svg" class="org-svg" width="60%" />
 </p>
 <p><span class="figure-number">Figure 1: </span>An example Splice AST</p>
@@ -107,9 +107,9 @@ would look something like this:
 </div>
 </div>
 
-<div id="outline-container-orga316f0f" class="outline-2">
-<h2 id="orga316f0f">Lexer &amp; Parser</h2>
-<div class="outline-text-2" id="text-orga316f0f">
+<div id="outline-container-org0b2f3a7" class="outline-2">
+<h2 id="org0b2f3a7">Lexer &amp; Parser</h2>
+<div class="outline-text-2" id="text-org0b2f3a7">
 <p>
 The lexer and parser work together to turn the former template into the latter AST. The job of a lexer is to split up the text of a program into relevant tokens, and the job of a parser is to create the AST from those tokens. In my program, these roles are intertwined- tokens are parsed as soon as they are identified. My lexing/parsing function takes the template and returns an AST. Within, it runs a loop which invokes a function that identifies a single token, parses it, and returns the remaining template.
 </p>
@@ -157,9 +157,9 @@ When an operator body token is identified, the parser simply creates an AST from
 </div>
 </div>
 
-<div id="outline-container-orga56b388" class="outline-2">
-<h2 id="orga56b388">Generator</h2>
-<div class="outline-text-2" id="text-orga56b388">
+<div id="outline-container-org3d3cf21" class="outline-2">
+<h2 id="org3d3cf21">Generator</h2>
+<div class="outline-text-2" id="text-org3d3cf21">
 <p>
 Now the hard work is done! All thats left is to turn the tree into text again. A reminder, when someone uses the compiler, they pass an object with the data to be filled into the template. That object can be thought of as the global scope for the Splice program. The job of the generator is to use the scope and the AST to render the final text output.
 </p>
@@ -199,9 +199,9 @@ Valid bindings refer to some property of the scope object, so all generator has 
 </div>
 </div>
 
-<div id="outline-container-org254ec33" class="outline-2">
-<h2 id="org254ec33">My Process</h2>
-<div class="outline-text-2" id="text-org254ec33">
+<div id="outline-container-orga7ab5f8" class="outline-2">
+<h2 id="orga7ab5f8">My Process</h2>
+<div class="outline-text-2" id="text-orga7ab5f8">
 <p>
 My original design for the syntax didn't stick. It looked like this:
 </p>
@@ -222,9 +222,9 @@ For the implementation, I started by hardcoding a prototype AST as well as a tes
 </div>
 </div>
 
-<div id="outline-container-org9bbf0ca" class="outline-2">
-<h2 id="org9bbf0ca">Challenges</h2>
-<div class="outline-text-2" id="text-org9bbf0ca">
+<div id="outline-container-org6632cb0" class="outline-2">
+<h2 id="org6632cb0">Challenges</h2>
+<div class="outline-text-2" id="text-org6632cb0">
 <p>
 After creating the documentation website using Splice and thinking that it was good to go, I ventured to try opening the website in Safari, and lo and behold, the site crashed immediately. I learned the hard way that not all browsers support look-behinds in regular expressions, because I had 49 of them in my Splice compiler.
 </p>
@@ -270,9 +270,9 @@ To get a token and the remaining template it can be used like this:
 </div>
 
 
-<div id="outline-container-orgce61605" class="outline-2">
-<h2 id="orgce61605">Open issues</h2>
-<div class="outline-text-2" id="text-orgce61605">
+<div id="outline-container-orgabd5624" class="outline-2">
+<h2 id="orgabd5624">Open issues</h2>
+<div class="outline-text-2" id="text-orgabd5624">
 <p>
 It would be good to enable pre-compilation of the templates to enable faster performance. My idea is to have an executable that will parse the template(s) within an html file and compile the syntax tree into javascript code, and then write it to a file. The resulting js file would contain a function which contains the syntax tree written as object/array/string literals. That way there is no parsing client-side, only compilation to html.
 </p>
