@@ -1,0 +1,237 @@
+#+TITLE: The Mechanics of Object Oriented JavaScript
+#+SETUPFILE: ../../../setup/blog-post.setup
+#+DATE: <2021-11-14>
+#+FILETAGS: :web:
+
+#+MACRO: src src_javascript[:exports code]{$1}
+
+More than you want to know.
+
+* Prerequisites - Execution Context, {{{src(this)}}}
+#+begin_export html
+<p>If you’re not already familiar with execution context in JavaScript, it is a topic worthy of a separate and lengthy article in and of itself. I recommend <a target="_blank" href="https://web.archive.org/web/20180209163541/https://dmitripavlutin.com/gentle-explanation-of-this-in-javascript/">this one.</a> A brief review:</p>
+#+end_export
+
+The execution context of an invocation is what is referenced by the key word {{{src(this)}}} within a function definition. The implicit execution context of an invocation is the receiver- whether an implicit receiver (as in function invocation) or an explicit receiver (as in method invocation).
+
+As we shall see, {{{src(this)}}} is useful because it allows programmers to reference the calling object and its properties from within the definition of a method which is shared among many objects.
+
+* Functions are objects
+In Javascript, functions are a type of object. As such, they contain properties like any object can. Every function has a {{{src(prototype)}}} property which, by default, references an object. This prototype object contains a {{{src(constructor)}}} property which, by default, references the function.
+
+[[./images/a.svg]]
+
+To demonstrate this with code, try the following in your browser’s console:
+
+#+BEGIN_SRC javascript
+function aFunction() {
+  // ...
+}
+​
+aFunction.prototype; // {constructor: ƒ}
+aFunction.prototype.constructor === aFunction; // true  
+#+END_SRC
+
+* Prototypes
+In JavaScript, every object has an object prototype referenced by its {{{src([[Prototype])}}} property. This property can be accessed by the {{{src(__proto__)}}} accessor method. (It’s pronounced “dunder proto” due to its leading and trailing double underscores). It’s important to note the distinction between a function’s prototype property and the {{{src([[Prototype]])}}} property which belongs to all objects (including functions).
+
+/Before going further, I should mention that accessing an object’s {{{src([[Prototype]])}}} directly via the {{{src(__proto__)}}} accessor is deprecated. JavaScript provides the methods Object.getPrototypeOf and Object.setPrototypeOf to access an object’s {{{src([[Prototype]])}}}. However, I will continue to use {{{src(__proto__)}}} for explanatory purposes. If you want to test my code in your browser and you find that {{{src(__proto__)}}} doesn’t work, you can substitute {{{src(foo.__proto__)}}} with {{{src(Object.getPrototypeOf(foo))}}} and it should work./
+
+When creating an object via an object literal, its {{{src([[Prototype]])}}} property refers to the same object referenced by {{{src(Object.prototype)}}}, which serves as the base {{{src([[Prototype]])}}} for all objects. This base prototype object has its own {{{src([[Prototype]])}}} property which stores {{{src(null)}}}.
+
+#+CAPTION: Note that {{{src(Object)}}} is a JavaScript function.
+[[./images/b.svg]]
+
+#+begin_src javascript
+( {} ).__proto__ === Object.prototype; // true;
+Object.prototype.__proto__ === null; // true;  
+#+end_src
+
+Functions being objects, they also have their own {{{src([[Prototype]])}}} which I have omitted from the above diagram since its not central to the point of this article. However, for those who are curious, here’s something to chew on:
+
+[[./images/c.svg]]
+
+* Behavior Delegation and the Prototype Chain
+The /prototype chain/ of an object refers to the series of objects referenced by each others' {{{src([[Prototype]])}}} properties.
+
+[[./images/d.svg]]
+
+A parent is the {{{src([[Prototype]])}}} of its child.
+When you attempt to access a property of an object, if JavaScript doesn’t find the property within the object, it will search the object’s prototype chain until it either finds the property or reaches the end of the chain, in which case it returns {{{src(undefined)}}}. This is why you can sometimes invoke a method on an object which hasn’t been assigned to a property of that object. All JavaScript objects by default have access to the properties of the object referenced by {{{src(Object.prototype)}}} since it is at the end of their prototype chain.
+#+begin_src javascript
+  ({}).notAProperty; // undefined
+  ({}).hasOwnProperty('foo'); // false
+  ({}).toString(); // '[object Object]'  ​  
+#+end_src
+
+Type {{{src(Object.prototype)}}} into your browser’s console to view the available methods.
+
+[[./images/e.svg]]
+
+When an object uses methods which are not assigned to one of its own properties, but are referenced further along the prototype chain, we can call it behavior delegation since the requested invocation is passed along, or delegated, to an object further along the chain. Sometimes this is referred to as prototypal inheritance.
+
+* Constructor functions
+A constructor function is merely a function whose intended purpose is to instantiate objects. Purely by convention, the name of a constructor function is capitalized to distinguish it from other functions. From the perspective of JavaScript, constructor functions are no different from any other functions and are treated the exact same way (despite that the syntax highlighting in your text editor might lead you to believe otherwise).
+
+* The new keyword
+When a function invocation is prefixed with the {{{src(new)}}} keyword, the execution context for the invocation is set to a new object, sometimes referred to as an instance, which is returned by the expression. (Note: It is only returned by the expression if an object isn’t explicitly returned within the function definition.) Therefore, within the definition of a constructor function, {{{src(this)}}} can be used to assign instance properties to values. If you forget to use {{{src(new)}}} when invoking your constructor function, you’ll assign values to properties of the global object. Don’t do that.
+
+#+begin_src javascript
+  function Constructor(val) {
+    this.foo = val;
+  }
+  ​
+  const instance = new Constructor('bar');
+  instance.__proto__ === Constructor.prototype; // true
+  ​
+  const instance2 = new Constructor('baz');
+  instatnce2.__proto__ === Constructor.prototype; // true
+  ​
+  instance.foo; // 'bar'
+  instance2.foo; // 'baz'
+#+end_src
+
+[[./images/f.svg]]
+
+Notice that the {{{src([[Prototype]])}}} of the instances is the same object referenced by {{{src(Constructor.prototype)}}}. We can define functions as properties of the prototype to create shared methods accessible to all instances.
+
+#+begin_src javascript
+  Constructor.prototype.xyz = function() {
+    return this;
+  }
+  ​
+  instance.xyz();                 //  {foo: 'bar'}
+  instance2.xyz();                //  {foo: 'baz'}
+  instance.hasOwnProperty('xyz'); // false;
+#+end_src
+
+[[./images/g.svg]]
+
+* Inheritance
+Supposing we want to create a subtype of object that inherits from {{{src(Constructor)}}}. Our first naive attempt might look something like this:
+#+begin_src javascript
+  // bad
+  function ChildConstructor(val, ownValue) {
+    Constructor.call(this, val);
+    this.qux = ownValue;
+  }
+  ​
+  const childInstance = new ChildConstructor('xyzzy', 5);
+  ​
+  childInstance.xyz(); // Uncaught TypeError:
+  // childInstance.xyz is not a function  
+#+end_src
+
+The problem with this is that the {{{src([[Prototype]])}}} property of {{{src(ChildConstructor.prototype)}}} points to {{{src(Object.prototype)}}}.
+
+#+begin_src javascript
+  childConstructor.prototype.__proto__ === Object.prototype;
+  // true  
+#+end_src
+
+[[./images/h.svg]]
+
+Therefore, no property by the name of {{{src(xyz)}}} can be found on the child instance’s prototype chain. In order to have access to {{{src(xyz)}}}, we need to put {{{src(Constructor.prototype)}}} on the child instance’s prototype chain by setting {{{src(ChildConstructor.prototype)}}}’s {{{src([[Prototype]])}}} to be {{{src(Constructor.prototype)}}}. What a mouthful! Our next naive attempt might look something like this:
+
+#+begin_src javascript
+  // less bad
+  function ChildConstructor(val, ownValue) {
+    Constructor.call(this, val);
+    this.qux = ownValue;
+  }
+  ​
+  ChildConstructor.prototype.__proto__ = Constructor.prototype;
+  ​
+  const childInstance = new ChildConstructor('xyzzy', 5);
+  ​
+  childInstance.xyz(); // {foo: 'xyzzy', qux: 5}
+#+end_src
+
+#+begin_export html
+<p>This works, however, it is recommended that you avoid altering the <code class="src src-javascript">[[Prototype]]</code> of an object for performance reasons. 
+<a target="_blank" href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/setPrototypeOf">This article</a> on MDN offers a better explanation. Alternatively, you can reassign the child constructor’s prototype property to a new object whose <code class="src src-javascript">[[Prototype]]</code> is already the desired object, using <code class="src src-javascript">Object.create</code>.</p>
+#+end_export
+
+#+begin_src javascript
+  // not bad
+  function ChildConstructor(val, ownValue) {
+    Constructor.call(this, val);
+    this.qux = ownValue;
+  }
+  ​
+  ChildConstructor.prototype = Object.create(Constructor.prototype);
+  ChildConstructor.prototype.constructor = ChildConstructor;
+  ​
+  ChildConstructor.prototype.childFunction = function() {
+    return this.foo;
+  }
+  ​
+  const childInstance = new ChildConstructor('xyzzy', 5);
+  ​
+  childInstance.xyz();                                    
+  // {foo: 'xyzzy', qux: 5}
+  childInstance.childFunction();                          
+  // 'xyzzzy';
+  childInstance.qux;                                      
+  // 5
+  childInstance.__proto__ === ChildConstructor.prototype;
+  // true
+  childInstance.constructor === ChildConstructor;         
+  // true
+#+end_src
+
+{{{src(Object.create)}}}, when called, creates and returns a new object whose {{{src([[Prototype]])}}} is the argument to the invocation of {{{src(Object.create)}}}. But this new object doesn’t have its own constructor property. Notice that we assign {{{src(ChildConstructor)}}} to {{{src(ChildConstructor.prototype.constructor)}}}. Otherwise the expression {{{src(childInstance.constructor)}}} would return {{{src(Constructor)}}} instead of {{{src(ChildConstructor)}}}.
+
+[[./images/i.svg]]
+
+* Objects Linking to Other Objects (OLOO)
+To quickly build a mental model of the OLOO pattern of object creation, compare the above diagram to the following:
+
+[[./images/j.svg]]
+
+The purpose of {{{src(Object.create)}}} is worth reiterating:
+
+{{{src(Object.create)}}}, when called, creates and returns a new object whose {{{src([[Prototype]])}}} is the argument to the invocation of {{{src(Object.create)}}}.
+
+We can use an object literal to create a prototype. Then we’ll use {{{src(Object.create)}}} to make objects which link to that object. We can use an initializer method to set the values of instance properties on our newly created object.
+
+#+begin_src javascript
+  const Prototype = {
+    addA: function(n) {
+      return this.a + n;
+    }
+    ​
+    init: function(n) {
+      this.a = a;
+      return this;
+    }
+  }
+  ​
+  const instance = Object.create(Prototype).init(20);
+  ​
+  instance.a;                       // 20
+  instance.addA(10);                // 30
+  instance.__proto__ === Prototype; // true  ​  
+#+end_src
+
+[[./images/k.svg]]
+
+The process for making a subtype is fairly straightforward.
+
+#+begin_src javascript
+  const ChildPrototype = Object.create(Prototype);
+  ChildPrototype.init = function(a, b) {
+    Prototype.init(this, a);
+    this.b = b;
+    return this;
+  };
+  ​
+  const childInstance = Object.create(ChildPrototype).init(5, 7);
+  childInstance;         // {a: 5, b: 7}
+  childInstance.addA(3); // 8
+  childInstance.__proto__ === ChildPrototype; // true
+  childInstance.hasOwnPrototype('addA');      // false  
+#+end_src
+
+[[./images/l.svg]]
+

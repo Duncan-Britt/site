@@ -2,7 +2,11 @@
 #+SETUPFILE: ../setup/page.setup
 
 * *Computer Science Student* - Denver, CO
-I'm currently in my final semester at Arapahoe Community College before graduating with an Associate of Science and transferring to a 4 year institution.
+
+#+BEGIN_EXPORT html
+<p>I'm in my final semester at Arapahoe Community College before graduating with an Associate of Science and transferring. I'm also employed as a tutor of physics and mathematics. I'm currently working on <a target="_self" href="/blog/autonomous-mobile-robot/autonomous-mobile-robot.html">building an autonomous mobile robot.</a></p>
+#+END_EXPORT
+
 
 * *Highlighted Projects*
 - [[https://duncan-britt.github.io/splice-docs/][Splice]]:

@@ -23,6 +23,59 @@ body {
     /* background-size: 200px 100px; */
 }
 
+/* .tag > li { */
+/*     display: inline-block */
+/* } */
+
+ul.tag {
+    padding-inline-start: 0;
+}
+
+ul.tag > li {
+    display: inline-block;
+}
+
+span.tag-title {
+    /* background-color: #EDEDED; */
+    /* border: 1px solid #EDEDED; */
+    /* color: #939393; */
+    /* cursor: pointer; */
+    display: block;
+    /* float: right; */
+    float: left;
+    font-size: 90%;
+    font-weight: normal;
+    margin: 0 3px;
+    padding: 1px 2px;
+    /* border-radius: 10px; */
+}
+
+span.tag {
+    background-color: #EDEDED;
+    border: 1px solid #EDEDED;
+    color: #939393;
+    cursor: pointer;
+    display: block;
+    /* float: right; */
+    float: left;
+    font-size: 90%;
+    font-weight: normal;
+    margin: 0 3px;
+    padding: 1px 2px;
+    border-radius: 10px;
+}
+
+@media (min-width:801px) {
+    span.tag:hover {
+        background-color: aliceblue;
+    }
+}
+
+span.selected {
+    /* background-color: #fac50e; */
+    background-color: #9ae2e6;
+}
+
 label {
     font-size: .75em;
 }

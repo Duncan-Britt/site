@@ -3,13 +3,12 @@
 * DONE resume under about
 * DONE remove tile
 * DONE center content on pages under nav bar
-* TODO more consistency!
+* DONE more consistency!
 ** DONE consistent link colors
-** TODO consistent sizes
-** TODO consistent colors between pages and fonts
+** DONE consistent sizes
+** DONE consistent colors between pages and fonts
 
-* TODO nav bar could pop out more
-* nav bar should be fixed and have a different background
+* DONE nav bar could pop out more
 
 * DONE Enable Drafts
 
@@ -18,5 +17,11 @@ https://www.indiehackers.com/interview/growing-an-interviewing-platform-for-prog
 
 * TODO Create API for adding a comment section, and use it
 
+* DONE get syntax highlighting for code blocks
+* DONE Create the ability to filter blog posts by tag
+* TODO allow dark theme in addition to light
 
-* TODO get syntax highlighting for code blocks
+* TODO Path planning article
+** TODO on hover, a star grid should change cursor
+** TODO make it impossible to draw over path end points
+** TODO fix issue with dragging endpoints off to the side

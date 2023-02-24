@@ -1,6 +1,7 @@
 #+TITLE: Splice: An HTML templating language
 #+SETUPFILE: ../../../setup/blog-post.setup
 #+DATE: <2022-01-19>
+#+FILETAGS: :web:
 
 +
   #+BEGIN_EXPORT html
@@ -41,6 +42,7 @@ Text nodes and binding nodes are leaf nodes, whereas operator nodes have a body 
 
 would look something like this:
 
+#+ATTR_HTML: :width 60%
 #+CAPTION: An example Splice AST
 [[./images/ast.svg]]
 

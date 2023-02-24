@@ -1,7 +1,7 @@
 #+TITLE: Software Generated Word Ladder Puzzles - Web App
 #+SETUPFILE: ../../../setup/blog-post.setup
 #+DATE: <2022-01-12>
-
+#+FILETAGS: :games:web:
 +
   #+BEGIN_EXPORT html
   <a href="https://word-ladders.herokuapp.com/play" target="_blank">Site</a>
