@@ -59,12 +59,12 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org9cdfec5">Program Overview</a></li>
-<li><a href="#org5810a62">Path Planning</a></li>
-<li><a href="#org9823c90">Grid Implementation</a></li>
-<li><a href="#orgb0864ad">PID Control</a>
+<li><a href="#org2f1fa43">Program Overview</a></li>
+<li><a href="#org7381794">Path Planning</a></li>
+<li><a href="#org690cec8">Grid Implementation</a></li>
+<li><a href="#org092aadb">PID Control</a>
 <ul>
-<li><a href="#orge2b8a45">Motor control</a></li>
+<li><a href="#orgc9c7c13">Motor control</a></li>
 </ul>
 </li>
 </ul>
@@ -78,11 +78,11 @@
 I'm the lead programmer on the robotics team at school and where working on an autonomous mobile robot. The project is sponsored by NASA's Colorado Space Grants Consortium and our robot will participate in their challenge in April. The involves traversing a variety of outdoor obstacle courses without the use of GPS. What follows is an overview of our in progress program.
 </p>
 
-<div id="outline-container-org9cdfec5" class="outline-2">
-<h2 id="org9cdfec5">Program Overview</h2>
-<div class="outline-text-2" id="text-org9cdfec5">
+<div id="outline-container-org2f1fa43" class="outline-2">
+<h2 id="org2f1fa43">Program Overview</h2>
+<div class="outline-text-2" id="text-org2f1fa43">
 
-<div id="org08eaeb7" class="figure">
+<div id="orgf0c5134" class="figure">
 <p><img src="./images/loops.svg" alt="loops.svg" class="org-svg" />
 </p>
 </div>
@@ -160,9 +160,9 @@ In the following sections I attempt to describe the components of the program in
 </p>
 </div>
 </div>
-<div id="outline-container-org5810a62" class="outline-2">
-<h2 id="org5810a62">Path Planning</h2>
-<div class="outline-text-2" id="text-org5810a62">
+<div id="outline-container-org7381794" class="outline-2">
+<h2 id="org7381794">Path Planning</h2>
+<div class="outline-text-2" id="text-org7381794">
 <p>
 We need to figure out how to decide whether an obstacle has been detected and whether it interrupts our path forward, as well as where we believe the obstacle is. We also need to figure out how to persist this knowledge in a way that will consume the least amount of memory.
 </p>
@@ -172,7 +172,7 @@ Equipped with knowledge of where obstacles lie, we can model the landscape surro
 </p>
 
 
-<div id="org0d423b2" class="figure">
+<div id="orgb325a87" class="figure">
 <p><img src="./images/occupancy-map.png" alt="occupancy-map.png" />
 </p>
 <p><span class="figure-number">Figure 1: </span>This image found <a href="https://iis-projects.ee.ethz.ch/index.php?title=Autonomous_Obstacle_Avoidance_with_Nano-Drones_and_Novel_Depth_Sensors">online</a> shows an example of an occupancy grid.</p>
@@ -239,9 +239,9 @@ Based on the memory available to us, we'll have to decide how large to make the 
 </p>
 </div>
 </div>
-<div id="outline-container-org9823c90" class="outline-2">
-<h2 id="org9823c90">Grid Implementation</h2>
-<div class="outline-text-2" id="text-org9823c90">
+<div id="outline-container-org690cec8" class="outline-2">
+<h2 id="org690cec8">Grid Implementation</h2>
+<div class="outline-text-2" id="text-org690cec8">
 <p>
 The grid is implemented as an array of bits. 0's are open spaces and 1's are obstacles:
 </p>
@@ -278,15 +278,15 @@ One of the things to consider is perhaps having a <a href="https://ieeexplore.ie
 </p>
 
 
-<div id="org8ece888" class="figure">
+<div id="org55bf744" class="figure">
 <p><img src="./images/non-uniform-grid.jpeg" alt="non-uniform-grid.jpeg" />
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-orgb0864ad" class="outline-2">
-<h2 id="orgb0864ad">PID Control</h2>
-<div class="outline-text-2" id="text-orgb0864ad">
+<div id="outline-container-org092aadb" class="outline-2">
+<h2 id="org092aadb">PID Control</h2>
+<div class="outline-text-2" id="text-org092aadb">
 <p>
 The PID algorithm can be used to deal with the low level motor control of our robot. We can adjust the speed and direction of the motors using a function of the magnitude and direction of the discrepancy between where the robot is and where it wants to be at any given time, typically referred to as the <b>error value</b> in the context of PID. In addition to the error value \(e(t)\), PID also uses the accumulation of these error values over time \(\int{e(t)dt}\), and the rate at which the discrepancy is changing \(\frac{de}{dt}\).
 </p>
@@ -314,9 +314,9 @@ We still need to implement all of this. These two videos do a good job of explai
 </ul>
 </div>
 
-<div id="outline-container-orge2b8a45" class="outline-3">
-<h3 id="orge2b8a45">Motor control</h3>
-<div class="outline-text-3" id="text-orge2b8a45">
+<div id="outline-container-orgc9c7c13" class="outline-3">
+<h3 id="orgc9c7c13">Motor control</h3>
+<div class="outline-text-3" id="text-orgc9c7c13">
 <p>
 What I have implemented so far is an interface for controlling the motors. First, allow me to try and motivate the need for such an interface.
 </p>

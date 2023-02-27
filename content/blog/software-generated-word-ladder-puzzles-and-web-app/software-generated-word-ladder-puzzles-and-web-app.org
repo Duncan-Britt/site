@@ -60,9 +60,9 @@ User input steps are considered valid if
 * Generating Puzzles
 I parsed the data from a csv file of 5,000 most commonly used English words into a graphical representation of the data, which I then serialized to a YAML file so that my ruby code can more efficiently recreate it. Each vertex in the graph represents a word. The neighbors of every vertex in the graph are the vertices whose word is "adjacent" to the word stored by the vertex.
 
+#+CAPTION: "The" and its neighbors.
 [[./images/graph.svg]]
 
-"The" and its neighbors.
 Among my 5k words, it is possible find two words between which there simply is no path. So in order to not waste time solving for the shortest path between two words for which no path exists, my program first creates a ladder randomly.
 
 Then, my program takes the first and last words from the random ladder, ignores the rest, and attempts to find the shortest path between them using a breadth first search of the graph. If it takes too long, (if the queue is getting too long) it will inform the calling method which will try again with an entirely new random word ladder.
