@@ -1,0 +1,44 @@
+#+TITLE: Discrete Math
+#+DATE: <2023-02-26>
+#+SETUPFILE: ../../../setup/blog-post.setup
+#+FILETAGS: :math:
+#+MACRO: src src_sh[:exports code]{$1}
+
+# * Browser-native HTML
+#+BEGIN_EXPORT html
+<iframe
+    src="template.pdf"
+    frameBorder="0"
+    scrolling="auto"
+    height="600px"
+    width="100%"
+></iframe>
+
+<a href="template.pdf">download</a>
+#+END_EXPORT
+
+* Viewer Js :noexport:
+#+BEGIN_EXPORT html
+  <!-- <a href="template.pdf">it's a template</a> -->
+  <!-- <a href="../../javascripts/ViewerJS/#/blog/discrete-math-notes/template.pdf">viewerjs</a> -->
+  <iframe
+    src="../../javascripts/ViewerJS/#/blog/discrete-math-notes/template.pdf"
+    frameBorder="0"
+    scrolling="auto"
+    height="800px"
+    width="100%"
+    ></iframe>
+#+END_EXPORT
+
+* Google Viewer :noexport:
+#+BEGIN_EXPORT html
+<iframe
+    src="https://drive.google.com/viewerng/viewer?embedded=true&url=http://infolab.stanford.edu/pub/papers/google.pdf#toolbar=0&scrollbar=0"
+    frameBorder="0"
+    scrolling="auto"
+    height="800px"
+    width="100%"
+></iframe>
+#+END_EXPORT
+
+[[./template.pdf][also this is a template]]
