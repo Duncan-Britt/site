@@ -5,7 +5,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Path Planning</title>
+<title>Path Planning With A*</title>
 <meta name="generator" content="Org Mode" />
 <link rel="stylesheet" type="text/css" href="/stylesheets/color-scheme.css"/>
 <link rel="stylesheet" type="text/css" href="/stylesheets/layout-blog.css"/>
@@ -15,7 +15,29 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
 <script type="text/javascript" src="https://fniessen.github.io/org-html-themes/src/lib/js/jquery.stickytableheaders.min.js"></script>
 <script type="text/javascript" src="https://fniessen.github.io/org-html-themes/src/readtheorg_theme/js/readtheorg.js"></script>
+<link rel="stylesheet" type="text/css" href="./path-finding.css"/>
 <script type="module" src="./path-finding.js"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        displayAlign: "center",
+        displayIndent: "0em",
+
+        "HTML-CSS": { scale: 100,
+                        linebreaks: { automatic: "false" },
+                        webFont: "TeX"
+                       },
+        SVG: {scale: 100,
+              linebreaks: { automatic: "false" },
+              font: "TeX"},
+        NativeMML: {scale: 100},
+        TeX: { equationNumbers: {autoNumber: "AMS"},
+               MultLineWidth: "85%",
+               TagSide: "right",
+               TagIndent: ".8em"
+             }
+});
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML"></script>
 </head>
 <body>
 <div id="preamble" class="status">
@@ -34,26 +56,677 @@
 </header>
 </div>
 <div id="content" class="content">
-<h1 class="title">Path Planning</h1>
+<h1 class="title">Path Planning With A*</h1>
 <div id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org6fc8744">A* Search Algorithm</a></li>
+<li><a href="#org16d482f">The A* Search Algorithm</a>
+<ul>
+<li><a href="#org27526f5">Breadth First Search</a></li>
+<li><a href="#orgbaa9a8f">Dijkstra's Shortest Path</a></li>
+<li><a href="#orgb8dfc67">A*</a>
+<ul>
+<li><a href="#orgbc89c9a">Grid Implementation</a></li>
+<li><a href="#org4213bd1">Plotting A Course</a></li>
+<li><a href="#org16a1933">Priority Queue</a></li>
+<li><a href="#org6141243">Rendering</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
+<p>
+In this blog post, I'll walk through my implementation of the A* path planning algorithm, including all of the source code used in the demos. <a href="/blog/autonomous-mobile-robot/autonomous-mobile-robot.html">I originally wrote this program in C++, to run on an Arduino,</a> and then translated it line by line to JavaScript. So, this probably isn't the most idiomatic JavaScript code, but its nice in that it would be very straightforward to use this guide to implement this in a non-garbage-collected language.
+</p>
 
+<div id="outline-container-org16d482f" class="outline-2">
+<h2 id="org16d482f">The A* Search Algorithm</h2>
+<div class="outline-text-2" id="text-org16d482f">
 
-<div id="outline-container-org6fc8744" class="outline-2">
-<h2 id="org6fc8744">A* Search Algorithm</h2>
-<div class="outline-text-2" id="text-org6fc8744">
+<div id="org2c10733" class="figure">
+<p><img src="./A_star.gif" alt="A_star.gif" style="width: 200px;height: auto;" />
+</p>
+<p><span class="figure-number">Figure 1: </span>Demo</p>
+</div>
+
 <div id="grid-container"></div>
+</div>
+
+<div id="outline-container-org27526f5" class="outline-3">
+<h3 id="org27526f5">Breadth First Search</h3>
+<div class="outline-text-3" id="text-org27526f5">
+<p>
+Let's start with a very basic search algorithm: Breadth-First Search (BFS). Given a tree of nodes, we could search for a specific node by first visiting the root node, and then adding its children to a queue. From there, we would visit each node added to the queue, and for each, add its children to the queue.
+</p>
+
+
+<div id="org6939d9d" class="figure">
+<p><img src="./bfs.gif" alt="bfs.gif" style="max-width: 500px; height: auto;" />
+</p>
+<p><span class="figure-number">Figure 2: </span>Breadth First Search</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgbaa9a8f" class="outline-3">
+<h3 id="orgbaa9a8f">Dijkstra's Shortest Path</h3>
+<div class="outline-text-3" id="text-orgbaa9a8f">
+<p>
+Dijkstra's famous algorithm improves upon BFS by using a priority queue, in which the elements are ordered based on the cost associated with arriving at each node. You could imagine a graph in which each node is a destination, and the edges are the roads between destinations. Associated with each edge is a cost which could represent the time it would take to traverse the road.
+</p>
+
+<p>
+This time, our queue will not contain individual nodes, but paths.
+</p>
+
+
+<div id="orgd3568bf" class="figure">
+<p><img src="./dijkstra.gif" alt="dijkstra.gif" style="max-width: 500px; height: auto;" />
+</p>
+<p><span class="figure-number">Figure 3: </span>Dijkstra's Shortest Path Algorithm</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgb8dfc67" class="outline-3">
+<h3 id="orgb8dfc67">A*</h3>
+<div class="outline-text-3" id="text-orgb8dfc67">
+<p>
+The A* search algorithm builds upon Dijkstra's algorithm by considering not only the cost associated with reaching a node, but also an estimate of the cost to reach the goal. Imagine every node in the previous graph contained a number which was the distance, as the crow flies, to the goal. This number would be weighed equally with the cost to reach a node when ordering the priority queue.
+</p>
+</div>
+
+<div id="outline-container-orgbc89c9a" class="outline-4">
+<h4 id="orgbc89c9a">Grid Implementation</h4>
+<div class="outline-text-4" id="text-orgbc89c9a">
+<p>
+In this demonstration, I'm going to show you how I used A* in the context of an occupancy grid to find the shortest path between the two red squares in the grid, while avoiding obstacles. To start, we'll need a way to represent our grid. For convenience, we should have a human readable way to initialize our grid. I've made it so the grid can be initialized from a string.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-javascript"><span class="linenr"> 0: </span><span class="org-keyword">let</span> <span class="org-variable-name">init_grid_str</span> = <span class="org-string">`</span>
+<span class="linenr"> 1: </span><span class="org-string">................</span>
+<span class="linenr"> 2: </span><span class="org-string">................</span>
+<span class="linenr"> 3: </span><span class="org-string">...##......##...</span>
+<span class="linenr"> 4: </span><span class="org-string">....#.......#...</span>
+<span class="linenr"> 5: </span><span class="org-string">....#.......#...</span>
+<span class="linenr"> 6: </span><span class="org-string">....######..###.</span>
+<span class="linenr"> 7: </span><span class="org-string">.........#......</span>
+<span class="linenr"> 8: </span><span class="org-string">.........#......</span>
+<span class="linenr"> 9: </span><span class="org-string">.........#......</span>
+<span class="linenr">10: </span><span class="org-string">...##....####...</span>
+<span class="linenr">11: </span><span class="org-string">....#.......#...</span>
+<span class="linenr">12: </span><span class="org-string">....#.......#...</span>
+<span class="linenr">13: </span><span class="org-string">....####....###.</span>
+<span class="linenr">14: </span><span class="org-string">................</span>
+<span class="linenr">15: </span><span class="org-string">................</span>
+<span class="linenr">16: </span><span class="org-string">`</span>.trim();
+<span class="linenr">17: </span>
+<span class="linenr">18: </span><span class="org-keyword">const</span> <span class="org-variable-name">EMPTY</span> = 0;
+<span class="linenr">19: </span><span class="org-keyword">const</span> <span class="org-variable-name">OCCUPIED</span> = 1;
+<span class="linenr">20: </span><span class="org-keyword">const</span> <span class="org-variable-name">END_POINT</span> = 2;
+<span class="linenr">21: </span>
+<span class="linenr">22: </span><span class="org-keyword">class</span> Grid {
+<span class="linenr">23: </span>  constructor(grid_str) {
+<span class="linenr">24: </span>    <span class="org-keyword">const</span> <span class="org-variable-name">rows</span> = grid_str.split(<span class="org-string">'\n'</span>);
+<span class="linenr">25: </span>    <span class="org-constant">this</span>.nRows = rows.length;
+<span class="linenr">26: </span>    <span class="org-constant">this</span>.nCols = rows[0].length;
+<span class="linenr">27: </span>    <span class="org-constant">this</span>._grid = Array(<span class="org-constant">this</span>.nCols * <span class="org-constant">this</span>.nRows).fill(EMPTY);
+<span class="linenr">28: </span>    rows.forEach((row, y) =&gt; {
+<span class="linenr">29: </span>      row.split(<span class="org-string">''</span>).forEach((<span class="org-type">char</span>, x) =&gt; {
+<span class="linenr">30: </span>        <span class="org-constant">this</span>._grid[y * <span class="org-constant">this</span>.nCols + x] = <span class="org-type">char</span> == <span class="org-string">'.'</span> ? EMPTY : <span class="org-type">char</span> == <span class="org-string">'#'</span> ? OCCUPIED : END_POINT;
+<span class="linenr">31: </span>      });
+<span class="linenr">32: </span>    });
+<span class="linenr">33: </span>
+<span class="linenr">34: </span>    <span class="org-constant">this</span>.start_idx = <span class="org-constant">this</span>.nCols * (<span class="org-constant">this</span>.nRows - 1); <span class="org-comment-delimiter">// </span><span class="org-comment">Traverse from the top right</span>
+<span class="linenr">35: </span>    <span class="org-constant">this</span>.end_idx = <span class="org-constant">this</span>.nCols - 1;                  <span class="org-comment-delimiter">// </span><span class="org-comment">to the bottom left corner</span>
+<span class="linenr">36: </span>    <span class="org-constant">this</span>._grid[<span class="org-constant">this</span>.start_idx] = END_POINT;         
+<span class="linenr">37: </span>    <span class="org-constant">this</span>._grid[<span class="org-constant">this</span>.end_idx] = END_POINT;
+<span class="linenr">38: </span>    <span class="org-constant">this</span>.path_capacity = 100;
+<span class="linenr">39: </span>    <span class="org-constant">this</span>.path_size = 0;
+<span class="linenr">40: </span>    <span class="org-constant">this</span>.path = Array(<span class="org-constant">this</span>.path_capacity);
+<span class="linenr">41: </span>  }
+</pre>
+</div>
+
+<p>
+You may have noticed that I set a <code>path_capacity</code> variable. This can be used to limit the memory consumption of our path finding algorithm, which would be useful if we were working with limited hardware.
+</p>
+
+<p>
+Internally, the grid is represented as a one dimensionally array, and in the above code, you can see how we can translate \((x,y)\) coordinates to grid indices mathematically on line 30: <code>y * this.nCols + x</code>. We'll provide an interface for accessing grid elements by their \((x,y)\) coordinates.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-javascript"><span class="linenr">43: </span>set_at(val, x, y) {
+<span class="linenr">44: </span>  <span class="org-keyword">if</span> (x &lt; 0 || y &lt; 0) {
+<span class="linenr">45: </span>    <span class="org-keyword">return</span>;
+<span class="linenr">46: </span>  }
+<span class="linenr">47: </span>  <span class="org-constant">this</span>._grid[y * <span class="org-constant">this</span>.nCols + x] = val;
+<span class="linenr">48: </span>}
+<span class="linenr">49: </span>
+<span class="linenr">50: </span>at(x, y) {
+<span class="linenr">51: </span>  <span class="org-keyword">return</span> <span class="org-constant">this</span>._grid[y * <span class="org-constant">this</span>.nCols + x];
+<span class="linenr">52: </span>}
+<span class="linenr">53: </span>
+<span class="linenr">54: </span>idx_to_cartesian(idx) {
+<span class="linenr">55: </span>  <span class="org-keyword">return</span> [idx % <span class="org-constant">this</span>.nCols, Math.floor(idx / <span class="org-constant">this</span>.nCols)];
+<span class="linenr">56: </span>}
+</pre>
+</div>
+
+<p>
+We also need a way to estimate the cost associated with reaching our goal, from a given space on the grid. We can do this by taking the euclidian distance between a given grid space and the target grid space. \[d = \sqrt{(y_b - y_a)^2 + (x_b - x_a)^2}\]
+</p>
+
+<div class="org-src-container">
+<pre class="src src-javascript"><span class="linenr">58: </span>distance(idx_a, idx_b) {
+<span class="linenr">59: </span>  <span class="org-keyword">let</span> [ <span class="org-variable-name">ax</span>, <span class="org-variable-name">ay</span> ] = <span class="org-constant">this</span>.idx_to_cartesian(idx_a);
+<span class="linenr">60: </span>  <span class="org-keyword">let</span> [ <span class="org-variable-name">bx</span>, <span class="org-variable-name">by</span> ] = <span class="org-constant">this</span>.idx_to_cartesian(idx_b);
+<span class="linenr">61: </span>
+<span class="linenr">62: </span>  <span class="org-keyword">return</span> Math.round(10 * Math.sqrt(Math.pow(by - ay, 2) + Math.pow(bx - ax, 2)));
+<span class="linenr">63: </span>}
+<span class="linenr">64: </span>
+<span class="linenr">65: </span>clear_path() {
+<span class="linenr">66: </span>  <span class="org-constant">this</span>.path_size = 0;
+<span class="linenr">67: </span>}
+</pre>
+</div>
+
+<p>
+I multiply by 10 and round the answer so that I can stick to integer values. I've also included a convenience method for clearing the path. That will be useful later.
+</p>
+
+<p>
+At this point, we're ready to dive into our path planning.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org4213bd1" class="outline-4">
+<h4 id="org4213bd1">Plotting A Course</h4>
+<div class="outline-text-4" id="text-org4213bd1">
+<div class="org-src-container">
+<pre class="src src-javascript"><span class="linenr">69: </span>plot_course() {
+<span class="linenr">70: </span>  <span class="org-keyword">const</span> <span class="org-variable-name">pq_max_size</span> = 10000;
+<span class="linenr">71: </span>  <span class="org-keyword">let</span> <span class="org-variable-name">pq</span> = Array(pq_max_size);
+<span class="linenr">72: </span>  <span class="org-keyword">for</span> (<span class="org-keyword">let</span> <span class="org-variable-name">i</span> = 0; i &lt; pq_max_size; i += 1) {
+<span class="linenr">73: </span>    pq[i] = <span class="org-keyword">new</span> <span class="org-type">PathNode</span>();
+<span class="linenr">74: </span>  }
+<span class="linenr">75: </span>
+<span class="linenr">76: </span>  pq[0].grid_idx = <span class="org-constant">this</span>.end_idx;
+<span class="linenr">77: </span>  pq[0].parent = <span class="org-constant">null</span>;
+<span class="linenr">78: </span>  pq[0].gCost = 0;
+<span class="linenr">79: </span>  pq[0].hCost = <span class="org-constant">this</span>.distance(<span class="org-constant">this</span>.end_idx, <span class="org-constant">this</span>.start_idx);
+<span class="linenr">80: </span>  <span class="org-keyword">let</span> <span class="org-variable-name">pq_size</span> = 1;
+</pre>
+</div>
+
+<p>
+The priority queue is implemented as an array of nodes. Each node has knowledge of its index in the grid, its parent on a path to it, the cost associated with reaching the node from the starting point, and the estimated cost associated with reaching the goal. <code>pq_size</code> is used to keep track of the size of our priority queue.
+</p>
+
+<p>
+The priority queue is initialized with a node representing the desired <i>end</i> position along our path. This warrants some explanation. A reminder, I wrote this code to run on an Arduino, as the brains of an autonomous mobile robot. The thinking behind this was, if we run out of memory before the path is completed, we can retry the path planning with the new end goal as the final position in the path from the previous trial. This way, if we're able to work our way back to the start, we'll have confidence that there is a path to the end goal, even if the robot can't hold it in memory all at once.
+</p>
+
+<p>
+We're also keeping track of the nodes we've previously explored.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-javascript"><span class="linenr">82: </span><span class="org-keyword">const</span> <span class="org-variable-name">explored_max_size</span> = pq_max_size;
+<span class="linenr">83: </span><span class="org-keyword">let</span> <span class="org-variable-name">explored</span> = Array(explored_max_size).fill(<span class="org-keyword">new</span> <span class="org-type">PathNode</span>());
+<span class="linenr">84: </span><span class="org-keyword">for</span> (<span class="org-keyword">let</span> <span class="org-variable-name">i</span> = 0; i &lt; pq_max_size; i += 1) {
+<span class="linenr">85: </span>  explored[i] = <span class="org-keyword">new</span> <span class="org-type">PathNode</span>();
+<span class="linenr">86: </span>}
+<span class="linenr">87: </span><span class="org-keyword">let</span> <span class="org-variable-name">explored_size</span> = 0;  
+</pre>
+</div>
+
+<p>
+Based on the number of rows and columns, we can find the relative index of the neighboring grid spaces. Let \(c\) be the number of columns in the grid, and \(i\) be the grid index of the current node being visited.
+</p>
+
+\begin{align*}
+\begin{bmatrix}
+i - (c + 1) & i-c & i - c + 1) \\
+i - 1 & i & i + 1 \\
+i + c + 1 & i + c & i + c - 1
+\end{bmatrix}
+\end{align*}
+
+<div class="org-src-container">
+<pre class="src src-javascript"><span class="linenr">89: </span><span class="org-comment-delimiter">// </span><span class="org-comment">5 6 7</span>
+<span class="linenr">90: </span><span class="org-comment-delimiter">// </span><span class="org-comment">4 X 0</span>
+<span class="linenr">91: </span><span class="org-comment-delimiter">// </span><span class="org-comment">3 2 1</span>
+<span class="linenr">92: </span><span class="org-keyword">const</span> <span class="org-variable-name">neighbors</span> = [
+<span class="linenr">93: </span>  1, <span class="org-constant">this</span>.nCols + 1, <span class="org-constant">this</span>.nCols, <span class="org-constant">this</span>.nCols - 1, -1,
+<span class="linenr">94: </span>  (0 - <span class="org-constant">this</span>.nCols) - 1, (0 - <span class="org-constant">this</span>.nCols), (0 - <span class="org-constant">this</span>.nCols) + 1
+<span class="linenr">95: </span>];
+</pre>
+</div>
+
+<p>
+We're gonna search for a path to our goal until
+</p>
+<ul class="org-ul">
+<li>the goal has been reached,</li>
+<li>our priority queue runs out, or</li>
+<li>we reach the capacity limit of our priority queue, explored nodes array, or path.</li>
+</ul>
+
+<p>
+We begin by dequeuing the highest priority node from our priority queue. We check to see if our destination has been reached. If so, we set the corresponding path by visiting the ancestors of the node, and return 0 to indicate success.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-javascript"><span class="linenr"> 97: </span><span class="org-keyword">while</span> (pq_size != 0) {
+<span class="linenr"> 98: </span>  <span class="org-keyword">if</span> (explored_size &gt;= explored_max_size) {
+<span class="linenr"> 99: </span>    <span class="org-keyword">return</span> -5;
+<span class="linenr">100: </span>  }
+<span class="linenr">101: </span>  pq_size = pq_dequeue(pq, pq_size, explored, explored_size);
+<span class="linenr">102: </span>  explored_size += 1;
+<span class="linenr">103: </span>
+<span class="linenr">104: </span>  <span class="org-keyword">if</span> (explored[explored_size-1].grid_idx == <span class="org-constant">this</span>.start_idx) {
+<span class="linenr">105: </span>    <span class="org-constant">this</span>.path[0] = explored[explored_size-1].grid_idx;
+<span class="linenr">106: </span>    <span class="org-constant">this</span>.path_size += 1;
+<span class="linenr">107: </span>    <span class="org-keyword">let</span> <span class="org-variable-name">node</span> = explored[explored_size - 1].parent;
+<span class="linenr">108: </span>    <span class="org-keyword">for</span> (<span class="org-keyword">let</span> <span class="org-variable-name">i</span> = 1; node <span class="org-keyword">instanceof</span> <span class="org-type">PathNode</span>; i += 1) {
+<span class="linenr">109: </span>      <span class="org-constant">this</span>.path[i] = node.grid_idx;
+<span class="linenr">110: </span>      node = node.parent;
+<span class="linenr">111: </span>      <span class="org-constant">this</span>.path_size += 1;
+<span class="linenr">112: </span>      <span class="org-keyword">if</span> (<span class="org-constant">this</span>.path_size == <span class="org-constant">this</span>.path_capacity &amp;&amp; node <span class="org-keyword">instanceof</span> <span class="org-type">PathNode</span>) {
+<span class="linenr">113: </span>        <span class="org-keyword">return</span> -1; <span class="org-comment-delimiter">// </span><span class="org-comment">Path capacity reached before completing path.</span>
+<span class="linenr">114: </span>      }
+<span class="linenr">115: </span>    }
+<span class="linenr">116: </span>
+<span class="linenr">117: </span>    <span class="org-keyword">return</span> 0;
+<span class="linenr">118: </span>  }  
+</pre>
+</div>
+
+<p>
+Having confirmed that our goal has not been reached, we can the add the node's neighbors to the priority queue. But we have to check that the index we find corresponds to an actual grid space. It may not if the currently visited node is along the boundaries of our grid.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-javascript"><span class="linenr">120: </span><span class="org-keyword">for</span> (<span class="org-keyword">let</span> <span class="org-variable-name">i</span> = 0; i &lt; 8; i += 1) {
+<span class="linenr">121: </span>  <span class="org-keyword">if</span> (explored[explored_size-1].grid_idx &lt; <span class="org-constant">this</span>.nCols &amp;&amp; i &gt;= 5) <span class="org-keyword">continue</span>; <span class="org-comment-delimiter">// </span><span class="org-comment">first row</span>
+<span class="linenr">122: </span>  <span class="org-keyword">if</span> (explored[explored_size-1].grid_idx % <span class="org-constant">this</span>.nCols == 0 &amp;&amp; i &gt;= 3 &amp;&amp; i &lt;= 5) <span class="org-keyword">continue</span>; <span class="org-comment-delimiter">// </span><span class="org-comment">first column</span>
+<span class="linenr">123: </span>  <span class="org-keyword">if</span> (explored[explored_size-1].grid_idx % <span class="org-constant">this</span>.nCols == <span class="org-constant">this</span>.nCols - 1 &amp;&amp; (i &lt;= 1 || i == 7)) <span class="org-keyword">continue</span>; <span class="org-comment-delimiter">// </span><span class="org-comment">last column</span>
+<span class="linenr">124: </span>  <span class="org-keyword">if</span> (Math.floor(explored[explored_size-1].grid_idx / <span class="org-constant">this</span>.nCols) == <span class="org-constant">this</span>.nRows - 1 &amp;&amp; (i &lt;= 3 &amp;&amp; i &gt;= 1)) <span class="org-keyword">continue</span>; <span class="org-comment-delimiter">// </span><span class="org-comment">last row</span>
+<span class="linenr">125: </span>
+<span class="linenr">126: </span>  <span class="org-keyword">let</span> <span class="org-variable-name">neighbor_idx</span> = explored[explored_size - 1].grid_idx + neighbors[i];
+</pre>
+</div>
+
+<p>
+For each of these valid neighboring grid spaces, we need to ask whether there is an obstacle their. If not, then we should add it to our priority queue, provided it's not already there. If it is in the priority queue already, may need to update the node to if a lower cost path exists.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-javascript"><span class="linenr">127: </span>      <span class="org-keyword">if</span> (<span class="org-constant">this</span>._grid[neighbor_idx] == OCCUPIED) {
+<span class="linenr">128: </span>        <span class="org-keyword">continue</span>;
+<span class="linenr">129: </span>      }
+<span class="linenr">130: </span>
+<span class="linenr">131: </span>      <span class="org-comment-delimiter">// </span><span class="org-comment">// ask whether the neighbor_idx exists in the pq already</span>
+<span class="linenr">132: </span>      <span class="org-keyword">let</span> <span class="org-variable-name">in_pq</span> = <span class="org-constant">false</span>;
+<span class="linenr">133: </span>      <span class="org-keyword">let</span> <span class="org-variable-name">pq_idx</span> = 0;
+<span class="linenr">134: </span>      <span class="org-keyword">for</span> (<span class="org-keyword">let</span> <span class="org-variable-name">i</span> = 0; i &lt; pq_size; i += 1) {
+<span class="linenr">135: </span>        <span class="org-keyword">if</span> (pq[i].grid_idx == neighbor_idx) {
+<span class="linenr">136: </span>          in_pq = <span class="org-constant">true</span>;
+<span class="linenr">137: </span>          pq_idx = i;
+<span class="linenr">138: </span>          <span class="org-keyword">break</span>;
+<span class="linenr">139: </span>        }
+<span class="linenr">140: </span>      }
+<span class="linenr">141: </span>      <span class="org-comment-delimiter">// </span><span class="org-comment">If so, the gCost and parent may need to be updated to reflect a lower cost path</span>
+<span class="linenr">142: </span>      <span class="org-keyword">if</span> (in_pq) {
+<span class="linenr">143: </span>        <span class="org-keyword">let</span> <span class="org-variable-name">new_gCost</span> = explored[explored_size - 1].gCost + <span class="org-constant">this</span>.distance(explored[explored_size - 1].grid_idx, neighbor_idx);
+<span class="linenr">144: </span>        <span class="org-keyword">if</span> (new_gCost &lt; pq[pq_idx].gCost) {
+<span class="linenr">145: </span>          pq[pq_idx].gCost = new_gCost;
+<span class="linenr">146: </span>          pq[pq_idx].parent = explored[explored_size - 1];
+<span class="linenr">147: </span>          pq_shift_up(pq, pq_idx);
+<span class="linenr">148: </span>        }
+<span class="linenr">149: </span>      } <span class="org-keyword">else</span> { <span class="org-comment-delimiter">// </span><span class="org-comment">otherwise, add a new PathNode to the queue</span>
+<span class="linenr">150: </span>        pq[pq_size].grid_idx = neighbor_idx;
+<span class="linenr">151: </span>        pq[pq_size].parent = explored[explored_size - 1];
+<span class="linenr">152: </span>        pq[pq_size].gCost = explored[explored_size - 1].gCost + <span class="org-constant">this</span>.distance(explored[explored_size - 1].grid_idx, neighbor_idx);
+<span class="linenr">153: </span>        pq[pq_size].hCost = <span class="org-constant">this</span>.distance(neighbor_idx, <span class="org-constant">this</span>.start_idx);
+<span class="linenr">154: </span>
+<span class="linenr">155: </span>        pq_shift_up(pq, pq_size);
+<span class="linenr">156: </span>        pq_size += 1;
+<span class="linenr">157: </span>
+<span class="linenr">158: </span>        <span class="org-keyword">if</span> (pq_size == pq_max_size) {
+<span class="linenr">159: </span>          <span class="org-keyword">return</span> -4; <span class="org-comment-delimiter">// </span><span class="org-comment">Reached capacity for priority queue</span>
+<span class="linenr">160: </span>        }
+<span class="linenr">161: </span>      }       
+<span class="linenr">162: </span>    }
+<span class="linenr">163: </span>  }
+<span class="linenr">164: </span>
+<span class="linenr">165: </span>  <span class="org-keyword">return</span> 1; <span class="org-comment-delimiter">// </span><span class="org-comment">Path not found</span>
+<span class="linenr">166: </span>  }
+<span class="linenr">167: </span>}
+</pre>
+</div>
+
+<p>
+Next up, the PathNodes used in <code>plot_course</code> need to be implemented:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-javascript"><span class="linenr">169: </span><span class="org-keyword">class</span> PathNode {
+<span class="linenr">170: </span>  constructor() {
+<span class="linenr">171: </span>    <span class="org-constant">this</span>.grid_idx = <span class="org-constant">null</span>;
+<span class="linenr">172: </span>    <span class="org-constant">this</span>.parent = <span class="org-constant">null</span>;
+<span class="linenr">173: </span>    <span class="org-constant">this</span>.gCost = <span class="org-constant">null</span>;
+<span class="linenr">174: </span>    <span class="org-constant">this</span>.hCost = <span class="org-constant">null</span>;
+<span class="linenr">175: </span>  }
+<span class="linenr">176: </span>
+<span class="linenr">177: </span>  less_than(other_node) {
+<span class="linenr">178: </span>    <span class="org-keyword">return</span> (<span class="org-constant">this</span>.gCost + <span class="org-constant">this</span>.hCost) &lt; (other_node.gCost + other_node.hCost);
+<span class="linenr">179: </span>  }
+<span class="linenr">180: </span>
+<span class="linenr">181: </span>  greater_than(other_node) {
+<span class="linenr">182: </span>    <span class="org-keyword">return</span> (<span class="org-constant">this</span>.gCost + <span class="org-constant">this</span>.hCost) &gt; (other_node.gCost + other_node.hCost);
+<span class="linenr">183: </span>  }
+<span class="linenr">184: </span>}
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org16a1933" class="outline-4">
+<h4 id="org16a1933">Priority Queue</h4>
+<div class="outline-text-4" id="text-org16a1933">
+<p>
+We still need to implement the functionality associated with our priority queue. In order for A* to be efficient, the priority queue must be efficient, so I'ved used a min-heap.
+</p>
+
+
+<div id="org3a460b7" class="figure">
+<p><img src="./min-heap.png" alt="min-heap.png" style="max-width: 400px; height: auto;" />
+</p>
+<p><span class="figure-number">Figure 4: </span>Min Heap Example</p>
+</div>
+
+<p>
+In order to traverse the tree, we'll need to be able to find the indices of the parent and children for a given node.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-javascript"><span class="linenr">186: </span><span class="org-keyword">function</span> <span class="org-function-name">pq_parent</span>(<span class="org-variable-name">i</span>) {
+<span class="linenr">187: </span>  <span class="org-keyword">return</span> Math.floor((i - 1) / 2);
+<span class="linenr">188: </span>}
+<span class="linenr">189: </span>
+<span class="linenr">190: </span><span class="org-keyword">function</span> <span class="org-function-name">pq_left_child</span>(<span class="org-variable-name">i</span>) {
+<span class="linenr">191: </span>  <span class="org-keyword">return</span> (2 * i) + 1;
+<span class="linenr">192: </span>}
+<span class="linenr">193: </span>
+<span class="linenr">194: </span><span class="org-keyword">function</span> <span class="org-function-name">pq_right_child</span>(<span class="org-variable-name">i</span>) {
+<span class="linenr">195: </span>  <span class="org-keyword">return</span> (2 * i) + 2;
+<span class="linenr">196: </span>}
+</pre>
+</div>
+
+<p>
+We'll also need a function to insert new nodes into our heap. We can do this by first appending the new node to the end of the end of our array, and then swapping it with its ancestors until the heap property is preserved.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-javascript"><span class="linenr">198: </span><span class="org-keyword">function</span> <span class="org-function-name">pq_shift_up</span>(<span class="org-variable-name">pq</span>, <span class="org-variable-name">i</span>) {
+<span class="linenr">199: </span>  <span class="org-keyword">while</span> (i &gt; 0 &amp;&amp; pq[pq_parent(i)].greater_than(pq[i])) {
+<span class="linenr">200: </span>    <span class="org-keyword">let</span> <span class="org-variable-name">parent_i</span> = pq_parent(i);
+<span class="linenr">201: </span>    <span class="org-keyword">let</span> <span class="org-variable-name">temp</span> = <span class="org-keyword">new</span> <span class="org-type">PathNode</span>();
+<span class="linenr">202: </span>    Object.assign(temp, pq[i]);
+<span class="linenr">203: </span>    Object.assign(pq[i], pq[parent_i]);
+<span class="linenr">204: </span>    Object.assign(pq[parent_i], temp);
+<span class="linenr">205: </span>
+<span class="linenr">206: </span>    i = parent_i;
+<span class="linenr">207: </span>  }
+<span class="linenr">208: </span>}
+</pre>
+</div>
+
+<p>
+When we dequeue a node from our priority queue, we'll need to move things around in our heap so that we can find and access the new highest priority node. For this, we'll take the last node in our array and move it to the top of the heap: the first element in our array. From there, we'll swap it with the least-cost child until the heap property is satisfied.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-javascript"><span class="linenr">210: </span><span class="org-keyword">function</span> <span class="org-function-name">pq_shift_down</span>(<span class="org-variable-name">pq</span>, <span class="org-variable-name">size</span>, <span class="org-variable-name">i</span>) {
+<span class="linenr">211: </span>  <span class="org-keyword">let</span> <span class="org-variable-name">min_index</span> = i;
+<span class="linenr">212: </span>
+<span class="linenr">213: </span>  <span class="org-keyword">while</span> (<span class="org-constant">true</span>) {
+<span class="linenr">214: </span>    <span class="org-keyword">let</span> <span class="org-variable-name">l</span> = pq_left_child(i);
+<span class="linenr">215: </span>
+<span class="linenr">216: </span>    <span class="org-keyword">if</span> (l &lt; size &amp;&amp; pq[l].less_than(pq[min_index])) {
+<span class="linenr">217: </span>      min_index = l;
+<span class="linenr">218: </span>    }
+<span class="linenr">219: </span>
+<span class="linenr">220: </span>    <span class="org-keyword">let</span> <span class="org-variable-name">r</span> = pq_right_child(i);
+<span class="linenr">221: </span>
+<span class="linenr">222: </span>    <span class="org-keyword">if</span> (r &lt; size &amp;&amp; pq[r].less_than(pq[min_index])) {
+<span class="linenr">223: </span>      min_index = r;
+<span class="linenr">224: </span>    }
+<span class="linenr">225: </span>
+<span class="linenr">226: </span>    <span class="org-keyword">if</span> (i != min_index) {
+<span class="linenr">227: </span>      <span class="org-keyword">let</span> <span class="org-variable-name">temp</span> = <span class="org-keyword">new</span> <span class="org-type">PathNode</span>();
+<span class="linenr">228: </span>      Object.assign(temp, pq[i]);
+<span class="linenr">229: </span>      pq[i] = pq[min_index];
+<span class="linenr">230: </span>      pq[min_index] = temp;
+<span class="linenr">231: </span>      i = min_index;
+<span class="linenr">232: </span>    } <span class="org-keyword">else</span> {
+<span class="linenr">233: </span>      <span class="org-keyword">break</span>;
+<span class="linenr">234: </span>    }
+<span class="linenr">235: </span>  }
+<span class="linenr">236: </span>}
+<span class="linenr">237: </span>
+<span class="linenr">238: </span><span class="org-keyword">function</span> <span class="org-function-name">pq_dequeue</span>(<span class="org-variable-name">pq</span>, <span class="org-variable-name">pq_size</span>, <span class="org-variable-name">explored</span>, <span class="org-variable-name">explored_size</span>) {
+<span class="linenr">239: </span>  Object.assign(explored[explored_size], pq[0]);
+<span class="linenr">240: </span>  pq[0] = pq[pq_size - 1];
+<span class="linenr">241: </span>  pq_shift_down(pq, pq_size - 1, 0);
+<span class="linenr">242: </span>  <span class="org-keyword">return</span> pq_size - 1;
+<span class="linenr">243: </span>}
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org6141243" class="outline-4">
+<h4 id="org6141243">Rendering</h4>
+<div class="outline-text-4" id="text-org6141243">
+<p>
+Finally, all that's left is to render our completed grid and path. This post is about path planning, so I won't go into too much detail, but below you can see how I've used an HTML canvas element to display the grid and draw the path. In addition, there are event handlers which allow you to interact with the grid, dragging the end points, are drawing/erasing obstacles.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-javascript"><span class="linenr">245: </span><span class="org-keyword">const</span> <span class="org-variable-name">SCALE</span> = 18;
+<span class="linenr">246: </span><span class="org-keyword">class</span> CanvasDisplay {
+<span class="linenr">247: </span>  constructor(parent, grid) {
+<span class="linenr">248: </span>    <span class="org-constant">this</span>.canvas = document.createElement(<span class="org-string">"canvas"</span>);
+<span class="linenr">249: </span>    <span class="org-constant">this</span>.canvas.style.border = <span class="org-string">"6px solid black"</span>;
+<span class="linenr">250: </span>    <span class="org-constant">this</span>.canvas.style.touchAction = <span class="org-string">'none'</span>;
+<span class="linenr">251: </span>    <span class="org-constant">this</span>.canvas.width = Math.min(600, grid.nCols * SCALE);
+<span class="linenr">252: </span>    <span class="org-constant">this</span>.canvas.height = Math.min(450, grid.nRows * SCALE);
+<span class="linenr">253: </span>    parent.appendChild(<span class="org-constant">this</span>.canvas);
+<span class="linenr">254: </span>    <span class="org-constant">this</span>.cx = <span class="org-constant">this</span>.canvas.getContext(<span class="org-string">"2d"</span>);
+<span class="linenr">255: </span>
+<span class="linenr">256: </span>    <span class="org-constant">this</span>.flipPlayer = <span class="org-constant">false</span>;
+<span class="linenr">257: </span>
+<span class="linenr">258: </span>    <span class="org-constant">this</span>.viewport = {
+<span class="linenr">259: </span>      left: 0,
+<span class="linenr">260: </span>      top: 0,
+<span class="linenr">261: </span>      width: <span class="org-constant">this</span>.canvas.width / SCALE,
+<span class="linenr">262: </span>      height: <span class="org-constant">this</span>.canvas.height / SCALE,
+<span class="linenr">263: </span>    };
+<span class="linenr">264: </span>
+<span class="linenr">265: </span>    <span class="org-constant">this</span>.grid = grid;
+<span class="linenr">266: </span>    <span class="org-keyword">let</span> <span class="org-variable-name">rerender_grid</span> = ((e) =&gt; {
+<span class="linenr">267: </span>      e.stopPropagation();
+<span class="linenr">268: </span>      e.preventDefault();
+<span class="linenr">269: </span>      <span class="org-keyword">let</span> <span class="org-variable-name">x</span> = Math.floor(e.offsetX / SCALE);
+<span class="linenr">270: </span>      <span class="org-keyword">let</span> <span class="org-variable-name">y</span> = Math.floor(e.offsetY / SCALE);
+<span class="linenr">271: </span>      <span class="org-comment-delimiter">// </span><span class="org-comment">Prevent issues from dragging or drawing off of grid.</span>
+<span class="linenr">272: </span>      <span class="org-keyword">if</span> (x &lt; 0 || y &lt; 0 || x &gt;= <span class="org-constant">this</span>.grid.nCols || y &gt;= <span class="org-constant">this</span>.grid.nRows) {
+<span class="linenr">273: </span>        <span class="org-keyword">return</span>;
+<span class="linenr">274: </span>      }
+<span class="linenr">275: </span>
+<span class="linenr">276: </span>      <span class="org-keyword">let</span> <span class="org-variable-name">idx</span> = y * <span class="org-constant">this</span>.grid.nCols + x;
+<span class="linenr">277: </span>      <span class="org-keyword">if</span> (idx == <span class="org-constant">this</span>.grid.start_idx || idx == <span class="org-constant">this</span>.grid.end_idx) {
+<span class="linenr">278: </span>        <span class="org-constant">this</span>.canvas.style.cursor = <span class="org-string">"grab"</span>;
+<span class="linenr">279: </span>      } <span class="org-keyword">else</span> {
+<span class="linenr">280: </span>        <span class="org-constant">this</span>.canvas.style.cursor = <span class="org-string">"crosshair"</span>
+<span class="linenr">281: </span>      }
+<span class="linenr">282: </span>
+<span class="linenr">283: </span>      <span class="org-keyword">if</span> (is_drawing) {
+<span class="linenr">284: </span>        <span class="org-comment-delimiter">// </span><span class="org-comment">Prevent drawing over path end points</span>
+<span class="linenr">285: </span>        <span class="org-keyword">if</span> (idx == <span class="org-constant">this</span>.grid.start_idx || idx == <span class="org-constant">this</span>.grid.end_idx) {
+<span class="linenr">286: </span>          <span class="org-keyword">return</span>;
+<span class="linenr">287: </span>        }
+<span class="linenr">288: </span>
+<span class="linenr">289: </span>        <span class="org-keyword">let</span> <span class="org-variable-name">new_value</span> = is_erasing ? 0 : 1;
+<span class="linenr">290: </span>        <span class="org-constant">this</span>.grid.set_at(new_value, x, y);
+<span class="linenr">291: </span>        <span class="org-constant">this</span>.draw();
+<span class="linenr">292: </span>      } <span class="org-keyword">else</span> <span class="org-keyword">if</span> (is_dragging) {
+<span class="linenr">293: </span>        <span class="org-constant">this</span>.canvas.style.cursor = <span class="org-string">"grabbing"</span>;
+<span class="linenr">294: </span>        <span class="org-keyword">if</span> (dragging_start) {
+<span class="linenr">295: </span>          <span class="org-constant">this</span>.grid._grid[<span class="org-constant">this</span>.grid.start_idx] = 0;
+<span class="linenr">296: </span>          <span class="org-constant">this</span>.grid.set_at(2, x, y);
+<span class="linenr">297: </span>          <span class="org-constant">this</span>.grid.start_idx = idx;
+<span class="linenr">298: </span>        } <span class="org-keyword">else</span> {
+<span class="linenr">299: </span>          <span class="org-constant">this</span>.grid._grid[<span class="org-constant">this</span>.grid.end_idx] = 0;
+<span class="linenr">300: </span>          <span class="org-constant">this</span>.grid.set_at(2, x, y);
+<span class="linenr">301: </span>          <span class="org-constant">this</span>.grid.end_idx = idx;
+<span class="linenr">302: </span>        }
+<span class="linenr">303: </span>        <span class="org-constant">this</span>.draw();
+<span class="linenr">304: </span>      }
+<span class="linenr">305: </span>    }).bind(<span class="org-constant">this</span>);
+<span class="linenr">306: </span>
+<span class="linenr">307: </span>    <span class="org-keyword">let</span> <span class="org-variable-name">press_handler</span> = ((e) =&gt; {
+<span class="linenr">308: </span>      e.stopPropagation();
+<span class="linenr">309: </span>      e.preventDefault();
+<span class="linenr">310: </span>      <span class="org-keyword">let</span> <span class="org-variable-name">x</span> = Math.floor(e.offsetX / SCALE);
+<span class="linenr">311: </span>      <span class="org-keyword">let</span> <span class="org-variable-name">y</span> = Math.floor(e.offsetY / SCALE);
+<span class="linenr">312: </span>      <span class="org-keyword">let</span> <span class="org-variable-name">target_cell_type</span> = <span class="org-constant">this</span>.grid.at(x, y);
+<span class="linenr">313: </span>
+<span class="linenr">314: </span>      is_dragging = target_cell_type == 2 ? <span class="org-constant">true</span> : <span class="org-constant">false</span>;
+<span class="linenr">315: </span>      <span class="org-keyword">if</span> (is_dragging) {
+<span class="linenr">316: </span>        <span class="org-keyword">let</span> <span class="org-variable-name">idx</span> = y * <span class="org-constant">this</span>.grid.nCols + x;
+<span class="linenr">317: </span>        dragging_start = idx == <span class="org-constant">this</span>.grid.start_idx;
+<span class="linenr">318: </span>        <span class="org-keyword">return</span>;
+<span class="linenr">319: </span>      }
+<span class="linenr">320: </span>
+<span class="linenr">321: </span>      is_drawing = target_cell_type == 2 ? <span class="org-constant">false</span> : <span class="org-constant">true</span>;      
+<span class="linenr">322: </span>      is_erasing = target_cell_type == 1 ? <span class="org-constant">true</span> : <span class="org-constant">false</span>;
+<span class="linenr">323: </span>
+<span class="linenr">324: </span>      <span class="org-keyword">let</span> <span class="org-variable-name">new_value</span> = is_erasing ? 0 : 1;
+<span class="linenr">325: </span>      <span class="org-constant">this</span>.grid.set_at(new_value, x, y);
+<span class="linenr">326: </span>      <span class="org-constant">this</span>.draw();
+<span class="linenr">327: </span>    }).bind(<span class="org-constant">this</span>);
+<span class="linenr">328: </span>
+<span class="linenr">329: </span>    <span class="org-keyword">let</span> <span class="org-variable-name">unclick_handler</span> = ((e) =&gt; {
+<span class="linenr">330: </span>      <span class="org-keyword">if</span> (is_dragging) {
+<span class="linenr">331: </span>        <span class="org-constant">this</span>.canvas.style.cursor = <span class="org-string">"grab"</span>;
+<span class="linenr">332: </span>      }
+<span class="linenr">333: </span>
+<span class="linenr">334: </span>      is_drawing = <span class="org-constant">false</span>;
+<span class="linenr">335: </span>      is_erasing = <span class="org-constant">false</span>;
+<span class="linenr">336: </span>      is_dragging = <span class="org-constant">false</span>;
+<span class="linenr">337: </span>      <span class="org-constant">this</span>.grid.clear_path();
+<span class="linenr">338: </span>      <span class="org-keyword">let</span> <span class="org-variable-name">err</span> = <span class="org-constant">this</span>.grid.plot_course();
+<span class="linenr">339: </span>      <span class="org-keyword">if</span> (err == 0) {
+<span class="linenr">340: </span>        <span class="org-constant">this</span>.draw_path(<span class="org-constant">this</span>.grid);
+<span class="linenr">341: </span>      } <span class="org-keyword">else</span> {
+<span class="linenr">342: </span>        console.log(err);
+<span class="linenr">343: </span>      }
+<span class="linenr">344: </span>    }).bind(<span class="org-constant">this</span>);
+<span class="linenr">345: </span>
+<span class="linenr">346: </span>    <span class="org-constant">this</span>.canvas.addEventListener(<span class="org-string">'mousedown'</span>, press_handler, <span class="org-constant">true</span>);
+<span class="linenr">347: </span>    <span class="org-constant">this</span>.canvas.addEventListener(<span class="org-string">'pointerdown'</span>, press_handler, <span class="org-constant">true</span>);
+<span class="linenr">348: </span>
+<span class="linenr">349: </span>    window.addEventListener(<span class="org-string">'mouseup'</span>, unclick_handler, <span class="org-constant">true</span>);      
+<span class="linenr">350: </span>    window.addEventListener(<span class="org-string">'pointerup'</span>, unclick_handler, <span class="org-constant">true</span>);
+<span class="linenr">351: </span>
+<span class="linenr">352: </span>    <span class="org-constant">this</span>.canvas.addEventListener(<span class="org-string">'mousemove'</span>, rerender_grid, <span class="org-constant">true</span>);
+<span class="linenr">353: </span>    <span class="org-constant">this</span>.canvas.addEventListener(<span class="org-string">'pointermove'</span>, rerender_grid, <span class="org-constant">true</span>);
+<span class="linenr">354: </span>
+<span class="linenr">355: </span>    <span class="org-constant">this</span>.draw();
+<span class="linenr">356: </span>    <span class="org-keyword">let</span> <span class="org-variable-name">err</span> = <span class="org-constant">this</span>.grid.plot_course();
+<span class="linenr">357: </span>    <span class="org-keyword">if</span> (err == 0) {
+<span class="linenr">358: </span>      <span class="org-constant">this</span>.draw_path(<span class="org-constant">this</span>.grid);
+<span class="linenr">359: </span>    } <span class="org-keyword">else</span> {
+<span class="linenr">360: </span>      console.log(err);
+<span class="linenr">361: </span>    }
+<span class="linenr">362: </span>  }
+<span class="linenr">363: </span>
+<span class="linenr">364: </span>  clear() {
+<span class="linenr">365: </span>    <span class="org-constant">this</span>.canvas.remove();
+<span class="linenr">366: </span>  }
+<span class="linenr">367: </span>}
+<span class="linenr">368: </span>
+<span class="linenr">369: </span>CanvasDisplay.<span class="org-constant">prototype</span>.draw = <span class="org-keyword">function</span>() {
+<span class="linenr">370: </span>  <span class="org-keyword">let</span> {left, top, width, height} = <span class="org-constant">this</span>.viewport;
+<span class="linenr">371: </span>  <span class="org-keyword">let</span> <span class="org-variable-name">xStart</span> = Math.floor(left);
+<span class="linenr">372: </span>  <span class="org-keyword">let</span> <span class="org-variable-name">xEnd</span> = Math.ceil(left + width);
+<span class="linenr">373: </span>  <span class="org-keyword">let</span> <span class="org-variable-name">yStart</span> = Math.floor(top);
+<span class="linenr">374: </span>  <span class="org-keyword">let</span> <span class="org-variable-name">yEnd</span> = Math.ceil(top + height);
+<span class="linenr">375: </span>
+<span class="linenr">376: </span>  <span class="org-keyword">for</span> (<span class="org-keyword">let</span> <span class="org-variable-name">y</span> = yStart; y &lt; yEnd; y++) {
+<span class="linenr">377: </span>    <span class="org-keyword">for</span> (<span class="org-keyword">let</span> <span class="org-variable-name">x</span> = xStart; x &lt; xEnd; x++) {
+<span class="linenr">378: </span>      <span class="org-keyword">let</span> <span class="org-variable-name">tile</span> = <span class="org-constant">this</span>.grid.at(x,y)
+<span class="linenr">379: </span>      <span class="org-keyword">let</span> <span class="org-variable-name">screenX</span> = (x - left) * SCALE;
+<span class="linenr">380: </span>      <span class="org-keyword">let</span> <span class="org-variable-name">screenY</span> = (y - top) * SCALE;      
+<span class="linenr">381: </span>      <span class="org-constant">this</span>.cx.fillStyle = tile == 0 ? <span class="org-string">"#2980B9"</span> : tile == 1 ? <span class="org-string">"black"</span> : <span class="org-string">"red"</span>;
+<span class="linenr">382: </span>      <span class="org-constant">this</span>.cx.fillRect(screenX, screenY, SCALE, SCALE);
+<span class="linenr">383: </span>    }
+<span class="linenr">384: </span>  }
+<span class="linenr">385: </span>}
+<span class="linenr">386: </span>
+<span class="linenr">387: </span>CanvasDisplay.<span class="org-constant">prototype</span>.draw_path = <span class="org-keyword">function</span>({ path, path_size }) {
+<span class="linenr">388: </span>  <span class="org-keyword">let</span> {left, top, width, height} = <span class="org-constant">this</span>.viewport;
+<span class="linenr">389: </span>  <span class="org-keyword">if</span> (path.length &lt;= 1) {
+<span class="linenr">390: </span>    <span class="org-keyword">return</span>;
+<span class="linenr">391: </span>  }
+<span class="linenr">392: </span>  <span class="org-constant">this</span>.cx.strokeStyle = <span class="org-string">"red"</span>;
+<span class="linenr">393: </span>  <span class="org-constant">this</span>.cx.lineWidth = SCALE / 3;
+<span class="linenr">394: </span>  <span class="org-constant">this</span>.cx.lineJoin = <span class="org-string">"round"</span>;
+<span class="linenr">395: </span>  <span class="org-constant">this</span>.cx.beginPath();
+<span class="linenr">396: </span>  <span class="org-keyword">let</span> [ <span class="org-variable-name">x</span>, <span class="org-variable-name">y</span> ] = <span class="org-constant">this</span>.grid.idx_to_cartesian(path[0]);
+<span class="linenr">397: </span>  <span class="org-keyword">let</span> <span class="org-variable-name">screenX</span> = (x - left) * SCALE + (SCALE / 2);
+<span class="linenr">398: </span>  <span class="org-keyword">let</span> <span class="org-variable-name">screenY</span> = (y - top) * SCALE + (SCALE / 2);
+<span class="linenr">399: </span>  <span class="org-constant">this</span>.cx.moveTo(screenX, screenY);
+<span class="linenr">400: </span>
+<span class="linenr">401: </span>  <span class="org-keyword">for</span> (<span class="org-keyword">let</span> <span class="org-variable-name">i</span> = 1; i &lt; path_size; i += 1) {
+<span class="linenr">402: </span>    <span class="org-keyword">let</span> [ <span class="org-variable-name">x</span>, <span class="org-variable-name">y</span> ] = <span class="org-constant">this</span>.grid.idx_to_cartesian(path[i]);
+<span class="linenr">403: </span>    <span class="org-keyword">let</span> <span class="org-variable-name">screenX</span> = (x - left) * SCALE + (SCALE / 2);
+<span class="linenr">404: </span>    <span class="org-keyword">let</span> <span class="org-variable-name">screenY</span> = (y - top) * SCALE + (SCALE / 2);
+<span class="linenr">405: </span>    <span class="org-constant">this</span>.cx.lineTo(screenX, screenY);
+<span class="linenr">406: </span>  }
+<span class="linenr">407: </span>
+<span class="linenr">408: </span>  <span class="org-constant">this</span>.cx.stroke();
+<span class="linenr">409: </span>}
+<span class="linenr">410: </span>
+<span class="linenr">411: </span><span class="org-keyword">let</span> <span class="org-variable-name">grid</span> = <span class="org-keyword">new</span> <span class="org-type">Grid</span>(init_grid_str);
+<span class="linenr">412: </span><span class="org-keyword">var</span> <span class="org-variable-name">is_drawing</span> = <span class="org-constant">false</span>;
+<span class="linenr">413: </span><span class="org-keyword">var</span> <span class="org-variable-name">is_erasing</span> = <span class="org-constant">false</span>; <span class="org-comment-delimiter">// </span><span class="org-comment">independent of whether drawing or not. erasing is a kind of drawing.</span>
+<span class="linenr">414: </span><span class="org-keyword">var</span> <span class="org-variable-name">is_dragging</span> = <span class="org-constant">false</span>;
+<span class="linenr">415: </span><span class="org-keyword">var</span> <span class="org-variable-name">dragging_start</span> = <span class="org-constant">false</span>;
+<span class="linenr">416: </span>
+<span class="linenr">417: </span>document.addEventListener(<span class="org-string">"DOMContentLoaded"</span>, () =&gt; {  
+<span class="linenr">418: </span>  <span class="org-keyword">let</span> <span class="org-variable-name">canvas</span> = <span class="org-keyword">new</span> <span class="org-type">CanvasDisplay</span>(document.querySelector(<span class="org-string">'#grid-container'</span>), grid);
+<span class="linenr">419: </span>});
+</pre>
+</div>
+</div>
+</div>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
-<p class="date">Date: 2023-02-15 Wed 00:00</p>
+<p class="date">Date: 2023-03-12 Sun 00:00</p>
 </div>
 </body>
 </html>
