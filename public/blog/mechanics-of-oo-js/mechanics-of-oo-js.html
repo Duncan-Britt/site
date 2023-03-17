@@ -38,14 +38,14 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org13a9992">Prerequisites - Execution Context, <code class="src src-javascript"><span class="org-constant">this</span></code></a></li>
-<li><a href="#org24b5ea4">Functions are objects</a></li>
-<li><a href="#orga57cbd7">Prototypes</a></li>
-<li><a href="#orge533f3d">Behavior Delegation and the Prototype Chain</a></li>
-<li><a href="#org7afe7e8">Constructor functions</a></li>
-<li><a href="#org2950eb9">The new keyword</a></li>
-<li><a href="#org0b16f4c">Inheritance</a></li>
-<li><a href="#org446f08e">Objects Linking to Other Objects (OLOO)</a></li>
+<li><a href="#orgb343dff">Prerequisites - Execution Context, <code class="src src-javascript"><span class="org-constant">this</span></code></a></li>
+<li><a href="#org45f8306">Functions are objects</a></li>
+<li><a href="#org793a92b">Prototypes</a></li>
+<li><a href="#org6c05228">Behavior Delegation and the Prototype Chain</a></li>
+<li><a href="#org3ef39fa">Constructor functions</a></li>
+<li><a href="#org3ededb6">The new keyword</a></li>
+<li><a href="#org36d4d79">Inheritance</a></li>
+<li><a href="#orgd9c1d7a">Objects Linking to Other Objects (OLOO)</a></li>
 </ul>
 </div>
 </div>
@@ -53,9 +53,9 @@
 More than you want to know.
 </p>
 
-<div id="outline-container-org13a9992" class="outline-2">
-<h2 id="org13a9992">Prerequisites - Execution Context, <code class="src src-javascript"><span class="org-constant">this</span></code></h2>
-<div class="outline-text-2" id="text-org13a9992">
+<div id="outline-container-orgb343dff" class="outline-2">
+<h2 id="orgb343dff">Prerequisites - Execution Context, <code class="src src-javascript"><span class="org-constant">this</span></code></h2>
+<div class="outline-text-2" id="text-orgb343dff">
 <p>If you’re not already familiar with execution context in JavaScript, it is a topic worthy of a separate and lengthy article in and of itself. I recommend <a target="_blank" href="https://web.archive.org/web/20180209163541/https://dmitripavlutin.com/gentle-explanation-of-this-in-javascript/">this one.</a> A brief review:</p>
 
 <p>
@@ -68,15 +68,15 @@ As we shall see, <code class="src src-javascript"><span class="org-constant">thi
 </div>
 </div>
 
-<div id="outline-container-org24b5ea4" class="outline-2">
-<h2 id="org24b5ea4">Functions are objects</h2>
-<div class="outline-text-2" id="text-org24b5ea4">
+<div id="outline-container-org45f8306" class="outline-2">
+<h2 id="org45f8306">Functions are objects</h2>
+<div class="outline-text-2" id="text-org45f8306">
 <p>
 In Javascript, functions are a type of object. As such, they contain properties like any object can. Every function has a <code class="src src-javascript">prototype</code> property which, by default, references an object. This prototype object contains a <code class="src src-javascript">constructor</code> property which, by default, references the function.
 </p>
 
 
-<div id="org218a6ba" class="figure">
+<div id="org98ab3a2" class="figure">
 <p><img src="./images/a.svg" alt="a.svg" class="org-svg" />
 </p>
 </div>
@@ -97,9 +97,9 @@ aFunction.<span class="org-constant">prototype</span>.constructor === aFunction;
 </div>
 </div>
 
-<div id="outline-container-orga57cbd7" class="outline-2">
-<h2 id="orga57cbd7">Prototypes</h2>
-<div class="outline-text-2" id="text-orga57cbd7">
+<div id="outline-container-org793a92b" class="outline-2">
+<h2 id="org793a92b">Prototypes</h2>
+<div class="outline-text-2" id="text-org793a92b">
 <p>
 In JavaScript, every object has an object prototype referenced by its <code class="src src-javascript">[[Prototype]</code> property. This property can be accessed by the <code class="src src-javascript">__proto__</code> accessor method. (It’s pronounced “dunder proto” due to its leading and trailing double underscores). It’s important to note the distinction between a function’s prototype property and the <code class="src src-javascript">[[Prototype]]</code> property which belongs to all objects (including functions).
 </p>
@@ -113,7 +113,7 @@ When creating an object via an object literal, its <code class="src src-javascri
 </p>
 
 
-<div id="org21442dd" class="figure">
+<div id="orgb780e09" class="figure">
 <p><img src="./images/b.svg" alt="b.svg" class="org-svg" />
 </p>
 <p><span class="figure-number">Figure 1: </span>Note that <code class="src src-javascript">Object</code> is a JavaScript function.</p>
@@ -130,22 +130,22 @@ Functions being objects, they also have their own <code class="src src-javascrip
 </p>
 
 
-<div id="org10bc3bf" class="figure">
+<div id="org9af32a5" class="figure">
 <p><img src="./images/c.svg" alt="c.svg" class="org-svg" />
 </p>
 </div>
 </div>
 </div>
 
-<div id="outline-container-orge533f3d" class="outline-2">
-<h2 id="orge533f3d">Behavior Delegation and the Prototype Chain</h2>
-<div class="outline-text-2" id="text-orge533f3d">
+<div id="outline-container-org6c05228" class="outline-2">
+<h2 id="org6c05228">Behavior Delegation and the Prototype Chain</h2>
+<div class="outline-text-2" id="text-org6c05228">
 <p>
 The <i>prototype chain</i> of an object refers to the series of objects referenced by each others' <code class="src src-javascript">[[Prototype]]</code> properties.
 </p>
 
 
-<div id="orga805371" class="figure">
+<div id="org7d1e458" class="figure">
 <p><img src="./images/d.svg" alt="d.svg" class="org-svg" />
 </p>
 </div>
@@ -166,7 +166,7 @@ Type <code class="src src-javascript">Object.<span class="org-constant">prototyp
 </p>
 
 
-<div id="org5ce2c58" class="figure">
+<div id="org247e0d5" class="figure">
 <p><img src="./images/e.svg" alt="e.svg" class="org-svg" />
 </p>
 </div>
@@ -177,18 +177,18 @@ When an object uses methods which are not assigned to one of its own properties,
 </div>
 </div>
 
-<div id="outline-container-org7afe7e8" class="outline-2">
-<h2 id="org7afe7e8">Constructor functions</h2>
-<div class="outline-text-2" id="text-org7afe7e8">
+<div id="outline-container-org3ef39fa" class="outline-2">
+<h2 id="org3ef39fa">Constructor functions</h2>
+<div class="outline-text-2" id="text-org3ef39fa">
 <p>
 A constructor function is merely a function whose intended purpose is to instantiate objects. Purely by convention, the name of a constructor function is capitalized to distinguish it from other functions. From the perspective of JavaScript, constructor functions are no different from any other functions and are treated the exact same way (despite that the syntax highlighting in your text editor might lead you to believe otherwise).
 </p>
 </div>
 </div>
 
-<div id="outline-container-org2950eb9" class="outline-2">
-<h2 id="org2950eb9">The new keyword</h2>
-<div class="outline-text-2" id="text-org2950eb9">
+<div id="outline-container-org3ededb6" class="outline-2">
+<h2 id="org3ededb6">The new keyword</h2>
+<div class="outline-text-2" id="text-org3ededb6">
 <p>
 When a function invocation is prefixed with the <code class="src src-javascript"><span class="org-keyword">new</span></code> keyword, the execution context for the invocation is set to a new object, sometimes referred to as an instance, which is returned by the expression. (Note: It is only returned by the expression if an object isn’t explicitly returned within the function definition.) Therefore, within the definition of a constructor function, <code class="src src-javascript"><span class="org-constant">this</span></code> can be used to assign instance properties to values. If you forget to use <code class="src src-javascript"><span class="org-keyword">new</span></code> when invoking your constructor function, you’ll assign values to properties of the global object. Don’t do that.
 </p>
@@ -210,7 +210,7 @@ instance2.foo; <span class="org-comment-delimiter">// </span><span class="org-co
 </div>
 
 
-<div id="org164e8a6" class="figure">
+<div id="org8c4baa0" class="figure">
 <p><img src="./images/f.svg" alt="f.svg" class="org-svg" />
 </p>
 </div>
@@ -231,16 +231,16 @@ instance.hasOwnProperty(<span class="org-string">'xyz'</span>); <span class="org
 </div>
 
 
-<div id="org8d3f923" class="figure">
+<div id="orgea0f6fe" class="figure">
 <p><img src="./images/g.svg" alt="g.svg" class="org-svg" />
 </p>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org0b16f4c" class="outline-2">
-<h2 id="org0b16f4c">Inheritance</h2>
-<div class="outline-text-2" id="text-org0b16f4c">
+<div id="outline-container-org36d4d79" class="outline-2">
+<h2 id="org36d4d79">Inheritance</h2>
+<div class="outline-text-2" id="text-org36d4d79">
 <p>
 Supposing we want to create a subtype of object that inherits from <code class="src src-javascript">Constructor</code>. Our first naive attempt might look something like this:
 </p>
@@ -269,7 +269,7 @@ The problem with this is that the <code class="src src-javascript">[[Prototype]]
 </div>
 
 
-<div id="orgf587a13" class="figure">
+<div id="orgde08550" class="figure">
 <p><img src="./images/h.svg" alt="h.svg" class="org-svg" />
 </p>
 </div>
@@ -330,22 +330,22 @@ childInstance.constructor === ChildConstructor;
 </p>
 
 
-<div id="orgf2a2ffd" class="figure">
+<div id="org26655d6" class="figure">
 <p><img src="./images/i.svg" alt="i.svg" class="org-svg" />
 </p>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org446f08e" class="outline-2">
-<h2 id="org446f08e">Objects Linking to Other Objects (OLOO)</h2>
-<div class="outline-text-2" id="text-org446f08e">
+<div id="outline-container-orgd9c1d7a" class="outline-2">
+<h2 id="orgd9c1d7a">Objects Linking to Other Objects (OLOO)</h2>
+<div class="outline-text-2" id="text-orgd9c1d7a">
 <p>
 To quickly build a mental model of the OLOO pattern of object creation, compare the above diagram to the following:
 </p>
 
 
-<div id="org5935f8c" class="figure">
+<div id="orgfb1647e" class="figure">
 <p><img src="./images/j.svg" alt="j.svg" class="org-svg" />
 </p>
 </div>
@@ -383,7 +383,7 @@ instance.__proto__ === Prototype; <span class="org-comment-delimiter">// </span>
 </div>
 
 
-<div id="orgef50ffd" class="figure">
+<div id="org6dfb85b" class="figure">
 <p><img src="./images/k.svg" alt="k.svg" class="org-svg" />
 </p>
 </div>
@@ -409,7 +409,7 @@ childInstance.hasOwnPrototype(<span class="org-string">'addA'</span>);      <spa
 </div>
 
 
-<div id="org7d2b4fa" class="figure">
+<div id="org1504487" class="figure">
 <p><img src="./images/l.svg" alt="l.svg" class="org-svg" />
 </p>
 </div>

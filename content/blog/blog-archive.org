@@ -1,6 +1,7 @@
 #+TITLE: Blog Posts
 
 #+begin_archive
+@@html:<li>@@ @@html:<span class="archive-item" data-tags=",algorithms,"><span class="archive-date">@@ 03-12-2023: @@html:</span>@@ [[file:path-finding-with-RRT/path-finding-RRT.org][Path Planning With RRT]] @@html:</span>@@ @@html:</li>@@
 @@html:<li>@@ @@html:<span class="archive-item" data-tags=",algorithms,"><span class="archive-date">@@ 03-12-2023: @@html:</span>@@ [[file:path-finding/path-finding.org][Path Planning With A*]] @@html:</span>@@ @@html:</li>@@
 @@html:<li>@@ @@html:<span class="archive-item" data-tags=",robotics,"><span class="archive-date">@@ 01-15-2023: @@html:</span>@@ [[file:autonomous-mobile-robot/autonomous-mobile-robot.org][Programming an Autonomous Mobile Robot]] @@html:</span>@@ @@html:</li>@@
 @@html:<li>@@ @@html:<span class="archive-item" data-tags=",web,"><span class="archive-date">@@ 01-19-2022: @@html:</span>@@ [[file:splice/splice.org][Splice: An HTML templating language]] @@html:</span>@@ @@html:</li>@@
