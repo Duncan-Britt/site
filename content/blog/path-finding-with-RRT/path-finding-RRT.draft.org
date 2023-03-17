@@ -1,9 +1,12 @@
 #+TITLE: Path Planning With RRT
 #+SETUPFILE: ../../../setup/blog-post.setup
-#+DATE: <2023-03-12>
+#+DATE: <2023-03-16>
 #+FILETAGS: :algorithms:
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="./path-finding.css"/>
 #+HTML_HEAD: <script type="module" src="./path-finding.js"></script>
+
+# RRT* is better: https://youtu.be/QR3U1dgc5RE?t=870
+# Instead of resampling when I hit an obstacle, I should just put a point right where I hit the obstacle!
 
 In my last blog post, I demonstrated the A* path planning algorithm. In this blog post, we're going to go through a sampling based approach called Rapidly Expanding Random Trees (RRT).
 
