@@ -1,0 +1,289 @@
+#+TITLE: Path Planning With RRT
+#+SETUPFILE: ../../../setup/blog-post.setup
+#+DATE: <2023-03-12>
+#+FILETAGS: :algorithms:
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="./path-finding.css"/>
+#+HTML_HEAD: <script type="module" src="./path-finding.js"></script>
+
+In my last blog post, I demonstrated the A* path planning algorithm. In this blog post, we're going to go through a sampling based approach called Rapidly Expanding Random Trees (RRT).
+
+* RRT
+#+BEGIN_EXPORT html
+<div id="grid-container"></div>
+#+END_EXPORT
+
+We're going to use a fast mathematical way of determining whether a straight line between two nodes intersects an obstacle. All of our obstacles are circles, and given the radius $r_c$ and center of the circle $(Cx,Cy)$, we can write an equation for the circle in $\mathbb{R}^2$:
+$$(x - C_x)^2 + (y-C_y)^2 = r_c^2.$$
+Let $\vec{r_0}$ be the vector pointing to the point $P$ of the nearest path node and $Q$ be the coordinate point of the path node we are trying to connect to. An equation for the line $r(t)$ between them is given by
+\begin{align*}
+r(t) & = \vec{r_0} + t \frac{\vec{PQ}}{\|\vec{PQ}\|}
+\end{align*}
+Let $\vec{u}$ be the unit vector $$\frac{\vec{PQ}}{\|\vec{PQ}\|}$$.
+\begin{align*}
+r(t) & = \vec{r_0} + t\vec{u} \\
+     & = \langle x_0, y_0 \rangle + t \langle u_x, u_y \rangle \\
+     & = \langle u_xt + x_0, u_yt + y_0 \rangle
+\end{align*}
+
+We need to find out if there is a point on the line that satisfies our equation for the circle, within a certain range of our parameter t, which corresponds to the distance we want to travel from our existing node.
+
+We can do this by substituting the $x$ and $y$ components of $r$ into our equation for our circle, and then solving for $t$. If there are any real solutions, then the path between our nodes is obstructed by the obstacle.
+$$\left(u_xt + x_{0} - C_{x} \right)^{2} + \left(u_yt + y_{0} - C_{y}\right)^{2} = r_{c}^{2}$$
+Solving this equation by hand would get a little messy, but a few lines of python make short work of it.
+#+begin_src python :results output drawer :exports both
+  from sympy import symbols, expand, factor, latex, solve
+
+  x0, ux, t, cx, y0, uy, cy, rc = symbols('x_0 u_x t C_x y_0 u_y C_y r_c')
+  expr = (ux*t + x0 - cx)**2 + (uy*t + y0 - cy)**2 - rc**2
+  solutions = solve(expr, t)
+  for solution in solutions:      
+      print("$$" + latex(solution) + "$$")
+#+end_src
+
+#+RESULTS:
+:results:
+$$\frac{C_{x} u_{x} + C_{y} u_{y} - u_{x} x_{0} - u_{y} y_{0} - \sqrt{- C_{x}^{2} u_{y}^{2} + 2 C_{x} C_{y} u_{x} u_{y} - 2 C_{x} u_{x} u_{y} y_{0} + 2 C_{x} u_{y}^{2} x_{0} - C_{y}^{2} u_{x}^{2} + 2 C_{y} u_{x}^{2} y_{0} - 2 C_{y} u_{x} u_{y} x_{0} + r_{c}^{2} u_{x}^{2} + r_{c}^{2} u_{y}^{2} - u_{x}^{2} y_{0}^{2} + 2 u_{x} u_{y} x_{0} y_{0} - u_{y}^{2} x_{0}^{2}}}{u_{x}^{2} + u_{y}^{2}}$$
+$$\frac{C_{x} u_{x} + C_{y} u_{y} - u_{x} x_{0} - u_{y} y_{0} + \sqrt{- C_{x}^{2} u_{y}^{2} + 2 C_{x} C_{y} u_{x} u_{y} - 2 C_{x} u_{x} u_{y} y_{0} + 2 C_{x} u_{y}^{2} x_{0} - C_{y}^{2} u_{x}^{2} + 2 C_{y} u_{x}^{2} y_{0} - 2 C_{y} u_{x} u_{y} x_{0} + r_{c}^{2} u_{x}^{2} + r_{c}^{2} u_{y}^{2} - u_{x}^{2} y_{0}^{2} + 2 u_{x} u_{y} x_{0} y_{0} - u_{y}^{2} x_{0}^{2}}}{u_{x}^{2} + u_{y}^{2}}$$
+:end:
+
+This may look messy, but all of these values are known constants. And since we don't actually need to know the points of intersection, we're really only interested in whether the part under the radical is greater than 0.
+
+#+BEGIN_SRC js
+  -cx**2 * dy**2 + 2 * cx * cy * dx * dy - 2cx * dx * dy * y0 + 2 * cx * dy**2 * x0 - cy**2 * dx**2 + 2 * cy * dx**2 * y0 - 2 * cy * dx * dy * xo + dx**2 * rc**2 - dx**2 * y0**2 + 2 * dx * dy * xo * y0 + dy**2 * rc**2 - dy**2 * x0**2 >= 0 ? 
+#+END_SRC
+
+# // Does the point lie on an obstacle? 
+# // Ignore the first two objects (those are start and end points, not obstacles)
+# if (objects.slice(2).some(circle => {
+#   return (sample_point[0] - circle.center.x)**2 + (sample_point[1] - circle.center.y)**2 <= circle.radius**2
+# })) { // If so, resample
+#   continue;
+# }
+
+# obstacles.push(new Circle({ center: { x: sample_point[0], y: 391 }, radius: 4, color: "red", }));
+
+#+BEGIN_SRC js -n 0 :tangle path-finding.js :exports source  
+  document.addEventListener("DOMContentLoaded", () => {
+    canvasRRT({
+      canvas_container: document.querySelector('#grid-container'),
+      width: 400,
+      height: 400,
+      objects: [
+        new Circle({ center: { x: 10, y: 391 }, radius: 10, color: "red", }),
+        new Circle({ center: { x: 389, y: 10 }, radius: 10, color: "red", }),
+        new Circle({ center: { x: 294, y: 150 }, radius: 40, color: "black", }),
+        new Circle({ center: { x: 164, y: 269 }, radius: 40, color: "black", }),
+        new Circle({ center: { x: 179, y: 152 }, radius: 30, color: "black", }),
+      ],
+    });
+  });
+
+  class Circle {
+    constructor({ center, radius, color }) {
+      this.center = center;
+      this.radius = radius;
+      this.color = color;
+    }
+
+    within(x, y) {
+      return distance({ x, y }, this.center) <= this.radius;
+    }
+  }
+
+  function distance(a, b) {
+    return Math.sqrt(Math.pow(b.y - a.y, 2) + Math.pow(b.x - a.x, 2));
+  }
+
+  class PathNode {
+    constructor(x, y, parent = null) {
+      this.x = x;
+      this.y = y;
+      this.parent = parent;
+    }
+  }
+
+  function canvasRRT({ canvas_container, width, height, objects }) {
+    let canvas = document.createElement('canvas');
+    canvas.style.border = "6px solid black";
+    canvas.style.touchAction = 'none'; // Prevent scroll on touch screen devices.
+    canvas.width = width
+    canvas.height = height
+    canvas_container.appendChild(canvas);
+    let cx = canvas.getContext("2d");
+    let path;
+
+    const draw_objects = () => {
+      objects.forEach(object => {
+        cx.beginPath();
+        // center=(x,y) radius=r angle=0 to 7
+        cx.arc(object.center.x, object.center.y, object.radius, 0, 7);
+        cx.fillStyle = object.color;
+        cx.fill();
+        cx.closePath();
+      });
+    };
+
+    const render_grid = () => {
+      // Give the canvas a blue background:
+      cx.fillStyle = "#2980B9";
+      cx.fillRect(0, 0, width, height);
+      draw_objects();
+    }
+    render_grid();
+
+    let object_grabbed_idx = -1;
+    let object_hovered_idx = -1;
+
+    const press_handler = e => {
+      e.stopPropagation();
+      e.preventDefault();
+      object_grabbed_idx = objects.reduce((res, object, current_idx) => {
+        return object.within(e.offsetX, e.offsetY) ?  current_idx : res;
+      }, -1); // -1 indicates no object grabbed
+
+      object_hovered_idx = object_grabbed_idx;
+      if (object_grabbed_idx != -1) {
+        canvas.style.cursor = "grabbing";
+      }
+    };
+
+    const move_handler = e => {
+      e.stopPropagation();
+      e.preventDefault();
+
+      if (object_grabbed_idx == -1) {
+        object_hovered_idx = objects.reduce((res, object, current_idx) => {
+          return object.within(e.offsetX, e.offsetY) ?  current_idx : res;
+        }, -1); // -1 indicates no object hovered over
+        if (object_hovered_idx == -1) {
+          canvas.style.cursor = "crosshair"
+        } else {
+          canvas.style.cursor = "grab"
+        }
+
+        return;
+      }
+
+      let x = e.offsetX;
+      let y = e.offsetY;
+      if (x < 0 || y < 0 || x >= canvas.width || y >= canvas.height) {
+        return;
+      }
+
+      objects[object_grabbed_idx].center = { x, y };
+      render_grid();
+    };
+
+    const RRT = () => {
+      const MAX_BRANCH_LENGTH = 50;
+      const PROXIMITY_THRESHOLD = 10;
+      const MAX_ITERATIONS = 10000;
+
+      let path_nodes = [new PathNode(objects[0].center.x, objects[0].center.y)];
+
+      let iterations = 0;
+      while (iterations <= MAX_ITERATIONS) {
+        // randomly sample a point, (xs, ys) 
+        let [xs, ys] = [Math.random() * canvas.width, Math.random() * canvas.height];
+        // Find the nearest node in the tree
+        let nearest_node = path_nodes.reduce((nearest, node) => {
+          return distance(node, { x: xs, y: ys }) < distance(nearest, { x: xs, y: ys }) ? node : nearest;
+        });
+        const dx = xs - nearest_node.x;
+        const dy = ys - nearest_node.y;
+        const magnitude = Math.sqrt(dx**2 + dy**2);
+        const ux = dx / magnitude;
+        const uy = dy / magnitude;
+        const r = t => {          
+          return [ ux * t + nearest_node.x, uy * t + nearest_node.y ];
+        };
+
+        // Does the line r(t) through the nearest node and the sample point intersect with any of the circles?
+        //   If not, make a new node in the direction of r(t)
+        //   If so, does it intersect the circle in the range 0 <= t <= MAX_t ?
+        //     if both are true, then resample.
+        //     Otherwise, the path is clear, make a new node in the direction of r(t)
+        let t1;
+        let t2;
+        if (objects.slice(2).some(circle => {
+          const cx = circle.center.x;
+          const cy = circle.center.y;
+          const x0 = nearest_node.x;
+          const y0 = nearest_node.y;
+          const rc = circle.radius;
+          const under_root = -(cx**2) * uy**2 + 2 * cx * cy * ux * uy - 2 * cx * ux * uy * y0 + 2 * cx * uy**2 * x0 - cy**2 * ux**2 + 2 * cy * ux**2 * y0 - 2 * cy * ux * uy * x0 + ux**2 * rc**2 + rc**2 * uy**2 - ux**2 * y0**2 + 2 * ux * uy * x0 * y0 - uy**2 * x0**2;
+          if (under_root < 0) {
+            return false;
+          }
+          // now we need to know if it has a solution on a range of t
+          let a = cx * ux + cy * uy - ux * x0 - uy * y0;
+          let denom = ux**2 + uy**2;
+          t1 = (a - Math.sqrt(under_root)) / denom;
+          t2 = (a + Math.sqrt(under_root)) / denom;
+          if (Math.min(t1, t2) < MAX_BRANCH_LENGTH) {
+            return true;
+          }
+          return false;
+        })) {
+          continue;
+        }
+
+        const new_node = new PathNode(
+          ...r(Math.min(MAX_BRANCH_LENGTH, distance(nearest_node, { x: xs, y: ys }))),
+          nearest_node
+        );
+        path_nodes.push(new_node);
+
+        // let node_circle = new Circle({ center: new_node, radius: 2, color: "yellow"});
+        // cx.beginPath();
+        // // center=(x,y) radius=r angle=0 to 7        
+        // cx.arc(node_circle.center.x, node_circle.center.y, node_circle.radius, 0, 7);
+        // cx.fillStyle = node_circle.color;
+        // cx.fill();
+        // cx.closePath();
+
+        if (distance(new_node, objects[1].center) < PROXIMITY_THRESHOLD) {
+          let node = new_node;
+          path = [];
+          while (node instanceof PathNode) {
+            path.push(node);
+            node = node.parent;
+          }
+          return 0;
+        }
+
+        iterations += 1;        
+      }
+      return -5;
+    };
+
+    const unclick_handler = e => {
+      object_grabbed_idx = -1;
+      canvas.style.cursor = object_hovered_idx == -1 ? "crosshair" : "grab";
+      // should return an error code and mutate the path
+      let err = RRT();
+      if (err == 0) {
+        cx.strokeStyle = "red";
+        cx.lineWidth = 1;
+        cx.lineJoin = "round";
+        cx.beginPath();
+        cx.moveTo(path[0].x, path[0].y);
+        path.forEach(node => {
+          let node_circle = new Circle({ center: node, radius: 2, color: "yellow"});
+          cx.lineTo(node.x, node.y);          
+        });
+        cx.stroke();
+      } else {
+        console.error(err);
+      }
+    };
+
+    canvas.addEventListener('mousedown', press_handler, true);
+    canvas.addEventListener('pointerdown', press_handler, true);
+    canvas.addEventListener('mousemove', move_handler, true);
+    canvas.addEventListener('pointermove', move_handler, true);
+    window.addEventListener('mouseup', unclick_handler, true);      
+    window.addEventListener('pointerup', unclick_handler, true);    
+  }
+#+END_SRC
+
