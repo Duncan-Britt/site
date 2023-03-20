@@ -32,15 +32,16 @@ Given a desired end position and starting position, RRT allows us to find a path
 
 We're going to implement the following interface: which allows us to render the above demo of RRT in a given HTML container.
 #+NAME: interface
-#+BEGIN_SRC js -n 14 -r -i
+#+BEGIN_SRC js -n 14 -r -i  
   document.addEventListener("DOMContentLoaded", () => {
+    let width = window.innerWidth > 450 ? 400 : window.innerWidth - 50;
     CanvasRRT({
       canvas_container: document.querySelector('#grid-container'),
-      width: 400,
+      width: window.innerWidth > 450 ? 400 : window.innerWidth - 75,
       height: 400,
       objects: [
         new Circle({ center: { x: 10, y: 391 }, radius: 10, border_color: "#d63230", border_width: 0}),
-        new Circle({ center: { x: 389, y: 10 }, radius: 10, border_color: "#d63230", border_width: 0}),
+        new Circle({ center: { x: width - 40, y: 10 }, radius: 10, border_color: "#d63230", border_width: 0}),
         new Circle({ center: { x: 294, y: 150 }, radius: 40, border_color: "black", fill_color: "#79a5a5"}),
         new Circle({ center: { x: 164, y: 269 }, radius: 40, border_color: "black", fill_color: "#79a5a5"}),
         new Circle({ center: { x: 179, y: 152 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
@@ -49,7 +50,7 @@ We're going to implement the following interface: which allows us to render the 
         new Circle({ center: { x: 217, y: 92 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
         new Circle({ center: { x: 306, y: 64 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
         new Circle({ center: { x: 261, y: 231 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
-        new Circle({ center: { x: 346, y: 241 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
+        new Circle({ center: { x: 340, y: 241 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
         new Circle({ center: { x: 310, y: 365 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
         new Circle({ center: { x: 248, y: 310 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
         new Circle({ center: { x: 66, y: 160 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
@@ -57,7 +58,7 @@ We're going to implement the following interface: which allows us to render the 
         new Circle({ center: { x: 97, y: 323 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
         new Circle({ center: { x: 183, y: 343 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
         new Circle({ center: { x: 125, y: 195 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
-        new Circle({ center: { x: 375, y: 322 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
+        new Circle({ center: { x: 325, y: 322 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
       ],
       speed_slider: document.querySelector('input#speed'),
     });
@@ -550,13 +551,14 @@ Below is the whole thing put together.
   });
 
   document.addEventListener("DOMContentLoaded", () => {
+    let width = window.innerWidth > 450 ? 400 : window.innerWidth - 50;
     CanvasRRT({
       canvas_container: document.querySelector('#grid-container'),
-      width: 400,
+      width: window.innerWidth > 450 ? 400 : window.innerWidth - 75,
       height: 400,
       objects: [
         new Circle({ center: { x: 10, y: 391 }, radius: 10, border_color: "#d63230", border_width: 0}),
-        new Circle({ center: { x: 389, y: 10 }, radius: 10, border_color: "#d63230", border_width: 0}),
+        new Circle({ center: { x: width - 40, y: 10 }, radius: 10, border_color: "#d63230", border_width: 0}),
         new Circle({ center: { x: 294, y: 150 }, radius: 40, border_color: "black", fill_color: "#79a5a5"}),
         new Circle({ center: { x: 164, y: 269 }, radius: 40, border_color: "black", fill_color: "#79a5a5"}),
         new Circle({ center: { x: 179, y: 152 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
@@ -565,7 +567,7 @@ Below is the whole thing put together.
         new Circle({ center: { x: 217, y: 92 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
         new Circle({ center: { x: 306, y: 64 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
         new Circle({ center: { x: 261, y: 231 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
-        new Circle({ center: { x: 346, y: 241 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
+        new Circle({ center: { x: 340, y: 241 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
         new Circle({ center: { x: 310, y: 365 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
         new Circle({ center: { x: 248, y: 310 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
         new Circle({ center: { x: 66, y: 160 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
@@ -573,7 +575,7 @@ Below is the whole thing put together.
         new Circle({ center: { x: 97, y: 323 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
         new Circle({ center: { x: 183, y: 343 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
         new Circle({ center: { x: 125, y: 195 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
-        new Circle({ center: { x: 375, y: 322 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
+        new Circle({ center: { x: 325, y: 322 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
       ],
       speed_slider: document.querySelector('input#speed'),
     });
