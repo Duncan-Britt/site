@@ -5,6 +5,12 @@ CSS Snippets Taken from gongzhitao/orgcss [https://github.com/gongzhitaao/orgcss
 This file is covered by the MIT License
 */
 
+/* for highlighting lines of source code */
+.coderef-on {
+    background-color: lemonchiffon;
+}
+.coderef-off {}
+
 :not(pre) > code {
     padding: 2px 5px;
     margin: auto 1px;

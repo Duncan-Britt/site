@@ -1,0 +1,963 @@
+#+TITLE: Path Planning By Rapidly Exploring Random Trees
+#+SETUPFILE: ../../../setup/blog-post.setup
+#+DATE: <2023-03-19>
+#+FILETAGS: :algorithms:
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="./path-finding.css"/>
+#+HTML_HEAD: <script src="//cdn.jsdelivr.net/npm/bluebird@3.7.2/js/browser/bluebird.min.js"></script>
+#+HTML_HEAD: <script type="module" src="./path-finding.js"></script>
+# #+HTML_HEAD: <script src="./htmlize.js"></script>
+# #+HTML_HEAD: <script type="module" src="./path-finding-untangled.js"></script>
+
+# RRT* is better: https://youtu.be/QR3U1dgc5RE?t=870
+# Instead of resampling when I hit an obstacle, I should just put a point right where I hit the obstacle!
+
+In my last blog post, I demonstrated the A* path planning algorithm. In this blog post, we're going to go through a sampling based approach called Rapidly Exploring Random Trees (RRT).
+
+#+ATTR_HTML: :style width: 200px;height: auto;
+#+CAPTION: Demo
+[[./RRT.gif]]
+
+#+BEGIN_EXPORT html
+<div>
+  <input type="range" id="speed" name="volume" min="0" max="1000" value="5000">
+  <label for="speed">Speed</label>
+</div>
+<div id="grid-container" style="position: relative; height: 420px"></div>
+#+END_EXPORT
+
+* Overview
+Given a desired end position and starting position, RRT allows us to find a path connecting those two points. We start by randomly sampling a point on the plane. From there, we find the node in our tree which is closest to our sampled node. (At first, this is just the starting point). Then, having found that node, we move from it a short distance in the direction of the sampled node, until we either run into an obstacle or reach a maximum branch length. There, we'll place a child node. As you can see in the above demonstration, this has the effect of drawing out our tree to cover the space. We keep doing this until we are able to place a node within a certain threshold of distance to our desired destination.
+
+* Implementation
+
+We're going to implement the following interface: which allows us to render the above demo of RRT in a given HTML container.
+#+NAME: interface
+#+BEGIN_SRC js -n 14 -r -i
+  document.addEventListener("DOMContentLoaded", () => {
+    CanvasRRT({
+      canvas_container: document.querySelector('#grid-container'),
+      width: 400,
+      height: 400,
+      objects: [
+        new Circle({ center: { x: 10, y: 391 }, radius: 10, border_color: "#d63230", border_width: 0}),
+        new Circle({ center: { x: 389, y: 10 }, radius: 10, border_color: "#d63230", border_width: 0}),
+        new Circle({ center: { x: 294, y: 150 }, radius: 40, border_color: "black", fill_color: "#79a5a5"}),
+        new Circle({ center: { x: 164, y: 269 }, radius: 40, border_color: "black", fill_color: "#79a5a5"}),
+        new Circle({ center: { x: 179, y: 152 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
+        new Circle({ center: { x: 69, y: 80 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
+        new Circle({ center: { x: 138, y: 67 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
+        new Circle({ center: { x: 217, y: 92 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
+        new Circle({ center: { x: 306, y: 64 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
+        new Circle({ center: { x: 261, y: 231 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
+        new Circle({ center: { x: 346, y: 241 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
+        new Circle({ center: { x: 310, y: 365 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
+        new Circle({ center: { x: 248, y: 310 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
+        new Circle({ center: { x: 66, y: 160 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
+        new Circle({ center: { x: 65, y: 249 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
+        new Circle({ center: { x: 97, y: 323 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
+        new Circle({ center: { x: 183, y: 343 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
+        new Circle({ center: { x: 125, y: 195 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
+        new Circle({ center: { x: 375, y: 322 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
+      ],
+      speed_slider: document.querySelector('input#speed'),
+    });
+  });
+#+END_SRC
+We specified the DOM elements for our container and speed slider, as well as the dimensions of the canvas and the obstacles we'd like to populate our canvas with, which are all circles in this example.
+
+#+NAME: circle-class-def
+#+BEGIN_SRC js -n 48 -r -i
+  class Circle {
+    constructor({ center, radius, border_color, border_width=4, fill_color=border_color }) {
+      this.center = center;
+      this.radius = radius;
+      this.border_color = border_color;
+      this.fill_color = fill_color;
+      this.border_width = border_width;
+    }
+
+    within(x, y) {
+      return distance({ x, y }, this.center) <= this.radius;
+    }
+  }
+
+  function distance(a, b) {
+    return Math.sqrt(Math.pow(b.y - a.y, 2) + Math.pow(b.x - a.x, 2));
+  }
+#+END_SRC
+
+First, we're going to set up our HTML canvases. The second canvas acts as a top layer for placing temporary drawings. This way, when we animate the algorithm, we can erase the sampled points by clearing ~layer2~.
+#+NAME: CanvasRRT-def-start
+#+BEGIN_SRC js -n 89 -r -i
+async function CanvasRRT ({ canvas_container, width, height, objects, speed_slider }) {
+  let canvas = document.createElement('canvas');
+  canvas.style.border = "6px solid black";
+  canvas.style.touchAction = 'none'; // Prevent scroll on touch screen devices.
+  canvas.width = width;
+  canvas.height = height;
+  canvas.style.position = "absolute";
+  canvas.style.left = 0;
+  canvas.style.top = 0;
+  canvas.style.zIndex = 0;
+
+  let layer2 = document.createElement('canvas');
+  layer2.style.border = "6px solid black";
+  layer2.style.touchAction = 'none'; // Prevent scroll on touch screen devices.
+  layer2.width = width;
+  layer2.height = height;
+  layer2.style.position = "absolute";
+  layer2.style.left = 0;
+  layer2.style.top = 0;
+  layer2.style.zIndex = 1;
+
+  canvas_container.appendChild(canvas);
+  canvas_container.appendChild(layer2);
+  let cx = canvas.getContext("2d");
+  let cx2 = layer2.getContext("2d");
+#+END_SRC
+The ~cx~ (and ~cx2~) object is what we will manipulate to draw on our canvas.
+
+** Event Handling
+Next up, we're going to need a way to respond to user events.
+
+#+NAME: register-event-handlers
+#+BEGIN_SRC js -n 366 -r -i
+  layer2.addEventListener('mousedown', press_handler, true);
+  layer2.addEventListener('pointerdown', press_handler, true);
+  layer2.addEventListener('mousemove', move_handler, true);
+  layer2.addEventListener('pointermove', move_handler, true);
+  window.addEventListener('mouseup', unclick_handler, true);      
+  window.addEventListener('pointerup', unclick_handler, true);
+#+END_SRC
+
+We want the canvas to be continuously re-rendered if the use is dragging an object, and we want to recalculate the path from A to B whenever the user clicks or finishes dragging an object. We'll also update the cursor depending on the context.
+
+#+NAME: press-move-handlers
+#+BEGIN_SRC js -n 136 -i
+  let object_grabbed_idx = -1;
+  let object_hovered_idx = -1;
+  let clicked_on = false;
+
+  const press_handler = e => {
+    e.stopPropagation();
+    e.preventDefault();
+    clicked_on = true;
+    object_grabbed_idx = objects.reduce((res, object, current_idx) => {
+      return object.within(e.offsetX, e.offsetY) ?  current_idx : res;
+    }, -1); // -1 indicates no object grabbed
+
+    object_hovered_idx = object_grabbed_idx;
+    if (object_grabbed_idx != -1) {
+      layer2.style.cursor = "grabbing";
+    }
+  };
+
+  const move_handler = e => {
+    e.stopPropagation();
+    e.preventDefault();
+
+    if (object_grabbed_idx == -1) {
+      object_hovered_idx = objects.reduce((res, object, current_idx) => {
+        return object.within(e.offsetX, e.offsetY) ?  current_idx : res;
+      }, -1); // -1 indicates no object hovered over
+      if (object_hovered_idx == -1) {
+        layer2.style.cursor = "crosshair"
+      } else {
+        layer2.style.cursor = "grab"
+      }
+
+      return;
+    }
+
+    let x = e.offsetX;
+    let y = e.offsetY;
+    if (x < 0 || y < 0 || x >= canvas.width || y >= canvas.height) {
+      return;
+    }
+
+    objects[object_grabbed_idx].center = { x, y };
+    render_grid();
+  };
+#+END_SRC
+
+The path should be [[(RRT-call)][recalculated]] when the user releases the mouse/trackpad/etc.... The path planning, especially when animated, may take some time, and while that is happening, we don't want the page to become unresponsive. Since JavaScript is single threaded, we have to interweave the execution of our path planning code asynchronously. For that, we're going to use the ~Promise~ API[fn:1]. 
+#+NAME: unclick-handler
+#+BEGIN_SRC js -n 332 -r -i 
+  let RRT_promise;
+
+  const unclick_handler = e => {
+    if (!clicked_on) { // the user may be unclicking off      
+      return;          // the canvas after clicking and 
+    }                  // dragging on the canvas
+
+    if (RRT_promise) {
+      RRT_promise.cancel();
+    }
+
+    render_grid();
+    object_grabbed_idx = -1;
+    layer2.style.cursor = object_hovered_idx == -1 ? "crosshair" : "grab";
+
+    RRT_promise = RRT(); (ref:RRT-call)
+    RRT_promise.then(err => {
+      if (err == 0) {
+        cx.strokeStyle = "#d63230"; 
+        cx.lineWidth = 3;           
+        cx.lineJoin = "round";      
+        cx.beginPath();             
+        cx.moveTo(path[0].x, path[0].y); 
+        path.forEach(node => { 
+          cx.lineTo(node.x, node.y);          
+        }); 
+        cx.stroke(); (ref:draw-path)
+      }
+    });
+
+    clicked_on = false;
+  };
+#+END_SRC
+Following a successful path planning, we'll [[(draw-path)][draw the path]] on the canvas.
+
+Here's the code used to render the grid whenever we reset it.
+#+NAME: render
+#+BEGIN_SRC js -n 115 -i
+  const render_grid = () => {  
+    // draw canvas background
+    cx.fillStyle = BACKGROUND_COLOR; // blue green
+    cx.fillRect(0, 0, width, height);
+
+    // draw objects
+    objects.forEach(object => {
+      cx.beginPath();
+      // center=(x,y) radius=r angle=0 to 7
+      cx.arc(object.center.x, object.center.y, object.radius - object.border_width / 2, 0, 7);
+      cx.fillStyle = object.fill_color;    
+      cx.fill();
+
+      cx.lineWidth = object.border_width;
+      cx.strokeStyle = object.border_color;
+      cx.stroke();
+
+      cx.closePath();
+    });
+  }
+#+END_SRC
+At this point, we're ready to dive into the algorithm.
+
+** Path Planning
+We begin by [[(sample)][sampling]] a random spot from the grid.
+#+NAME: RRT0
+#+BEGIN_SRC js -n 181 -r -i
+const timestep = () => 1000 - speed_slider.value;
+let path;
+const RRT = () => {
+  return new Promise(async (resolve, reject, onCancel) => {
+    const MAX_BRANCH_LENGTH = 20;
+    const PROXIMITY_THRESHOLD = 10;
+    const MAX_ITERATIONS = 5000;
+
+    let path_nodes = [new PathNode(objects[0].center.x, objects[0].center.y)];
+
+    let iterations = 0;
+    let unfulfilled_promise = true;
+    onCancel(function() {
+      unfulfilled_promise = false;
+    });
+    while (iterations <= MAX_ITERATIONS && unfulfilled_promise) {
+      // randomly sample a point, (xs, ys) 
+      let [xs, ys] = [Math.random() * canvas.width, Math.random() * canvas.height]; (ref:sample)
+
+      if (timestep() != 0 && unfulfilled_promise) {
+        // display sample spot
+        let sample_circle = new Circle({ center: {x: xs, y: ys}, radius: 3, fill: true, border_color: "red"});
+        cx2.beginPath(); 
+        // center=(x,y) radius=r angle=0 to 7 
+        cx2.arc(sample_circle.center.x, sample_circle.center.y, sample_circle.radius, 0, 7);
+        cx2.fillStyle = sample_circle.fill_color;
+        cx2.fill(); (ref:draw-sample)
+        cx2.closePath();
+        await sleep(timestep());
+      }
+
+      // Find the nearest node in the tree
+      let nearest_node = path_nodes.reduce((nearest, node) => { (ref:find-nearest-node)
+        return distance(node, { x: xs, y: ys }) < distance(nearest, { x: xs, y: ys }) ? node : nearest;
+      });
+#+END_SRC
+If the user sets the speed to anything less than 100%, we also [[(draw-sample)][draw the point]] on the second layer of our canvas. Then we then we need to [[(find-nearest-node)][find the nearest node]] in the tree.
+
+*** Dealing With Obstacles
+We now turn our attention to the task of deciding where to place our new node. We're going to put it in the direction of the sampled point, from our ~nearest_node~. But we don't want to go very far at any given time. And we also don't want to place it within an obstacle, but we can go right up to the edge of an obstacle. We'll need a way to travel in the direction of the sampled point from our ~nearest_node~. But we also need to be able to determine whether and where that line intersects with an obstacle. 
+
+A line through points $P$ and $Q$ can be described parametrically as
+\begin{align*}
+\vec{r}(t) & = \vec{r_0} + t \frac{\vec{PQ}}{\|\vec{PQ}\|},
+\end{align*}
+where $\vec{r_0}$ is the vector pointing to point $P$, from the origin. Notice the $\|\vec{PQ}\|$ in the denominator makes $\frac{\vec{PQ}}{\|\vec{PQ}\|}$ a unit vector, which means that $\vec{r}(t)$ is parameterized by the length of the line. This will come in handy. Let $\vec{u}$ be the unit vector $\frac{\vec{PQ}}{\|\vec{PQ}\|}$.
+\begin{align*}
+\vec{r}(t) & = \vec{r_0} + t\vec{u} \\
+     & = \langle x_0, y_0 \rangle + t \langle u_x, u_y \rangle \\
+     & = \langle u_xt + x_0, u_yt + y_0 \rangle
+\end{align*}
+
+#+NAME: r-of-t
+#+BEGIN_SRC js -n 216 -r -i
+const dx = xs - nearest_node.x;
+const dy = ys - nearest_node.y;
+const magnitude = Math.sqrt(dx**2 + dy**2);
+const ux = dx / magnitude;
+const uy = dy / magnitude;
+// r(t) is the vector equation of a line through the nearest node and the sampled point
+//        ⎛x ⎞     ⎛u ⎞
+//        ⎜ 0⎟     ⎜ x⎟
+// r(t) = ⎜  ⎟ + t ⎜  ⎟
+//        ⎜y ⎟     ⎜u ⎟
+//        ⎝ 0⎠     ⎝ y⎠
+
+const r = t => {          
+  return [ ux * t + nearest_node.x, uy * t + nearest_node.y ];
+};
+#+END_SRC
+
+All of our obstacles are circles, and given the radius $r_c$ and center of the circle $(C_x,C_y)$, we can write an equation for the circle in $\mathbb{R}^2$:
+$$(x - C_x)^2 + (y-C_y)^2 = r_c^2.$$
+
+We need to find out if there is a point on the line that satisfies our equation for any of our circles, within a certain range of our parameter $t$, which corresponds to the distance we want to travel from our existing node.
+
+We can do this by substituting the $\hat{x}$ and $\hat{y}$ components of $\vec{r}$ into the equation of each circle, and then solving for $t$. If there are any real solutions, then our line cuts through the circle, and we know where.
+$$\left(u_xt + x_{0} - C_{x} \right)^{2} + \left(u_yt + y_{0} - C_{y}\right)^{2} = r_{c}^{2}$$
+Solving this equation by hand would get a little messy, but a few lines of python make short work of it.
+#+begin_src python :results output drawer :exports both
+  from sympy import symbols, expand, factor, latex, solve
+
+  x0, ux, t, cx, y0, uy, cy, rc = symbols('x_0 u_x t C_x y_0 u_y C_y r_c')
+  expr = (ux*t + x0 - cx)**2 + (uy*t + y0 - cy)**2 - rc**2
+  solutions = solve(expr, t)
+  for solution in solutions:      
+      print("$$" + latex(solution) + "$$")
+#+end_src
+
+#+RESULTS:
+:results:
+$$\frac{C_{x} u_{x} + C_{y} u_{y} - u_{x} x_{0} - u_{y} y_{0} - \sqrt{- C_{x}^{2} u_{y}^{2} + 2 C_{x} C_{y} u_{x} u_{y} - 2 C_{x} u_{x} u_{y} y_{0} + 2 C_{x} u_{y}^{2} x_{0} - C_{y}^{2} u_{x}^{2} + 2 C_{y} u_{x}^{2} y_{0} - 2 C_{y} u_{x} u_{y} x_{0} + r_{c}^{2} u_{x}^{2} + r_{c}^{2} u_{y}^{2} - u_{x}^{2} y_{0}^{2} + 2 u_{x} u_{y} x_{0} y_{0} - u_{y}^{2} x_{0}^{2}}}{u_{x}^{2} + u_{y}^{2}}$$
+$$\frac{C_{x} u_{x} + C_{y} u_{y} - u_{x} x_{0} - u_{y} y_{0} + \sqrt{- C_{x}^{2} u_{y}^{2} + 2 C_{x} C_{y} u_{x} u_{y} - 2 C_{x} u_{x} u_{y} y_{0} + 2 C_{x} u_{y}^{2} x_{0} - C_{y}^{2} u_{x}^{2} + 2 C_{y} u_{x}^{2} y_{0} - 2 C_{y} u_{x} u_{y} x_{0} + r_{c}^{2} u_{x}^{2} + r_{c}^{2} u_{y}^{2} - u_{x}^{2} y_{0}^{2} + 2 u_{x} u_{y} x_{0} y_{0} - u_{y}^{2} x_{0}^{2}}}{u_{x}^{2} + u_{y}^{2}}$$
+:end:
+
+This may look messy, but all of these values are known constants. We're looking for $t$ values at points of intersection. First we are interested in whether the part [[(underoot)][under the radical]] is less than 0, because that would imply there is no solution, and that we can safely ignore the possibility of running into an obstacle.
+
+#+NAME: math-2
+#+BEGIN_SRC js -n 232 -r -i
+let ts = []; // t values at intersections between r(t) and the circles
+if (unfulfilled_promise) {
+  objects.slice(2).forEach(circle => {
+    const cx = circle.center.x;
+    const cy = circle.center.y;
+    const x0 = nearest_node.x;
+    const y0 = nearest_node.y;
+    const rc = circle.radius;
+    const under_root = -(cx**2) * uy**2 + 2 * cx * cy * ux * uy - 2 * cx * ux * uy * y0 + 2 * cx * uy**2 * x0 - cy**2 * ux**2 + 2 * cy * ux**2 * y0 - 2 * cy * ux * uy * x0 + ux**2 * rc**2 + rc**2 * uy**2 - ux**2 * y0**2 + 2 * ux * uy * x0 * y0 - uy**2 * x0**2; (ref:underoot)
+    if (under_root < 0) {           
+      return; // no intersection
+    }
+#+END_SRC
+
+Next, we're going to evaluate and collect the solutions. We're only interested in solutions greater than 0 and less than the maximum distance we want to travel.
+#+NAME: math-3
+#+BEGIN_SRC js -n 245 -r -i
+      // now we need to know if it has a solution on a range of t
+      let a = cx * ux + cy * uy - ux * x0 - uy * y0;
+      let denom = ux**2 + uy**2;
+      let t1 = (a - Math.sqrt(under_root)) / denom;
+      let t2 = (a + Math.sqrt(under_root)) / denom;
+      let tsi = [t1, t2];
+      tsi.forEach(t => {
+        if (t > 0 && t < MAX_BRANCH_LENGTH) {
+          ts.push(t);
+        }         
+      });
+    });  
+  }
+#+END_SRC
+
+The $t$ value we're going to use to place our actual node will be the minimum among the ~MAX_BRANCH_LENGTH~, any solutions we found, and the distance between the nearest node and the sample node. To avoid errors associated with floating point numbers, we'll double check that the a node at this point won't lie within an obstacle, and we'll add the node to our path.
+
+#+NAME: math-4
+#+BEGIN_SRC js -n 259 -r -i
+let tn = Math.min(...ts, MAX_BRANCH_LENGTH, distance(nearest_node, { x: xs, y: ys })) - 0.2;
+
+if (objects.slice(2).every(circle => !circle.within(...r(tn)))) {       
+  const new_node = new PathNode(...r(tn), nearest_node);
+  path_nodes.push(new_node);
+#+END_SRC
+We'll also animate the branch joining the node. and draw the node on the canvas.
+#+NAME: math-5
+#+BEGIN_SRC js -n 265 -r -i
+if (timestep() != 0) {
+  const waypoints = calc_waypoints(nearest_node, new_node, 100);
+  for (let t = 1; t < waypoints.length; t++) {
+    const a = waypoints[t-1];
+    const b = waypoints[t];
+
+    await sleep(timestep() / 100);
+    requestAnimationFrame(_ => {
+      if (unfulfilled_promise) {
+        cx.strokeStyle = TREE_COLOR;
+        cx.lineWidth = 1.2;
+        cx.beginPath();
+        cx.moveTo(a.x, a.y);
+        cx.lineTo(b.x, b.y);
+        cx.stroke();
+        cx.closePath();
+      }
+    });
+  }
+} else {
+  if (unfulfilled_promise) {
+    cx.strokeStyle = TREE_COLOR;
+    cx.lineWidth = 1.2;
+    cx.beginPath();
+    cx.moveTo(nearest_node.x, nearest_node.y);
+    cx.lineTo(new_node.x, new_node.y);
+    cx.stroke();
+    cx.closePath();
+  }
+}
+let node_circle = new Circle({ center: new_node, radius: 1.2, fill: true, border_color: NODE_COLOR}); 
+if (unfulfilled_promise) {
+  cx.beginPath();
+  // center=(x,y) radius=r angle=0 to 7        
+  cx.arc(node_circle.center.x, node_circle.center.y, node_circle.radius, 0, 7);
+  cx.fillStyle = node_circle.fill_color;
+  cx.fill();
+  cx.closePath();
+}
+#+END_SRC
+Finally we need to check and see if the new node is close enough to are target destination. Otherwise, we'll continue searching.
+
+#+NAME: end-loop
+#+BEGIN_SRC js -n 305 -r -i
+    if (distance(new_node, objects[1].center) < PROXIMITY_THRESHOLD && unfulfilled_promise) {
+      let node = new_node;
+      path = [];
+      while (node instanceof PathNode) {
+        path.push(node);
+        node = node.parent;
+      }
+      resolve(0);
+      unfulfilled_promise = false;
+    }
+  }
+
+  // delete sample circle
+  cx2.clearRect(0, 0, layer2.width, layer2.height);        
+
+  iterations += 1;        
+}  
+
+#+END_SRC
+
+#+BEGIN_SRC js -n 0 -r -i :tangle path-finding.js :noweb yes :exports none
+Promise.config({
+  // Enable warnings
+  // warnings: true,
+  // Enable long stack traces
+  // longStackTraces: true,
+  // Enable cancellation
+  cancellation: true,
+  // Enable monitoring
+  // monitoring: true,
+  // Enable async hooks
+  // asyncHooks: true,
+});
+
+  <<interface>>
+
+const BACKGROUND_COLOR = "#008b8b";
+const NODE_COLOR = "#5fcbcb"; // #E7E438
+const TREE_COLOR = "#5fcbcb"; // #fac50e
+
+  <<circle-class-def>>
+
+class PathNode {
+  constructor(x, y, parent = null) {
+    this.x = x;
+    this.y = y;
+    this.parent = parent;
+  } 
+}
+
+function calc_waypoints(a, b, n) {
+  let waypoints = [];
+  let dx = b.x - a.x;
+  let dy = b.y - a.y;
+
+  for (let j = 0; j < n; j++) {
+    let x = a.x + dx * j / n;
+    let y = a.y + dy * j / n;
+    waypoints.push({ x, y });
+  }
+  return waypoints;
+}
+
+const sleep = async ms => new Promise(r => setTimeout(r, ms));
+
+  <<CanvasRRT-def-start>>
+
+  <<render>>
+
+  <<press-move-handlers>>
+
+  <<RRT0>>
+  <<r-of-t>>
+
+  <<math-2>>
+
+  <<math-3>>
+
+  <<math-4>>
+
+  <<math-5>>
+
+  <<end-loop>>
+reject(new Error("Iteration limit reached"));
+unfulfilled_promise = false;
+});
+};
+
+  <<unclick-handler>>
+
+  <<register-event-handlers>>
+
+clicked_on = true;
+unclick_handler();
+}
+#+END_SRC
+
+* Source Code
+Below is the whole thing put together.
+#+BEGIN_SRC js -n 0
+  Promise.config({
+    // Enable warnings
+    // warnings: true,
+    // Enable long stack traces
+    // longStackTraces: true,
+    // Enable cancellation
+    cancellation: true,
+    // Enable monitoring
+    // monitoring: true,
+    // Enable async hooks
+    // asyncHooks: true,
+  });
+
+  document.addEventListener("DOMContentLoaded", () => {
+    CanvasRRT({
+      canvas_container: document.querySelector('#grid-container'),
+      width: 400,
+      height: 400,
+      objects: [
+        new Circle({ center: { x: 10, y: 391 }, radius: 10, border_color: "#d63230", border_width: 0}),
+        new Circle({ center: { x: 389, y: 10 }, radius: 10, border_color: "#d63230", border_width: 0}),
+        new Circle({ center: { x: 294, y: 150 }, radius: 40, border_color: "black", fill_color: "#79a5a5"}),
+        new Circle({ center: { x: 164, y: 269 }, radius: 40, border_color: "black", fill_color: "#79a5a5"}),
+        new Circle({ center: { x: 179, y: 152 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
+        new Circle({ center: { x: 69, y: 80 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
+        new Circle({ center: { x: 138, y: 67 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
+        new Circle({ center: { x: 217, y: 92 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
+        new Circle({ center: { x: 306, y: 64 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
+        new Circle({ center: { x: 261, y: 231 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
+        new Circle({ center: { x: 346, y: 241 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
+        new Circle({ center: { x: 310, y: 365 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
+        new Circle({ center: { x: 248, y: 310 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
+        new Circle({ center: { x: 66, y: 160 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
+        new Circle({ center: { x: 65, y: 249 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
+        new Circle({ center: { x: 97, y: 323 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
+        new Circle({ center: { x: 183, y: 343 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
+        new Circle({ center: { x: 125, y: 195 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
+        new Circle({ center: { x: 375, y: 322 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
+      ],
+      speed_slider: document.querySelector('input#speed'),
+    });
+  });
+
+  const BACKGROUND_COLOR = "#008b8b";
+  const NODE_COLOR = "#5fcbcb"; // #E7E438
+  const TREE_COLOR = "#5fcbcb"; // #fac50e
+
+  class Circle {
+    constructor({ center, radius, border_color, border_width=4, fill_color=border_color }) {
+      this.center = center;
+      this.radius = radius;
+      this.border_color = border_color;
+      this.fill_color = fill_color;
+      this.border_width = border_width;
+    }
+  
+    within(x, y) {
+      return distance({ x, y }, this.center) <= this.radius;
+    }
+  }
+
+  function distance(a, b) {
+    return Math.sqrt(Math.pow(b.y - a.y, 2) + Math.pow(b.x - a.x, 2));
+  }
+
+  class PathNode {
+    constructor(x, y, parent = null) {
+      this.x = x;
+      this.y = y;
+      this.parent = parent;
+    } 
+  }
+
+  function calc_waypoints(a, b, n) {
+    let waypoints = [];
+    let dx = b.x - a.x;
+    let dy = b.y - a.y;
+
+    for (let j = 0; j < n; j++) {
+      let x = a.x + dx * j / n;
+      let y = a.y + dy * j / n;
+      waypoints.push({ x, y });
+    }
+    return waypoints;
+  }
+
+  const sleep = async ms => new Promise(r => setTimeout(r, ms));
+
+  async function CanvasRRT ({ canvas_container, width, height, objects, speed_slider }) {
+    let canvas = document.createElement('canvas');
+    canvas.style.border = "6px solid black";
+    canvas.style.touchAction = 'none'; // Prevent scroll on touch screen devices.
+    canvas.width = width;
+    canvas.height = height;
+    canvas.style.position = "absolute";
+    canvas.style.left = 0;
+    canvas.style.top = 0;
+    canvas.style.zIndex = 0;
+  
+    let layer2 = document.createElement('canvas');
+    layer2.style.border = "6px solid black";
+    layer2.style.touchAction = 'none'; // Prevent scroll on touch screen devices.
+    layer2.width = width;
+    layer2.height = height;
+    layer2.style.position = "absolute";
+    layer2.style.left = 0;
+    layer2.style.top = 0;
+    layer2.style.zIndex = 1;
+  
+    canvas_container.appendChild(canvas);
+    canvas_container.appendChild(layer2);
+    let cx = canvas.getContext("2d");
+    let cx2 = layer2.getContext("2d");
+
+    const render_grid = () => {  
+      // draw canvas background
+      cx.fillStyle = BACKGROUND_COLOR; // blue green
+      cx.fillRect(0, 0, width, height);
+    
+      // draw objects
+      objects.forEach(object => {
+        cx.beginPath();
+        // center=(x,y) radius=r angle=0 to 7
+        cx.arc(object.center.x, object.center.y, object.radius - object.border_width / 2, 0, 7);
+        cx.fillStyle = object.fill_color;    
+        cx.fill();
+      
+        cx.lineWidth = object.border_width;
+        cx.strokeStyle = object.border_color;
+        cx.stroke();
+      
+        cx.closePath();
+      });
+    }
+
+    let object_grabbed_idx = -1;
+    let object_hovered_idx = -1;
+    let clicked_on = false;
+  
+    const press_handler = e => {
+      e.stopPropagation();
+      e.preventDefault();
+      clicked_on = true;
+      object_grabbed_idx = objects.reduce((res, object, current_idx) => {
+        return object.within(e.offsetX, e.offsetY) ?  current_idx : res;
+      }, -1); // -1 indicates no object grabbed
+    
+      object_hovered_idx = object_grabbed_idx;
+      if (object_grabbed_idx != -1) {
+        layer2.style.cursor = "grabbing";
+      }
+    };
+  
+    const move_handler = e => {
+      e.stopPropagation();
+      e.preventDefault();
+    
+      if (object_grabbed_idx == -1) {
+        object_hovered_idx = objects.reduce((res, object, current_idx) => {
+          return object.within(e.offsetX, e.offsetY) ?  current_idx : res;
+        }, -1); // -1 indicates no object hovered over
+        if (object_hovered_idx == -1) {
+          layer2.style.cursor = "crosshair"
+        } else {
+          layer2.style.cursor = "grab"
+        }
+      
+        return;
+      }
+    
+      let x = e.offsetX;
+      let y = e.offsetY;
+      if (x < 0 || y < 0 || x >= canvas.width || y >= canvas.height) {
+        return;
+      }
+    
+      objects[object_grabbed_idx].center = { x, y };
+      render_grid();
+    };
+
+    const timestep = () => 1000 - speed_slider.value;
+    let path;
+    const RRT = () => {
+      return new Promise(async (resolve, reject, onCancel) => {
+        const MAX_BRANCH_LENGTH = 20;
+        const PROXIMITY_THRESHOLD = 10;
+        const MAX_ITERATIONS = 5000;
+      
+        let path_nodes = [new PathNode(objects[0].center.x, objects[0].center.y)];
+      
+        let iterations = 0;
+        let unfulfilled_promise = true;
+        onCancel(function() {
+          unfulfilled_promise = false;
+        });
+        while (iterations <= MAX_ITERATIONS && unfulfilled_promise) {
+          // randomly sample a point, (xs, ys) 
+          let [xs, ys] = [Math.random() * canvas.width, Math.random() * canvas.height];
+        
+          if (timestep() != 0 && unfulfilled_promise) {
+            // display sample spot
+            let sample_circle = new Circle({ center: {x: xs, y: ys}, radius: 3, fill: true, border_color: "red"});
+            cx2.beginPath(); 
+            // center=(x,y) radius=r angle=0 to 7 
+            cx2.arc(sample_circle.center.x, sample_circle.center.y, sample_circle.radius, 0, 7);
+            cx2.fillStyle = sample_circle.fill_color;
+            cx2.fill();
+            cx2.closePath();
+            await sleep(timestep());
+          }
+        
+          // Find the nearest node in the tree
+          let nearest_node = path_nodes.reduce((nearest, node) => {
+            return distance(node, { x: xs, y: ys }) < distance(nearest, { x: xs, y: ys }) ? node : nearest;
+          });
+          const dx = xs - nearest_node.x;
+          const dy = ys - nearest_node.y;
+          const magnitude = Math.sqrt(dx**2 + dy**2);
+          const ux = dx / magnitude;
+          const uy = dy / magnitude;
+          // r(t) is the vector equation of a line through the nearest node and the sampled point
+          //        ⎛x ⎞     ⎛u ⎞
+          //        ⎜ 0⎟     ⎜ x⎟
+          // r(t) = ⎜  ⎟ + t ⎜  ⎟
+          //        ⎜y ⎟     ⎜u ⎟
+          //        ⎝ 0⎠     ⎝ y⎠
+        
+          const r = t => {          
+            return [ ux * t + nearest_node.x, uy * t + nearest_node.y ];
+          };
+
+          let ts = []; // t values at intersections between r(t) and the circles
+          if (unfulfilled_promise) {
+            objects.slice(2).forEach(circle => {
+              const cx = circle.center.x;
+              const cy = circle.center.y;
+              const x0 = nearest_node.x;
+              const y0 = nearest_node.y;
+              const rc = circle.radius;
+              const under_root = -(cx**2) * uy**2 + 2 * cx * cy * ux * uy - 2 * cx * ux * uy * y0 + 2 * cx * uy**2 * x0 - cy**2 * ux**2 + 2 * cy * ux**2 * y0 - 2 * cy * ux * uy * x0 + ux**2 * rc**2 + rc**2 * uy**2 - ux**2 * y0**2 + 2 * ux * uy * x0 * y0 - uy**2 * x0**2;
+              if (under_root < 0) {           
+                return; // no intersection
+              }
+
+              // now we need to know if it has a solution on a range of t
+              let a = cx * ux + cy * uy - ux * x0 - uy * y0;
+              let denom = ux**2 + uy**2;
+              let t1 = (a - Math.sqrt(under_root)) / denom;
+              let t2 = (a + Math.sqrt(under_root)) / denom;
+              let tsi = [t1, t2];
+              tsi.forEach(t => {
+                if (t > 0 && t < MAX_BRANCH_LENGTH) {
+                  ts.push(t);
+                }         
+              });
+            });  
+          }
+
+          let tn = Math.min(...ts, MAX_BRANCH_LENGTH, distance(nearest_node, { x: xs, y: ys })) - 0.2;
+        
+          if (objects.slice(2).every(circle => !circle.within(...r(tn)))) {       
+            const new_node = new PathNode(...r(tn), nearest_node);
+            path_nodes.push(new_node);
+
+            if (timestep() != 0) {
+              const waypoints = calc_waypoints(nearest_node, new_node, 100);
+              for (let t = 1; t < waypoints.length; t++) {
+                const a = waypoints[t-1];
+                const b = waypoints[t];
+              
+                await sleep(timestep() / 100);
+                requestAnimationFrame(_ => {
+                  if (unfulfilled_promise) {
+                    cx.strokeStyle = TREE_COLOR;
+                    cx.lineWidth = 1.2;
+                    cx.beginPath();
+                    cx.moveTo(a.x, a.y);
+                    cx.lineTo(b.x, b.y);
+                    cx.stroke();
+                    cx.closePath();
+                  }
+                });
+              }
+            } else {
+              if (unfulfilled_promise) {
+                cx.strokeStyle = TREE_COLOR;
+                cx.lineWidth = 1.2;
+                cx.beginPath();
+                cx.moveTo(nearest_node.x, nearest_node.y);
+                cx.lineTo(new_node.x, new_node.y);
+                cx.stroke();
+                cx.closePath();
+              }
+            }
+            let node_circle = new Circle({ center: new_node, radius: 1.2, fill: true, border_color: NODE_COLOR}); 
+            if (unfulfilled_promise) {
+              cx.beginPath();
+              // center=(x,y) radius=r angle=0 to 7        
+              cx.arc(node_circle.center.x, node_circle.center.y, node_circle.radius, 0, 7);
+              cx.fillStyle = node_circle.fill_color;
+              cx.fill();
+              cx.closePath();
+            }
+
+            if (distance(new_node, objects[1].center) < PROXIMITY_THRESHOLD && unfulfilled_promise) {
+              let node = new_node;
+              path = [];
+              while (node instanceof PathNode) {
+                path.push(node);
+                node = node.parent;
+              }
+              resolve(0);
+              unfulfilled_promise = false;
+            }
+          }
+        
+          // delete sample circle
+          cx2.clearRect(0, 0, layer2.width, layer2.height);        
+        
+          iterations += 1;        
+        }  
+      
+        reject(new Error("Iteration limit reached"));
+        unfulfilled_promise = false;
+      });
+    };
+
+    let RRT_promise;
+  
+    const unclick_handler = e => {
+      if (!clicked_on) { // the user may be unclicking off      
+        return;          // the canvas after clicking and 
+      }                  // dragging on the canvas
+    
+      if (RRT_promise) {
+        RRT_promise.cancel();
+      }
+    
+      render_grid();
+      object_grabbed_idx = -1;
+      layer2.style.cursor = object_hovered_idx == -1 ? "crosshair" : "grab";
+    
+      RRT_promise = RRT();
+      RRT_promise.then(err => {
+        if (err == 0) {
+          cx.strokeStyle = "#d63230"; 
+          cx.lineWidth = 3;           
+          cx.lineJoin = "round";      
+          cx.beginPath();             
+          cx.moveTo(path[0].x, path[0].y); 
+          path.forEach(node => { 
+            cx.lineTo(node.x, node.y);          
+          }); 
+          cx.stroke();
+        }
+      });
+    
+      clicked_on = false;
+    };
+
+    layer2.addEventListener('mousedown', press_handler, true);
+    layer2.addEventListener('pointerdown', press_handler, true);
+    layer2.addEventListener('mousemove', move_handler, true);
+    layer2.addEventListener('pointermove', move_handler, true);
+    window.addEventListener('mouseup', unclick_handler, true);      
+    window.addEventListener('pointerup', unclick_handler, true);
+
+    clicked_on = true;
+    unclick_handler();
+  }
+#+END_SRC
+
+* notes                                                            :noexport:
+Currently, async CanvasRRT function takes in the dimensions, objects, and dome elements it needs to make the RRT widget. It doesn't provide an interface to edit the widget from outside, which I think is just fine.
+
+We create 2 canvases. The reason for this is we need the second so that we can clear temporary dots from samples. So they act like two layers.
+
+** types
+*** Circle
+contains a center, radius, border_colour, fill_color,, and border_width
+** parameters
+*** canvas_container
+*** width
+*** height
+*** objects
+A bunch of [[Circle]]s. The first two represent the start and end nodes for the path, respectively.
+*** speed_slider
+
+** variables
+*** canvas
+*** layer2
+*** cx
+*** cx2
+*** path
+*** clicked_on
+*** object_grabbed_idx
+used to indicate whether and object was grabbed, and which one, so that the [[move_handler]] can update the position of the correct object
+*** object_hovered_idx
+This variable prevents the unclick_handler from running unless the click initially took place within the canvas.
+** functions
+*** render_grid
+has access to cx and objects through closure. Draws background and then objects.
+*** press_handler
+updates [[clicked_on]] to reflect that the click occured in the canvas
+if an object was grabbed, updates [[object_grabbed_idx]] to denote which one.
+*** move_handler
+updates cursor if necessary. Updates state of object if an object is being dragged.
+*** timestep
+returns a timestep for animations based on [[speed_slider]] value
+*** RRT
+Returns a promise which implements the RRT algorithm and animations. 
+
+**** Local variables
+***** MAX_BRANCH_LENGTH
+how far to branch off from the tree when placing a new node
+***** PROXIMATY_THRESHOLD
+how close do we need to be to the destination node in order to call it good?
+***** MAX_ITERATIONS
+works like a timeout.
+***** unfulfilled_promise
+[[RRT]] returns a Promise in order to not block the call stack. But, if the user clicks on the canvas, we want to start over the RRT function. Or, we may wish to stop the execution if the path is reached, or if the iterations limit is reached. Because RRT is a promise, we have to do some work to halt it's execution. We pass the onCancel parameter to the Promise, which is a function which accepts a function parameter, specifying what to do if we cancel the Promise function from outside. So, we set unfulfilled_promise to false, and then we have to specify in various places in the code where loops occur, where things might take a non trivial amount of time, that we want to check if the promise is still unfulfilled before continuing.
+
+* Footnotes
+[fn:1] Annoyingly, JavaScript provides no method for cancelling a Promise. So, I'm using a third party library called [[http://bluebirdjs.com/docs/getting-started.html][bluebird.js]].
+

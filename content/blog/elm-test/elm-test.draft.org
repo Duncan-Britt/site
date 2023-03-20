@@ -1,0 +1,21 @@
+#+TITLE: Elm Test
+#+SETUPFILE: ../../../setup/blog-post.setup
+#+DATE: <2023-03-18>
+#+FILETAGS: :demo:
+#+HTML_HEAD: <script src="js/main.js"></script>
+
+Ran ~elm init~ in this directory (~/elm-test~). Then, Elm source compiled with ~elm make src/Main.elm --output=js/main.js~.
+
+* Demo of Elm
+#+BEGIN_EXPORT html
+<div id="elmapp"></div>
+<script>
+var app = Elm.Main.init({
+  node: document.getElementById('elmapp')
+});
+</script>
+#+END_EXPORT
+
+
+
+
