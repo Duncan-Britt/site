@@ -1,0 +1,14 @@
+#+TITLE: UPDATE: Programming an Autonomous Mobile Robot
+#+SETUPFILE: ../../../setup/blog-post.setup
+#+DATE: <2023-05-13>
+#+FILETAGS: :robotics:
+#+MACRO: src src_sh[:exports code]{$1}
+
++
+  #+BEGIN_EXPORT html
+  <a href="https://github.com/Duncan-Britt/Space-Grants-Robotics-ACC-22-23" target="_blank">Source Code</a>
+  #+END_EXPORT
+
+#+BEGIN_EXPORT html
+<p>In <a href="/blog/autonomous-mobile-robot/autonomous-mobile-robot.html" target="_blank">a previous blog</a> post I described my plans for the brains of an autonomous mobile robot built by the robotics team at Arapahoe Community College. In this post, I'll describe what we actually ended up doing.</p>
+#+END_EXPORT

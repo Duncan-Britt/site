@@ -10,6 +10,7 @@
 
 # RRT* is better: https://youtu.be/QR3U1dgc5RE?t=870
 # Instead of resampling when I hit an obstacle, I should just put a point right where I hit the obstacle!
+# http://msl.cs.uiuc.edu/~lavalle/papers/Lav98c.pdf
 
 In my last blog post, I demonstrated the A* path planning algorithm. In this blog post, we're going to go through a sampling based approach called Rapidly Exploring Random Trees (RRT).
 
@@ -960,6 +961,17 @@ works like a timeout.
 ***** unfulfilled_promise
 [[RRT]] returns a Promise in order to not block the call stack. But, if the user clicks on the canvas, we want to start over the RRT function. Or, we may wish to stop the execution if the path is reached, or if the iterations limit is reached. Because RRT is a promise, we have to do some work to halt it's execution. We pass the onCancel parameter to the Promise, which is a function which accepts a function parameter, specifying what to do if we cancel the Promise function from outside. So, we set unfulfilled_promise to false, and then we have to specify in various places in the code where loops occur, where things might take a non trivial amount of time, that we want to check if the promise is still unfulfilled before continuing.
 
+* Comments                                                         :noexport:
+#+BEGIN_EXPORT html
+<script>talkyardServerUrl='https://site-jbajhd11mo.talkyard.net';</script>
+<script async defer src="https://c1.ty-cdn.net/-/talkyard-comments.min.js"></script>
+<!-- You can specify a per page discussion id on the next line, if your URLs might change. -->
+<div class="talkyard-comments" data-discussion-id="" style="margin-top: 45px;">
+<noscript>Please enable Javascript to view comments.</noscript>
+</div>
+#+END_EXPORT
+
 * Footnotes
 [fn:1] Annoyingly, JavaScript provides no method for cancelling a Promise. So, I'm using a third party library called [[http://bluebirdjs.com/docs/getting-started.html][bluebird.js]].
+
 

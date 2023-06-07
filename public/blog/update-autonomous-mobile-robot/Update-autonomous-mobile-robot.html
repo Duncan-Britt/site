@@ -5,7 +5,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Programming an Autonomous Mobile Robot</title>
+<title>UPDATE: Programming an Autonomous Mobile Robot</title>
 <meta name="generator" content="Org Mode" />
 <link rel="stylesheet" type="text/css" href="/stylesheets/color-scheme.css"/>
 <link rel="stylesheet" type="text/css" href="/stylesheets/layout-blog.css"/>
@@ -55,17 +55,17 @@
 </header>
 </div>
 <div id="content" class="content">
-<h1 class="title">Programming an Autonomous Mobile Robot</h1>
+<h1 class="title">UPDATE: Programming an Autonomous Mobile Robot</h1>
 <div id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org6fda4df">Program Overview</a></li>
-<li><a href="#org434b1cc">Path Planning</a></li>
-<li><a href="#org8163f21">Grid Implementation</a></li>
-<li><a href="#org2202786">PID Control</a>
+<li><a href="#org8b4f162">Program Overview</a></li>
+<li><a href="#orgff84e48">Path Planning</a></li>
+<li><a href="#orgc6feb02">Grid Implementation</a></li>
+<li><a href="#org4458157">PID Control</a>
 <ul>
-<li><a href="#orgdf9f00f">Motor control</a></li>
+<li><a href="#orgf5eda5e">Motor control</a></li>
 </ul>
 </li>
 </ul>
@@ -75,15 +75,13 @@
 <li><a href="https://github.com/Duncan-Britt/Space-Grants-Robotics-ACC-22-23" target="_blank">Source Code</a></li>
 </ul>
 
-<p>
-I'm the lead programmer on the robotics team at school and where working on an autonomous mobile robot. The project is sponsored by NASA's Colorado Space Grants Consortium and our robot will participate in their challenge in April. The involves traversing a variety of outdoor obstacle courses without the use of GPS. What follows is an overview of our in progress program.
-</p>
+<p>In <a href="/blog/autonomous-mobile-robot/autonomous-mobile-robot.html" target="_blank">a previous blog</a> post I described my plans for the brains of an autonomous mobile robot built by the robotics team at Arapahoe Community College.</p>
 
-<div id="outline-container-org6fda4df" class="outline-2">
-<h2 id="org6fda4df">Program Overview</h2>
-<div class="outline-text-2" id="text-org6fda4df">
+<div id="outline-container-org8b4f162" class="outline-2">
+<h2 id="org8b4f162">Program Overview</h2>
+<div class="outline-text-2" id="text-org8b4f162">
 
-<div id="orgcc36505" class="figure">
+<div id="org03c08a7" class="figure">
 <p><img src="./images/loops.svg" alt="loops.svg" class="org-svg" />
 </p>
 </div>
@@ -161,9 +159,9 @@ In the following sections I attempt to describe the components of the program in
 </p>
 </div>
 </div>
-<div id="outline-container-org434b1cc" class="outline-2">
-<h2 id="org434b1cc">Path Planning</h2>
-<div class="outline-text-2" id="text-org434b1cc">
+<div id="outline-container-orgff84e48" class="outline-2">
+<h2 id="orgff84e48">Path Planning</h2>
+<div class="outline-text-2" id="text-orgff84e48">
 <p>
 We need to figure out how to decide whether an obstacle has been detected and whether it interrupts our path forward, as well as where we believe the obstacle is. We also need to figure out how to persist this knowledge in a way that will consume the least amount of memory.
 </p>
@@ -173,7 +171,7 @@ Equipped with knowledge of where obstacles lie, we can model the landscape surro
 </p>
 
 
-<div id="org47c3b38" class="figure">
+<div id="org879b97b" class="figure">
 <p><img src="./images/occupancy-map.png" alt="occupancy-map.png" />
 </p>
 <p><span class="figure-number">Figure 1: </span>This image found <a href="https://iis-projects.ee.ethz.ch/index.php?title=Autonomous_Obstacle_Avoidance_with_Nano-Drones_and_Novel_Depth_Sensors">online</a> shows an example of an occupancy grid.</p>
@@ -240,9 +238,9 @@ Based on the memory available to us, we'll have to decide how large to make the 
 </p>
 </div>
 </div>
-<div id="outline-container-org8163f21" class="outline-2">
-<h2 id="org8163f21">Grid Implementation</h2>
-<div class="outline-text-2" id="text-org8163f21">
+<div id="outline-container-orgc6feb02" class="outline-2">
+<h2 id="orgc6feb02">Grid Implementation</h2>
+<div class="outline-text-2" id="text-orgc6feb02">
 <p>
 The grid is implemented as an array of bits. 0's are open spaces and 1's are obstacles:
 </p>
@@ -279,15 +277,15 @@ One of the things to consider is perhaps having a <a href="https://ieeexplore.ie
 </p>
 
 
-<div id="orgbf3aa65" class="figure">
+<div id="org313ccf2" class="figure">
 <p><img src="./images/non-uniform-grid.jpeg" alt="non-uniform-grid.jpeg" />
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-org2202786" class="outline-2">
-<h2 id="org2202786">PID Control</h2>
-<div class="outline-text-2" id="text-org2202786">
+<div id="outline-container-org4458157" class="outline-2">
+<h2 id="org4458157">PID Control</h2>
+<div class="outline-text-2" id="text-org4458157">
 <p>
 The PID algorithm can be used to deal with the low level motor control of our robot. We can adjust the speed and direction of the motors using a function of the magnitude and direction of the discrepancy between where the robot is and where it wants to be at any given time, typically referred to as the <b>error value</b> in the context of PID. In addition to the error value \(e(t)\), PID also uses the accumulation of these error values over time \(\int{e(t)dt}\), and the rate at which the discrepancy is changing \(\frac{de}{dt}\).
 </p>
@@ -315,9 +313,9 @@ We still need to implement all of this. These two videos do a good job of explai
 </ul>
 </div>
 
-<div id="outline-container-orgdf9f00f" class="outline-3">
-<h3 id="orgdf9f00f">Motor control</h3>
-<div class="outline-text-3" id="text-orgdf9f00f">
+<div id="outline-container-orgf5eda5e" class="outline-3">
+<h3 id="orgf5eda5e">Motor control</h3>
+<div class="outline-text-3" id="text-orgf5eda5e">
 <p>
 What I have implemented so far is an interface for controlling the motors. First, allow me to try and motivate the need for such an interface.
 </p>
@@ -378,7 +376,7 @@ This is the interface that I expect to be used along with PID. PID tells us how 
 </div>
 </div>
 <div id="postamble" class="status">
-<p class="date">Date: 2023-01-15 Sun 00:00</p>
+<p class="date">Date: 2023-05-13 Sat 00:00</p>
 </div>
 </body>
 </html>

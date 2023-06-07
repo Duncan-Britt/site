@@ -1,0 +1,14 @@
+#info {
+	position: absolute;
+	top: 0;
+        left: 0;
+	/* width: 100%; */
+	text-align: center;
+	z-index: 100;
+	display: block;
+        color: white;
+}
+
+#test-graphic-container {
+    position: relative;
+}

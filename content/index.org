@@ -1,12 +1,11 @@
 #+TITLE: Duncan Britt
 #+SETUPFILE: ../setup/page.setup
 
-* *Computer Science Student* - Denver, CO
+* *Computer Science Student* - University of Colorado at Boulder
 
 #+BEGIN_EXPORT html
-<p>I'm in my final semester at Arapahoe Community College before graduating with an Associate of Science and transferring. I'm also employed as a tutor of physics and mathematics. I'm currently working on <a target="_self" href="/blog/autonomous-mobile-robot/autonomous-mobile-robot.html">building an autonomous mobile robot.</a></p>
+<p>I'm in my penultimate year of my undergraduate degree. I'm currently employed by the <a target="_blank" href="https://geneticlogiclab.org/">Genetic Logic Lab</a> at CU as a software developer.</p>
 #+END_EXPORT
-
 
 * *Highlighted Projects*
 - [[https://duncan-britt.github.io/splice-docs/][Splice]]:

@@ -546,3 +546,13 @@ Finally, all that's left is to render our completed grid and path. This post is 
     let canvas = new CanvasDisplay(document.querySelector('#grid-container'), grid);
   });
 #+END_SRC
+
+* Comments                                                         :noexport:
+#+BEGIN_EXPORT html
+<script>talkyardServerUrl='https://site-jbajhd11mo.talkyard.net';</script>
+<script async defer src="https://c1.ty-cdn.net/-/talkyard-comments.min.js"></script>
+<!-- You can specify a per page discussion id on the next line, if your URLs might change. -->
+<div class="talkyard-comments" data-discussion-id="" style="margin-top: 45px;">
+<noscript>Please enable Javascript to view comments.</noscript>
+</div>
+#+END_EXPORT
