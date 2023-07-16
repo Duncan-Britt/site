@@ -1,0 +1,84 @@
+#+TITLE: How Our Surroundings Form Us
+#+SETUPFILE: ../../../setup/blog-post.setup
+#+DATE: <2023-06-14>
+#+FILETAGS: :philosophical:
+#+LATEX_CLASS: article
+#+LATEX_CLASS_OPTIONS: [letterpaper]
+#+LATEX_HEADER: \usepackage[margin=1in]{geometry}
+#+LATEX_HEADER: \usepackage{multicol}
+#+LATEX_HEADER: \usepackage{setspace}
+#+LATEX_HEADER: \usepackage{pgfornament}
+#+LATEX_HEADER: \setstretch{1.5}
+
+:QUOTE:
+#+BEGIN_QUOTE
+If I consider my life honestly, I see that it is governed by a certain very small number of patterns of events which I take part in over and over again.
+
+Being in bed, having a shower, having breakfast in the kitchen, sitting in my study writing, walkin in the garden, cooking and eating our common lunch at my office with my friends, going ot the movies, taking my family to eat at a restaurant, having a drink ata friend's house, driving on the freeway, gong to bed again. There are a few more....
+
+If these few patterns are good for me, I can live well. If they are bad for me, I can't.
+#+END_QUOTE
+-- Chris Alexander in /The Timeless Way of Building/
+:END:
+
+There is a myth that a person need only do inner work-- that a man is entirely responsible for his own problems, and that to cure himself, he need only change himself[fn:1]. In reality, our lives are as much a product of our environment as anything else. And for as much as we do to shape our surroundings, we are to a greater extent /formed by/ our surroundings. 
+
+Our actions are inseparable from the places in which they occur. You wouldn't go bowling without the lanes, nor play hockey on a baseball field. You wouldn't go clubbing at the library or have an intimate conversation on stage.
+
+Every environment defines the kind of experiences that will be had within. "Environment" describes both immediate surroundings such as the room you're in, or the larger setting, such as the layout of the town in which you live. They defines the patterns of daily life, the values which will be encouraged or stamped out, and the nature of the relationships among the inhabitants.
+
+This is because of the influence our environments have on us. Sometimes this influence is obvious and practical. You wouldn't try to study in a room with no seating or desk. But somtimes this influence is much more subtle or psychological in nature.
+
+A personal example: In my home, currently, I walk past a beautiful upright piano multiple times a day, and any time I feel like playing, I can just sit down and play. In contrast, if I were to play guitar, I would have to fetch a guitar from under my bed, take it out of the case, and set up my digital audio work-station on my computer for input monitoring because I do not own a guitar amp. All together, this only takes about 2 minutes to do, and yet the fact that I'm never /prompted/ to play guitar by seeing it, and the friction associated with getting set up to play, means I almost never play guitar these days. But I frequently play piano because the sight of it is an invitation to play.
+
+We have innate, immutable desires. Our environment can cater to certain desires while subduing others. It can pit our desires in conflict with one another, causing chronic stress and fatigue, or instead resolve conflict between otherwise competing desires.
+
+Consider a room with seating opposite the windows. Human beings are phototropic animals. Like moths, we tend toward bright light. Yet, if we are to be in a room for any length of time, we prefer to sit down. Having the seating away from the windows creates internal conflict within us. No inner work will resolve this conflict or make the stress go away. Almost every person will choose to sit down after some time, because our desire to sit is usually stronger than our desire to be near the bright light. Thus, the outcome is defined by the combination of our human nature (which remains constant) and our surroundings (which can change).
+
+Consider a college classroom with rows of forward facing desks for about 20 students, who, at the onset, don't know one another. During the short breaks during class time when someone could, hypothetically, strike up a conversation with someone new, people are inhibited by the backdrop of silence; the inescapable feeling that everyone else in the room is listening to every utterance. Now imagine the desks were arranged in squares of 4 facing each other. Although this makes little difference from a practical perspective, psychologically, it is another universe. At some point, it becomes weird /not/ to talk. It might turn the class into a catalyst for new friendships, (and perhaps also increase disruptions).
+
+On a street which lacks vibrant sidewalk life, a place conducive to casual contact among neighbors, people are compelled to either enlarge their private life to include their neighbors, or, more often, make little or no contact whatsoever. When forced to choose between sharing much or nothing, most choose to share nothing[fn:2]. And the absence of sidewalk life is itself caused by other features of the environment, such as the lack of businesses within walking distance. As such, the nature of the relationships among neighbors is downstream of the layout of the town, as is the variety, depth, and quality of the relationships each resident posesses.
+
+Conversely, public spaces, such as an active sidewalk, can prompt us to engage in spontaneous social interactions. Ironically, this becomes a breeding ground for more intimate relationships specifically because it does not entail any private commitments-- it safe to interact without inviting unwanted entanglements-- and also because, after repeated encounters, one's natural shyness is overcome by increasing familiarity.
+
+When our environment changes our lives, by motivating certain patterns of behavior, by slowly molding our values to reflect the necessities of our circumstances, by building or widdling down our relationships, it is doing work upon us. Our environment is always doing work upon us, and sometimes that work is constructive, helping us to thrive. Sometimes it's not.
+
+When you fully understand this, you'll realize that the work you do on your environment, (or effort to relocate), is an investment which may yield an enormous return. Whether choosing the layout of the furniture in your home, or the architectural design of your home, or the area you live in, or the zoning laws therein, you are constructing the circumstances which will mold yourself and your life.
+
+* notes                                                            :noexport:
+
+There is a myth that a person need only do inner work-- that a man is entirely responsible for his own problems, and that to cure himself, he need only change himself (Alexander, 106). In reality, our lives are as much a product of our environment as anything else. And for as much as we do to shape our surroundings, we are to a greater extent formed by our surroundings. 
+
+Our actions are inseparable from the places in which they occur.
+# elaborate
+#+BEGIN_COMMENT
+Activities
+- sitting on the porch, watching passers by.
+- sitting down having dinner
+- dancing at a club
+- dancing in a ballroom
+
+I want to say the our actions are in some essential way inseparable from the circumstances in which they occur. That without those circumstances our actions wouldn't even make sense. They would never occur. 
+
+You take a person swinging a bat and remove the pitcher, ball field, baseball, diamond, and it's fundamentally not the same thing. You can't even imagine baseball without the field.
+
+You take somebody sitting with a fishing rod and remove the lake and it's not the same thing. You can't even imagine fishing without water. 
+
+It's not just that our actions are inseperable from our circumstances and environments. That is true, but maybe it doesn't matter? Mabye it's beside the point? The main thing is, our actions are influenced if not dictated by our environments. This is because, you can't do certain activities without the environment to do so. And also because different environments cater to different desires, and spur us to act in different ways.
+
+
+
+You cannot play baseball without a baseball field, nor play hockey on one. You can't go clubbing at the library or have a dinner party under a bridge. Perhaps you could try, but clearly it would be a very different experience. Every environment defines the kind of experiences that will be had within.
+#+END_COMMENT
+
+
+
+
+-> The patterns of daily life are dictated by the environment and circumstances in which we live.
+-> Our environments either create or resolve inner conflict. They lend themselves toward certain choices.
+-> Our choices, motivated by our environments, shape our lives, our relationships with others, and ourselves.
+
+* Footnotes
+[fn:2] Paraphrased from chapter 3, page 62 of /The Death and Life of Great American Cities/ by Jane Jacobs.
+
+[fn:1] Paraphrased from page 106 of /The Timeless Way of Building/ by Christopher Alexander.

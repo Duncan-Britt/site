@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SeqImprove: Curation of Genetic Circuits</title>
+<meta name="generator" content="Org Mode" />
+<link rel="stylesheet" type="text/css" href="/stylesheets/color-scheme.css"/>
+<link rel="stylesheet" type="text/css" href="/stylesheets/layout-blog.css"/>
+<link rel="stylesheet" type="text/css" href="/stylesheets/blog-post.css"/>
+<link rel="stylesheet" type="text/css" href="/stylesheets/htmlize2.css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/src/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/src/readtheorg_theme/js/readtheorg.js"></script>
+<script src="/javascripts/htmlize.js"></script>
+</head>
+<body>
+<div id="preamble" class="status">
+<header>
+    <nav>
+        <a target="_self" href="/">About</a> -
+        <a target="_self" href="/blog-posts.html">Blog</a> |
+        <!-- <a target="_self" href="/portfolio.html">Portfolio</a> -         -->
+        <!-- <a target="_self" href="/contact.html">Contact</a> - -->
+        <!-- <a target="_self" href="/resume.html">Resume</a> | -->
+        <a target="_blank" rel="noopener noreferrer" href="https://duncan-britt.github.io/splice-docs">Splice</a> -
+        <a target="_blank" rel="noopener noreferrer" href="https://word-ladders.herokuapp.com/">Word Ladders</a>
+        <!-- <a target="_blank" rel="noopener noreferrer" href="https://github.com/Duncan-Britt/">GitHub</a> -
+             <a target="_blank" rel="noopener noreferrer" href="https://www.codewars.com/users/Duncan-Britt">Code Wars</a> -->
+    </nav>
+</header>
+</div>
+<div id="content" class="content">
+<h1 class="title">SeqImprove: Curation of Genetic Circuits</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#org520ae36">What is Synthetic Biology?</a>
+<ul>
+<li><a href="#orga4b9c4b">Genetic Engineering</a></li>
+<li><a href="#org4cd2074">Synthetic Biology</a></li>
+</ul>
+</li>
+<li><a href="#org02e81b3">Our mission</a></li>
+<li><a href="#orgd5d7f6b">SeqImprove</a>
+<ul>
+<li><a href="#orgc7fe16b">My Work</a></li>
+<li><a href="#org0d6f982">Challenges</a></li>
+<li><a href="#org6a946a8">Looking ahead</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<ul class="org-ul">
+<li><p><a href="https://seqimprove.synbiohub.org/" target="_blank">Site</a></li>
+<li><p><a href="https://github.com/MyersResearchGroup/SeqImprove" target="_blank">Repo</a></p></li>
+</ul>
+
+
+<div id="orgbc92c74" class="figure">
+<p><img src="./SeqImprove.gif" alt="SeqImprove.gif" style="width: 700px;height: auto;" />
+</p>
+<p><span class="figure-number">Figure 1: </span>Demo</p>
+</div>
+
+<div id="outline-container-org520ae36" class="outline-2">
+<h2 id="org520ae36">What is Synthetic Biology?</h2>
+<div class="outline-text-2" id="text-org520ae36">
+</div>
+<div id="outline-container-orga4b9c4b" class="outline-3">
+<h3 id="orga4b9c4b">Genetic Engineering</h3>
+<div class="outline-text-3" id="text-orga4b9c4b">
+<p>
+Genes are like tiny pieces of code that tell living things how to grow, develop, and function. Genetic engineering allows scientists to add new genes, remove genes, or change existing genes in an organism's DNA. It's like adding or deleting lines of code in a computer program. By making these changes, genetic engineers can give organisms new abilities or change their characteristics. For example, they can make crops more resistant to pests or drought, create bacteria or yeast which produce medicine, or even treat genetic diseases in humans.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org4cd2074" class="outline-3">
+<h3 id="org4cd2074">Synthetic Biology</h3>
+<div class="outline-text-3" id="text-org4cd2074">
+<p>
+Genetic Engineering as commonly practiced isn't a real engineering discipline. Imagine you design a bridge by throwing bricks at a river until you can cross the river. Then you call it a bridge and publish your design. Maybe you didn't notice that in the process of creating your bridge you inadvertently created a dam as well. That's analogous to how genetic engineering works most of the time.
+</p>
+
+<p>
+Synthetic Biology aims to turn genetic engineering into a real engineering discipline by applying the principles of standardization, abstraction, and modularity. The goal is to be able to create genetic circuits from understood components with predictable results. It's a nice idea, but most of the work in the field doesn't live up to those ideals. As yet the field is held back because the research is largely not findable, accessible, interoperable, or reusuable (F.A.I.R.). Genetic circuits are designed with ad-hoc methods which vary widely from lab to lab, and researchers communicate their genetic designs ambiguously, such that it cannot be easily reproduced by other researchers. Sometimes the data is not easily accessible.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org02e81b3" class="outline-2">
+<h2 id="org02e81b3">Our mission</h2>
+<div class="outline-text-2" id="text-org02e81b3">
+<p>
+A small but growing faction of researchers in the field, among them, the team at the Genetic Logic Lab at CU Boulder, are committed to bringing Synthetic Biology into the 21st century. This involves
+</p>
+<ul class="org-ul">
+<li>introducing a standardized, machine readable format for describing genetic designs unambiguously, known as the Synthetic Biology Open Language (SBOL),</li>
+<li>as well as providing a suite of software tools for designing, curating, and annotating SBOL documents,</li>
+<li>and finally maintaining an online database where researchers can share their designs at the time of publications and easily search for genetic components created by others.</li>
+</ul>
+
+<p>
+What we are trying to do isn't entirely new. Synthetic biology has a strong presence in industry, and based on what we know about how the process of manufacturing genetic circuits is automated by companies like Ginko and Amyris, we know they must have a suite of proprietary internal tools similar to what we are trying to build. But having an open standard could benefit the industry too if it allows collaboration between companies, and enables them to take advantage of better, more ambitious, and more reproducible research from academia.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgd5d7f6b" class="outline-2">
+<h2 id="orgd5d7f6b">SeqImprove</h2>
+<div class="outline-text-2" id="text-orgd5d7f6b">
+<p>SeqImprove is a web application proposed by <a href="https://geneticlogiclab.org/author/jet-mante/" target="_blank">Jet Mante</a> in her <a href="https://www.biorxiv.org/content/10.1101/2023.04.25.538300v1.full" target="_blank">doctoral thesis</a>, initially developed by a former undergaduate researcher named Zach Sents and handed off to me in late May 2023. The purpose of SeqImprove is to help the large majority of synthetic biologists who haven't yet adopted SBOL and the related tools into their workflow make that transition. SeqImprove allows you to take a very basic description of a genetic circuit containing only a dna sequence and perhaps a text description of it, and to turn that into a much more rich, fleshed out, machine readable SBOL document with text and sequence annotations that more fully describe the components and enable parts to be tagged such that they could appear in search results when the documents are uploaded to SynBioHub, the online database of SBOL documents.</p>
+
+<p>
+It would be practically impossible for a human being to read a DNA sequence and identify the genetic components, but SeqImprove does exactly that. It also uses machine learning to annotate text descriptions of genetic circuits, even as the text descriptions may refer to the same thing in different ways, or contain spelling errors.
+</p>
+</div>
+
+<div id="outline-container-orgc7fe16b" class="outline-3">
+<h3 id="orgc7fe16b">My Work</h3>
+<div class="outline-text-3" id="text-orgc7fe16b">
+
+<div id="org7db0c01" class="figure">
+<p><img src="./office.jpg" alt="office.jpg" width="60%" height="auto" />  
+</p>
+<p><span class="figure-number">Figure 2: </span>My workspace</p>
+</div>
+
+<p>
+So far (July 15, 2023) I've added a few features and fixed bugs.
+</p>
+<ul class="org-ul">
+<li>Added support for creating entries from scratch</li>
+<li>Added support for overlapping sequence annotations</li>
+<li>Added support for multiple roles for genetic components</li>
+<li>Added error handling</li>
+<li>Made sequences editable</li>
+<li>Made Display Ids editable</li>
+<li>Added support for url uploads from synbiohub</li>
+<li>Fixed copy/paste bug with DNA sequence display</li>
+<li>Added copy button for DNA sequence annotations</li>
+<li>Added footer with info about the lab &amp; links</li>
+<li>Fixed bug where server would crash if a bad url was sent</li>
+<li>Fixed bug where invalid URIs were generated from sequence annotations</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org0d6f982" class="outline-3">
+<h3 id="org0d6f982">Challenges</h3>
+<div class="outline-text-3" id="text-org0d6f982">
+<p>
+In order for our methods and workflows to see wider adoption in the community, we need to provide powerful and robust tools and be able to demonstrate their utility. In our lab and others, the graduate students tend to be more focused on synthetic biology than software, and the software tools like SeqImprove tend to be written by undergraduate C.S. majors who only work for a shortwhile on the project before moving on. The high turnover rate combined with the lack of experience on the part of the people making the software results in a lot of buggy software.
+</p>
+</div>
+</div>
+<div id="outline-container-org6a946a8" class="outline-3">
+<h3 id="org6a946a8">Looking ahead</h3>
+<div class="outline-text-3" id="text-org6a946a8">
+<p>
+Things to work on going forward:
+</p>
+<ul class="org-ul">
+<li>improving text annotations by retraining the neural network</li>
+<li>improving performance by rewriting the backend in the same programming language as the libraries we use for annotations so that the neural net can be an ongoing process on the server, rather than having to start and stop every request.</li>
+<li>improve metadata of resulting documents</li>
+<li>add support for other input file formats besides SBOL such as FASTA and GenBank</li>
+<li>allow the user to specify which library of genetic components to annotate against</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="date">Date: 2023-07-15 Sat 00:00</p>
+</div>
+</body>
+</html>

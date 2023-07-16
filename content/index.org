@@ -8,6 +8,11 @@
 #+END_EXPORT
 
 * *Highlighted Projects*
+- [[https://seqimprove.synbiohub.org/][SeqImprove]]:
+  #+BEGIN_EXPORT html
+  Annotation and Curation of Genetic Circuits -
+  <a target="_self" href="/blog/seqimprove/seqimprove.html"> article</a>
+  #+END_EXPORT
 - [[https://duncan-britt.github.io/splice-docs/][Splice]]:
   #+BEGIN_EXPORT html
   A templating language for front-end web development - 
@@ -20,7 +25,14 @@
   #+END_EXPORT
 - [[https://github.com/Duncan-Britt/Assignment-Tracker#readme][Assignment Tracker]]: To-do list app with query language interface.
 - [[https://github.com/Duncan-Britt/Tic-Tac-Toe#readme][Tic-Tac-Toe]]
-
+- 
+  #+BEGIN_EXPORT html
+  <a target="_self" href="/blog/path-finding-with-RRT/path-finding-RRT.html">Path Planning By Rapidly Exploring Random Trees Demo</a>
+  #+END_EXPORT
+- 
+  #+BEGIN_EXPORT html
+  <a target="_self" href="/blog/path-finding/path-finding.html">Path Planning With A* Demo</a>
+  #+END_EXPORT
 * *Links*
 - [[https://github.com/Duncan-Britt/][Github]]
 - [[https://www.codewars.com/users/Duncan-Britt][Code Wars]] 
