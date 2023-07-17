@@ -41,7 +41,7 @@ A small but growing faction of researchers in the field, among them, the team at
 
 # expand on the benefits of this ^^^  
 
-What we are trying to do isn't entirely new. Synthetic biology has a strong presence in industry, and based on what we know about how the process of manufacturing genetic circuits is automated by companies like Ginko and Amyris, we know they must have a suite of proprietary internal tools similar to what we are trying to build. But having an open standard could benefit the industry too if it allows collaboration between companies, and enables them to take advantage of better, more ambitious, and more reproducible research from academia.
+What we are trying to do isn't entirely new. Synthetic biology has a strong presence in industry, and based on what we know about how the process of manufacturing genetic circuits is automated by companies like Ginkgo and Amyris, we know they must have a suite of proprietary internal tools similar to what we are trying to build. But having an open standard could benefit the industry too if it allows collaboration between companies, and enables them to take advantage of better, more ambitious, and more reproducible research from academia.
 
 * SeqImprove
 # maybe have a source for the 98%, or just "many"
