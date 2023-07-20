@@ -73,7 +73,8 @@ So far (July 15, 2023) I've added a few features and fixed bugs.
 - Fixed bug where invalid URIs were generated from sequence annotations
 
 ** Challenges
-In order for our methods and workflows to see wider adoption in the community, we need to provide powerful and robust tools and be able to demonstrate their utility. In our lab and others, the graduate students tend to be more focused on synthetic biology than software, and the software tools like SeqImprove tend to be written by undergraduate C.S. majors who only work for a shortwhile on the project before moving on. The high turnover rate presents a significant obstacle.
+In order for our methods and workflows to see wider adoption in the community, we need to provide powerful and robust tools and be able to demonstrate their utility. Currently many of the tools and libraries in the ecosystem are unfinished, buggy, difficult to install, or all of the above. That must be resolved.
+
 ** Looking ahead
 Things to work on going forward:
 - improving text annotations by retraining the neural network
