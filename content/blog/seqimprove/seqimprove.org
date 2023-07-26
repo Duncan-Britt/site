@@ -47,7 +47,7 @@ A small but growing faction of researchers in the field, among them, the team at
   #+BEGIN_EXPORT html
   maintaining an <a href="https://synbiohub.org/" target="_blank">online database</a> where researchers can share their designs at the time of publication and easily search for genetic components created by others.
   #+END_EXPORT
-#+ATTR_HTML: :style width: 400px;height: auto;
+#+ATTR_HTML: :width 70% :height auto
 [[./sbol3_evolution.svg]][fn:1]
 
 #+BEGIN_EXPORT html
