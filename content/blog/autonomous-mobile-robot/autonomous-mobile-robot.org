@@ -6,8 +6,12 @@
 
 +
   #+BEGIN_EXPORT html
-  <a href="https://github.com/Duncan-Britt/Space-Grants-Robotics-ACC-22-23" target="_blank">Source Code</a>
+  <p><a href="https://github.com/Duncan-Britt/Space-Grants-Robotics-ACC-22-23" target="_blank">Source Code</a></p>
   #+END_EXPORT
+
+#+ATTR_ORG: :width 300px
+#+CAPTION: My Arduino Due with magnetometer
+[[./images/board.jpg]]
 
 I'm the lead programmer on the robotics team at school and where working on an autonomous mobile robot. The project is sponsored by NASA's Colorado Space Grants Consortium and our robot will participate in their challenge in April. The involves traversing a variety of outdoor obstacle courses without the use of GPS. What follows is an overview of our in progress program.
 
@@ -222,10 +226,74 @@ We also have functions for incrementing the velocity of the motors by a certain 
 #+end_SRC
 This is the interface that I expect to be used along with PID. PID tells us how to adjust the current speed and direction of the motors.
 
-* Perception & Localization :noexport:
+* Perception & Localization
 For any of the sensors we end up using, we'll need to write code that we can use to query the sensor for data. Currently we have a third party library for the Sharp IR sensor which makes getting distance data as easy as {{{src(sensor_IR.distance())}}}.
 
 There's a very real possibility that our estimate of our current position relative to the starting point won't be great and will become terrible as time goes on. The thing that is really important though is that we can maintain our sense of direction, and that's why a compass would be valuable. This way, we can make sure we are at least headed in the right general direction.
 
+* UPDATE: The challenge at the sand dunes.
+We didn't end up having time to implement all the feature I had planned for. A week before the challenge in April, we discovered the robot lacked sufficient torque to be able to turn in place. There wasn't enough time left to fix the hardware, but I could make the robot do wide turns by applying more power to either side. The plan became to have the robot do many-point turns.
 
+#+ATTR_ORG: :width 300px
+#+CAPTION: State diagram
+[[./images/state-diagram.png]]
 
+#+ATTR_HTML: :width 300px
+#+CAPTION: Testing out many-point turns
+[[./images/wide_turns.gif]]
+
+We also had yet to attach wheel encoders to the robot, so without the ability to localize or turn in place, I set about an entirely different strategy which involved having the robot attempt to go in the direction that was forward when the robot was turned on, and avoiding abstacles by turning away for a short time.
+
+When we got to the sand dunes we realized the courses were much narrower and shorter than we had anticipated. To accomodate this, I rewrote the driving script for our program several times while at the sand dunes, over the course of about 4 hours. Another source of difficulty we discovered at the dunes was that our IR sensors returned noisy distance readings and regularly picked up the ground, leading to false positives in obstacle detection. To deal with this, I attempted to avoid false pasitives by taking 10 consecutive measurements and only considering an obstacle detected if all measurements were within the threshold. It worked reasonably well, but we still didn't have enough space to turn with digging the robot into the sand and getting stuck.
+
+#+CAPTION: The driving script for our last attempt.
+#+BEGIN_SRC c++
+  loop_main
+  .when((void*)time_elapsed_ms_50)
+  .then((void*)+[]() -> void {
+      float xl = (float)sensor_left.distance();
+      float xr =  (float)sensor_right.distance();
+      int current_left = xl - ((0 - 3) * pow(10.0, 14.0) * pow((xl + 66.0), -7.42)) + 1.7;
+      int current_right = xr - 1.718 * sin((xr + 40.8) / (11.7802)) + 1.26; // sensor calibrations
+      for (int i = 9; i > 0; i--) {
+          prev_left[i] = prev_left[i - 1];
+          prev_right[i] = prev_right[i - 1];
+      }
+
+      prev_left[0] = current_left;
+      prev_right[0] = current_right;
+
+      bool left_detected = true;
+      bool right_detected = true;
+      for (int i = 0; i < 10; ++i) {
+          if (prev_left[i] > 25) {
+              left_detected = false;                  
+          }
+
+          if (prev_right[i] > 25) {
+              right_detected = false;
+          }
+
+          if ((!left_detected) || (!right_detected)) {
+              break;
+          } 
+      }
+
+      if (left_detected) { // back up to the left
+          motors_set_velocity_left(-10);
+          motors_set_velocity_right(-100);
+          delay(2000);
+      } else if (right_detected) { // back up to the right
+          motors_set_velocity_right(-10);
+          motors_set_velocity_left(-100);
+          delay(2000);
+      }
+      motors_set_velocity(100);
+   });
+#+END_SRC
+
+We were able to clear 3 of 5 obstacle courses, and we won an award for my navigation system despite that it was not in use at the dunes.
+
+#+ATTR_ORG: :width 300px
+#+CAPTION: IDA* algorithm test, ran on my Arduino Uno.
+[[./images/ida-star.gif]]
