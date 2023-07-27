@@ -234,15 +234,15 @@ There's a very real possibility that our estimate of our current position relati
 * UPDATE: The challenge at the sand dunes.
 We didn't end up having time to implement all the feature I had planned for. A week before the challenge in April, we discovered the robot lacked sufficient torque to be able to turn in place. There wasn't enough time left to fix the hardware, but I could make the robot do wide turns by applying more power to either side. The plan became to have the robot do many-point turns.
 
-#+ATTR_ORG: :width 300px
-#+CAPTION: State diagram
-[[./images/state-diagram.png]]
-
 #+ATTR_HTML: :width 300px
 #+CAPTION: Testing out many-point turns
 [[./images/wide_turns.gif]]
 
 We also had yet to attach wheel encoders to the robot, so without the ability to localize or turn in place, I set about an entirely different strategy which involved having the robot attempt to go in the direction that was forward when the robot was turned on, and avoiding abstacles by turning away for a short time.
+
+#+ATTR_ORG: :width 300px
+#+CAPTION: State diagram
+[[./images/state-diagram.png]]
 
 When we got to the sand dunes we realized the courses were much narrower and shorter than we had anticipated. To accomodate this, I rewrote the driving script for our program several times while at the sand dunes, over the course of about 4 hours. Another source of difficulty we discovered at the dunes was that our IR sensors returned noisy distance readings and regularly picked up the ground, leading to false positives in obstacle detection. To deal with this, I attempted to avoid false pasitives by taking 10 consecutive measurements and only considering an obstacle detected if all measurements were within the threshold. It worked reasonably well, but we still didn't have enough space to turn with digging the robot into the sand and getting stuck.
 
