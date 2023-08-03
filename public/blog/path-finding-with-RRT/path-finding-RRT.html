@@ -63,18 +63,18 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org9f06205">Overview</a></li>
-<li><a href="#org0a67dde">Implementation</a>
+<li><a href="#org164be45">Overview</a></li>
+<li><a href="#org633a4ca">Implementation</a>
 <ul>
-<li><a href="#org7ac4e9a">Event Handling</a></li>
-<li><a href="#org10fc6a1">Path Planning</a>
+<li><a href="#orgc0a1142">Event Handling</a></li>
+<li><a href="#org41f0775">Path Planning</a>
 <ul>
-<li><a href="#orgd8e8e10">Dealing With Obstacles</a></li>
+<li><a href="#org38ebc73">Dealing With Obstacles</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#orgacd73a0">Source Code</a></li>
+<li><a href="#org2530af9">Source Code</a></li>
 </ul>
 </div>
 </div>
@@ -83,7 +83,7 @@ In my last blog post, I demonstrated the A* path planning algorithm. In this blo
 </p>
 
 
-<div id="org3274ec2" class="figure">
+<div id="org8a24a26" class="figure">
 <p><img src="./RRT.gif" alt="RRT.gif" style="width: 200px;height: auto;" />
 </p>
 <p><span class="figure-number">Figure 1: </span>Demo</p>
@@ -95,23 +95,23 @@ In my last blog post, I demonstrated the A* path planning algorithm. In this blo
 </div>
 <div id="grid-container" style="position: relative; height: 420px"></div>
 
-<div id="outline-container-org9f06205" class="outline-2">
-<h2 id="org9f06205">Overview</h2>
-<div class="outline-text-2" id="text-org9f06205">
+<div id="outline-container-org164be45" class="outline-2">
+<h2 id="org164be45">Overview</h2>
+<div class="outline-text-2" id="text-org164be45">
 <p>
 Given a desired end position and starting position, RRT allows us to find a path connecting those two points. We start by randomly sampling a point on the plane. From there, we find the node in our tree which is closest to our sampled node. (At first, this is just the starting point). Then, having found that node, we move from it a short distance in the direction of the sampled node, until we either run into an obstacle or reach a maximum branch length. There, we'll place a child node. As you can see in the above demonstration, this has the effect of drawing out our tree to cover the space. We keep doing this until we are able to place a node within a certain threshold of distance to our desired destination.
 </p>
 </div>
 </div>
 
-<div id="outline-container-org0a67dde" class="outline-2">
-<h2 id="org0a67dde">Implementation</h2>
-<div class="outline-text-2" id="text-org0a67dde">
+<div id="outline-container-org633a4ca" class="outline-2">
+<h2 id="org633a4ca">Implementation</h2>
+<div class="outline-text-2" id="text-org633a4ca">
 <p>
 We're going to implement the following interface: which allows us to render the above demo of RRT in a given HTML container.
 </p>
 <div class="org-src-container">
-<pre class="src src-js" id="org3a9343b"><span class="linenr">14: </span>  document.addEventListener(<span class="org-string">"DOMContentLoaded"</span>, () =&gt; {
+<pre class="src src-js" id="org37a2980"><span class="linenr">14: </span>  document.addEventListener(<span class="org-string">"DOMContentLoaded"</span>, () =&gt; {
 <span class="linenr">15: </span>    <span class="org-keyword">let</span> <span class="org-variable-name">width</span> = window.innerWidth &gt; 450 ? 400 : window.innerWidth - 50;
 <span class="linenr">16: </span>    CanvasRRT({
 <span class="linenr">17: </span>      canvas_container: document.querySelector(<span class="org-string">'#grid-container'</span>),
@@ -148,7 +148,7 @@ We specified the DOM elements for our container and speed slider, as well as the
 </p>
 
 <div class="org-src-container">
-<pre class="src src-js" id="org07d6f3c"><span class="linenr">48: </span>  <span class="org-keyword">class</span> Circle {
+<pre class="src src-js" id="org5d27d0c"><span class="linenr">48: </span>  <span class="org-keyword">class</span> Circle {
 <span class="linenr">49: </span>    constructor({ center, radius, border_color, border_width=4, fill_color=border_color }) {
 <span class="linenr">50: </span>      <span class="org-constant">this</span>.center = center;
 <span class="linenr">51: </span>      <span class="org-constant">this</span>.radius = radius;
@@ -172,7 +172,7 @@ We specified the DOM elements for our container and speed slider, as well as the
 First, we're going to set up our HTML canvases. The second canvas acts as a top layer for placing temporary drawings. This way, when we animate the algorithm, we can erase the sampled points by clearing <code>layer2</code>.
 </p>
 <div class="org-src-container">
-<pre class="src src-js" id="org83966a1"><span class="linenr"> 89: </span><span class="org-keyword">async</span> <span class="org-keyword">function</span> CanvasRRT ({ canvas_container, width, height, objects, speed_slider }) {
+<pre class="src src-js" id="org1941b39"><span class="linenr"> 89: </span><span class="org-keyword">async</span> <span class="org-keyword">function</span> CanvasRRT ({ canvas_container, width, height, objects, speed_slider }) {
 <span class="linenr"> 90: </span>  <span class="org-keyword">let</span> <span class="org-variable-name">canvas</span> = document.createElement(<span class="org-string">'canvas'</span>);
 <span class="linenr"> 91: </span>  canvas.style.border = <span class="org-string">"6px solid black"</span>;
 <span class="linenr"> 92: </span>  canvas.style.touchAction = <span class="org-string">'none'</span>; <span class="org-comment-delimiter">// </span><span class="org-comment">Prevent scroll on touch screen devices.</span>
@@ -204,15 +204,15 @@ The <code>cx</code> (and <code>cx2</code>) object is what we will manipulate to 
 </p>
 </div>
 
-<div id="outline-container-org7ac4e9a" class="outline-3">
-<h3 id="org7ac4e9a">Event Handling</h3>
-<div class="outline-text-3" id="text-org7ac4e9a">
+<div id="outline-container-orgc0a1142" class="outline-3">
+<h3 id="orgc0a1142">Event Handling</h3>
+<div class="outline-text-3" id="text-orgc0a1142">
 <p>
 Next up, we're going to need a way to respond to user events.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-js" id="org5862707"><span class="linenr">366: </span>  layer2.addEventListener(<span class="org-string">'mousedown'</span>, press_handler, <span class="org-constant">true</span>);
+<pre class="src src-js" id="org7f265a3"><span class="linenr">366: </span>  layer2.addEventListener(<span class="org-string">'mousedown'</span>, press_handler, <span class="org-constant">true</span>);
 <span class="linenr">367: </span>  layer2.addEventListener(<span class="org-string">'pointerdown'</span>, press_handler, <span class="org-constant">true</span>);
 <span class="linenr">368: </span>  layer2.addEventListener(<span class="org-string">'mousemove'</span>, move_handler, <span class="org-constant">true</span>);
 <span class="linenr">369: </span>  layer2.addEventListener(<span class="org-string">'pointermove'</span>, move_handler, <span class="org-constant">true</span>);
@@ -226,7 +226,7 @@ We want the canvas to be continuously re-rendered if the use is dragging an obje
 </p>
 
 <div class="org-src-container">
-<pre class="src src-js" id="orgb9fb19f"><span class="linenr">136: </span>  <span class="org-keyword">let</span> <span class="org-variable-name">object_grabbed_idx</span> = -1;
+<pre class="src src-js" id="orge378c6a"><span class="linenr">136: </span>  <span class="org-keyword">let</span> <span class="org-variable-name">object_grabbed_idx</span> = -1;
 <span class="linenr">137: </span>  <span class="org-keyword">let</span> <span class="org-variable-name">object_hovered_idx</span> = -1;
 <span class="linenr">138: </span>  <span class="org-keyword">let</span> <span class="org-variable-name">clicked_on</span> = <span class="org-constant">false</span>;
 <span class="linenr">139: </span>
@@ -277,7 +277,7 @@ We want the canvas to be continuously re-rendered if the use is dragging an obje
 The path should be <a href="#coderef-RRT-call" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-RRT-call');" onmouseout="CodeHighlightOff(this, 'coderef-RRT-call');">recalculated</a> when the user releases the mouse/trackpad/etc&#x2026;. The path planning, especially when animated, may take some time, and while that is happening, we don't want the page to become unresponsive. Since JavaScript is single threaded, we have to interweave the execution of our path planning code asynchronously. For that, we're going to use the <code>Promise</code> API<sup><a id="fnr.1" class="footref" href="#fn.1" role="doc-backlink">1</a></sup>. 
 </p>
 <div class="org-src-container">
-<pre class="src src-js" id="orge8ae57b"><span class="linenr">332: </span>  <span class="org-keyword">let</span> <span class="org-variable-name">RRT_promise</span>;
+<pre class="src src-js" id="orgcdd0b4f"><span class="linenr">332: </span>  <span class="org-keyword">let</span> <span class="org-variable-name">RRT_promise</span>;
 <span class="linenr">333: </span>
 <span class="linenr">334: </span>  <span class="org-keyword">const</span> <span class="org-variable-name">unclick_handler</span> = e =&gt; {
 <span class="linenr">335: </span>    <span class="org-keyword">if</span> (!clicked_on) { <span class="org-comment-delimiter">// </span><span class="org-comment">the user may be unclicking off      </span>
@@ -319,7 +319,7 @@ Following a successful path planning, we'll <a href="#coderef-draw-path" class="
 Here's the code used to render the grid whenever we reset it.
 </p>
 <div class="org-src-container">
-<pre class="src src-js" id="org3414ed9"><span class="linenr">115: </span>  <span class="org-keyword">const</span> <span class="org-variable-name">render_grid</span> = () =&gt; {  
+<pre class="src src-js" id="org0814cea"><span class="linenr">115: </span>  <span class="org-keyword">const</span> <span class="org-variable-name">render_grid</span> = () =&gt; {  
 <span class="linenr">116: </span>    <span class="org-comment-delimiter">// </span><span class="org-comment">draw canvas background</span>
 <span class="linenr">117: </span>    cx.fillStyle = BACKGROUND_COLOR; <span class="org-comment-delimiter">// </span><span class="org-comment">blue green</span>
 <span class="linenr">118: </span>    cx.fillRect(0, 0, width, height);
@@ -347,14 +347,14 @@ At this point, we're ready to dive into the algorithm.
 </div>
 </div>
 
-<div id="outline-container-org10fc6a1" class="outline-3">
-<h3 id="org10fc6a1">Path Planning</h3>
-<div class="outline-text-3" id="text-org10fc6a1">
+<div id="outline-container-org41f0775" class="outline-3">
+<h3 id="org41f0775">Path Planning</h3>
+<div class="outline-text-3" id="text-org41f0775">
 <p>
 We begin by <a href="#coderef-sample" class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-sample');" onmouseout="CodeHighlightOff(this, 'coderef-sample');">sampling</a> a random spot from the grid.
 </p>
 <div class="org-src-container">
-<pre class="src src-js" id="org67abe5d"><span class="linenr">181: </span><span class="org-keyword">const</span> <span class="org-variable-name">timestep</span> = () =&gt; 1000 - speed_slider.value;
+<pre class="src src-js" id="org3df5504"><span class="linenr">181: </span><span class="org-keyword">const</span> <span class="org-variable-name">timestep</span> = () =&gt; 1000 - speed_slider.value;
 <span class="linenr">182: </span><span class="org-keyword">let</span> <span class="org-variable-name">path</span>;
 <span class="linenr">183: </span><span class="org-keyword">const</span> <span class="org-variable-name">RRT</span> = () =&gt; {
 <span class="linenr">184: </span>  <span class="org-keyword">return</span> <span class="org-keyword">new</span> <span class="org-type">Promise</span>(<span class="org-keyword">async</span> (resolve, reject, onCancel) =&gt; {
@@ -396,9 +396,9 @@ If the user sets the speed to anything less than 100%, we also <a href="#coderef
 </p>
 </div>
 
-<div id="outline-container-orgd8e8e10" class="outline-4">
-<h4 id="orgd8e8e10">Dealing With Obstacles</h4>
-<div class="outline-text-4" id="text-orgd8e8e10">
+<div id="outline-container-org38ebc73" class="outline-4">
+<h4 id="org38ebc73">Dealing With Obstacles</h4>
+<div class="outline-text-4" id="text-org38ebc73">
 <p>
 We now turn our attention to the task of deciding where to place our new node. We're going to put it in the direction of the sampled point, from our <code>nearest_node</code>. But we don't want to go very far at any given time. And we also don't want to place it within an obstacle, but we can go right up to the edge of an obstacle. We'll need a way to travel in the direction of the sampled point from our <code>nearest_node</code>. But we also need to be able to determine whether and where that line intersects with an obstacle. 
 </p>
@@ -419,7 +419,7 @@ where \(\vec{r_0}\) is the vector pointing to point \(P\), from the origin. Noti
 \end{align*}
 
 <div class="org-src-container">
-<pre class="src src-js" id="org921d120"><span class="linenr">216: </span><span class="org-keyword">const</span> <span class="org-variable-name">dx</span> = xs - nearest_node.x;
+<pre class="src src-js" id="org75800e9"><span class="linenr">216: </span><span class="org-keyword">const</span> <span class="org-variable-name">dx</span> = xs - nearest_node.x;
 <span class="linenr">217: </span><span class="org-keyword">const</span> <span class="org-variable-name">dy</span> = ys - nearest_node.y;
 <span class="linenr">218: </span><span class="org-keyword">const</span> <span class="org-variable-name">magnitude</span> = Math.sqrt(dx**2 + dy**2);
 <span class="linenr">219: </span><span class="org-keyword">const</span> <span class="org-variable-name">ux</span> = dx / magnitude;
@@ -472,7 +472,7 @@ This may look messy, but all of these values are known constants. We're looking 
 </p>
 
 <div class="org-src-container">
-<pre class="src src-js" id="org0261f1f"><span class="linenr">232: </span><span class="org-keyword">let</span> <span class="org-variable-name">ts</span> = []; <span class="org-comment-delimiter">// </span><span class="org-comment">t values at intersections between r(t) and the circles</span>
+<pre class="src src-js" id="orgf85f1f6"><span class="linenr">232: </span><span class="org-keyword">let</span> <span class="org-variable-name">ts</span> = []; <span class="org-comment-delimiter">// </span><span class="org-comment">t values at intersections between r(t) and the circles</span>
 <span class="linenr">233: </span><span class="org-keyword">if</span> (unfulfilled_promise) {
 <span class="linenr">234: </span>  objects.slice(2).forEach(circle =&gt; {
 <span class="linenr">235: </span>    <span class="org-keyword">const</span> <span class="org-variable-name">cx</span> = circle.center.x;
@@ -491,7 +491,7 @@ This may look messy, but all of these values are known constants. We're looking 
 Next, we're going to evaluate and collect the solutions. We're only interested in solutions greater than 0 and less than the maximum distance we want to travel.
 </p>
 <div class="org-src-container">
-<pre class="src src-js" id="org7451a26"><span class="linenr">245: </span>      <span class="org-comment-delimiter">// </span><span class="org-comment">now we need to know if it has a solution on a range of t</span>
+<pre class="src src-js" id="orgc049c61"><span class="linenr">245: </span>      <span class="org-comment-delimiter">// </span><span class="org-comment">now we need to know if it has a solution on a range of t</span>
 <span class="linenr">246: </span>      <span class="org-keyword">let</span> <span class="org-variable-name">a</span> = cx * ux + cy * uy - ux * x0 - uy * y0;
 <span class="linenr">247: </span>      <span class="org-keyword">let</span> <span class="org-variable-name">denom</span> = ux**2 + uy**2;
 <span class="linenr">248: </span>      <span class="org-keyword">let</span> <span class="org-variable-name">t1</span> = (a - Math.sqrt(under_root)) / denom;
@@ -512,7 +512,7 @@ The \(t\) value we're going to use to place our actual node will be the minimum 
 </p>
 
 <div class="org-src-container">
-<pre class="src src-js" id="org63aa332"><span class="linenr">259: </span><span class="org-keyword">let</span> <span class="org-variable-name">tn</span> = Math.min(...ts, MAX_BRANCH_LENGTH, distance(nearest_node, { x: xs, y: ys })) - 0.2;
+<pre class="src src-js" id="org6c4a74c"><span class="linenr">259: </span><span class="org-keyword">let</span> <span class="org-variable-name">tn</span> = Math.min(...ts, MAX_BRANCH_LENGTH, distance(nearest_node, { x: xs, y: ys })) - 0.2;
 <span class="linenr">260: </span>
 <span class="linenr">261: </span><span class="org-keyword">if</span> (objects.slice(2).every(circle =&gt; !circle.within(...r(tn)))) {       
 <span class="linenr">262: </span>  <span class="org-keyword">const</span> <span class="org-variable-name">new_node</span> = <span class="org-keyword">new</span> <span class="org-type">PathNode</span>(...r(tn), nearest_node);
@@ -523,7 +523,7 @@ The \(t\) value we're going to use to place our actual node will be the minimum 
 We'll also animate the branch joining the node. and draw the node on the canvas.
 </p>
 <div class="org-src-container">
-<pre class="src src-js" id="org0af0a44"><span class="linenr">265: </span><span class="org-keyword">if</span> (timestep() != 0) {
+<pre class="src src-js" id="orgc620cf8"><span class="linenr">265: </span><span class="org-keyword">if</span> (timestep() != 0) {
 <span class="linenr">266: </span>  <span class="org-keyword">const</span> <span class="org-variable-name">waypoints</span> = calc_waypoints(nearest_node, new_node, 100);
 <span class="linenr">267: </span>  <span class="org-keyword">for</span> (<span class="org-keyword">let</span> <span class="org-variable-name">t</span> = 1; t &lt; waypoints.length; t++) {
 <span class="linenr">268: </span>    <span class="org-keyword">const</span> <span class="org-variable-name">a</span> = waypoints[t-1];
@@ -569,7 +569,7 @@ Finally we need to check and see if the new node is close enough to are target d
 </p>
 
 <div class="org-src-container">
-<pre class="src src-js" id="orga661661"><span class="linenr">305: </span>    <span class="org-keyword">if</span> (distance(new_node, objects[1].center) &lt; PROXIMITY_THRESHOLD &amp;&amp; unfulfilled_promise) {
+<pre class="src src-js" id="orgbbc649f"><span class="linenr">305: </span>    <span class="org-keyword">if</span> (distance(new_node, objects[1].center) &lt; PROXIMITY_THRESHOLD &amp;&amp; unfulfilled_promise) {
 <span class="linenr">306: </span>      <span class="org-keyword">let</span> <span class="org-variable-name">node</span> = new_node;
 <span class="linenr">307: </span>      path = [];
 <span class="linenr">308: </span>      <span class="org-keyword">while</span> (node <span class="org-keyword">instanceof</span> <span class="org-type">PathNode</span>) {
@@ -594,9 +594,9 @@ Finally we need to check and see if the new node is close enough to are target d
 </div>
 </div>
 
-<div id="outline-container-orgacd73a0" class="outline-2">
-<h2 id="orgacd73a0">Source Code</h2>
-<div class="outline-text-2" id="text-orgacd73a0">
+<div id="outline-container-org2530af9" class="outline-2">
+<h2 id="org2530af9">Source Code</h2>
+<div class="outline-text-2" id="text-org2530af9">
 <p>
 Below is the whole thing put together.
 </p>
