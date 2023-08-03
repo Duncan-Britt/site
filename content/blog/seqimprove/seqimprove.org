@@ -23,6 +23,8 @@
 #+CAPTION: Demo
 [[./SeqImprove.gif]]
 
+This summer I've been working for the Genetic Logic Lab at CU Boulder on a web application called SeqImprove. In order to understand SeqImprove, you first need to know the context of my work, described below.
+
 * What is Synthetic Biology?
 ** Genetic Engineering
 Genes are like tiny pieces of code that tell living things how to grow, develop, and function. Genetic engineering allows scientists to add new genes, remove genes, or change existing genes in an organism's DNA. It's like adding or deleting lines of code in a computer program. By making these changes, genetic engineers can give organisms new abilities or change their characteristics. For example, they can make crops more resistant to pests or drought, create bacteria or yeast which produce medicine, or even treat genetic diseases in humans.
@@ -68,7 +70,7 @@ It would be practically impossible for a human being to read a DNA sequence and 
 #+CAPTION: My workspace
 [[./office.jpg]]  
 
-So far (August 3, 2023) I've added a few features and fixed bugs.
+So far (updated August 3, 2023) I've added a few features and fixed bugs.
 - Massively improved performance (450% speed increase for sequence analysis!). This required rewriting the backend in the same language as the third party library we use for sequence analysis in order to be able to store parsed feature libraries in computer memory between requests. So I rewrote our nodeJS/express API as a Python/Flask API.
 - Implemented support for conversion of FASTA files to SBOL, to enable users to upload their genetic circuits on the more traditional FASTA format.
 - Allowed the user to select which part libraries to annotate sequences against, and display which part libraries an annotations came from.  
