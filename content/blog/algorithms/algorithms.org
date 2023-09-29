@@ -1,0 +1,46 @@
+#+TITLE: Algorithms at CU
+#+SETUPFILE: ../../../setup/blog-post.setup
+#+DATE: <2023-09-28>
+#+FILETAGS: :algorithms:
+
+#+BEGIN_EXPORT html
+<p>This is just a short post in which I mention that I'm taking Algorithms at school right now. I decided to keep a <a href="https://github.com/Duncan-Britt/algorithms/tree/main#Algorithms" target="_blank">Github repository</a>of my implementations of some of the algorithms we are being taught.</p>
+#+END_EXPORT
+
+These are the topics covered in the course:
+
+1. Proof by Induction.
+2. (Greedy) Shortest path algorithms: BFS/DFS.*
+3. (Greedy) Shortest path algorithms: Dijkstra’s Algorithm.*
+4. (Greedy) Examples where greedy algorithms fail.*
+5. (Greedy) Correctness: Exchange Arguments.
+6. (Greedy) Minimum-weight spanning trees: Safe and useless edges.*
+7. (Greedy) Minimum-weight spanning trees: Kruskal’s Algorithm.*
+8. (Greedy) Minimum-weight spanning trees: Prim’s Algorithm.*
+9. (Greedy) Huffman Encoding.
+10. (Greedy) Network flows: terminology.*
+11. (Greedy) Network Flows: Ford–Fulkerson Algorithm.*
+12. Asymptotics: Calculus I Techniques (Polynomials, Polylogarithmic Functions, L’Hopital’s Rule).*
+13. Asymptotics: Calculus II Techniques (Exponentials, Factorials, Quasipolynomials, Ratio and Root Test).*
+14. Analyzing Code I: Independent Nested Loops.*
+15. Analyzing Code II: Dependent Nested Loops.*
+16. Analyzing Code III: Writing Down Recurrences.*
+17. Analyzing Recurrences I: Unrolling.*
+18. (Divide & Conquer) Basics & counterexamples.*
+19. Analyzing Recurrences II: Tree Method.
+20. (Divide & Conquer) Quicksort, Modifications, and Analysis.*
+21. (Dynamic Programming) Identify the precise subproblems.*
+22. (Dynamic Programming) Write Down Recurrences.*
+23. (Dynamic Programming) Using Recurrence to solve.*
+24. (Dynamic Programming) Backtracking to find solutions. †
+25. (Dynamic Programming) Design Dynamic Programming Algorithms.*
+26. (Data Structures) Hash tables, collisions.†
+27. (Data Structures) Doubling lists & their amortized analysis.†
+28. (Computational Complexity) Formulating Decision Problems.†
+29. (Computational Complexity) Showing Problems belong to P.†
+30. (Computational Complexity) Showing Problems belong to NP.†
+31. (Computational Complexity) Structure and Consequences of P vs. NP.
+32. Challenge Standard I
+33. Challenge Standard II
+
+So far (September 28) we've covered the first 10.

@@ -24,7 +24,7 @@
   <a target="_self" href="/blog/software-generated-word-ladder-puzzles-and-web-app/software-generated-word-ladder-puzzles-and-web-app.html"> article</a>
   #+END_EXPORT
 - [[https://github.com/Duncan-Britt/Assignment-Tracker#readme][Assignment Tracker]]: To-do list app with query language interface.
-- [[https://github.com/Duncan-Britt/Tic-Tac-Toe#readme][Tic-Tac-Toe]]
+- [[https://github.com/Duncan-Britt/Tic-Tac-Toe#readme][Tic-Tac-Toe]] (with helper tool that recommends moves!)
 - 
   #+BEGIN_EXPORT html
   <a target="_self" href="/blog/path-finding-with-RRT/path-finding-RRT.html">Path Planning By Rapidly Exploring Random Trees Demo</a>
