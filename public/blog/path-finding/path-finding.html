@@ -62,16 +62,16 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#orge235a50">The A* Search Algorithm</a>
+<li><a href="#org18bab83">The A* Search Algorithm</a>
 <ul>
-<li><a href="#org93cce4a">Breadth First Search</a></li>
-<li><a href="#org5a81a6e">Dijkstra's Shortest Path</a></li>
-<li><a href="#orgb2695ca">A*</a>
+<li><a href="#org5717bf2">Breadth First Search</a></li>
+<li><a href="#org15782e3">Dijkstra's Shortest Path</a></li>
+<li><a href="#org99f8473">A*</a>
 <ul>
-<li><a href="#orge22de66">Grid Implementation</a></li>
-<li><a href="#org4c3a735">Plotting A Course</a></li>
-<li><a href="#org5fd9199">Priority Queue</a></li>
-<li><a href="#org3b1dd89">Rendering</a></li>
+<li><a href="#orgbe6a259">Grid Implementation</a></li>
+<li><a href="#orgfe7c468">Plotting A Course</a></li>
+<li><a href="#org42be6dd">Priority Queue</a></li>
+<li><a href="#org3f7a108">Rendering</a></li>
 </ul>
 </li>
 </ul>
@@ -83,11 +83,11 @@
 In this blog post, I'll walk through my implementation of the A* path planning algorithm, including all of the source code used in the demos. <a href="/blog/autonomous-mobile-robot/autonomous-mobile-robot.html">I originally wrote this program in C++, to run on an Arduino,</a> and then translated it line by line to JavaScript. So, this probably isn't the most idiomatic JavaScript code, but its nice in that it would be very straightforward to use this guide to implement this in a non-garbage-collected language.
 </p>
 
-<div id="outline-container-orge235a50" class="outline-2">
-<h2 id="orge235a50">The A* Search Algorithm</h2>
-<div class="outline-text-2" id="text-orge235a50">
+<div id="outline-container-org18bab83" class="outline-2">
+<h2 id="org18bab83">The A* Search Algorithm</h2>
+<div class="outline-text-2" id="text-org18bab83">
 
-<div id="org3b2a136" class="figure">
+<div id="org61b7974" class="figure">
 <p><img src="./A_star.gif" alt="A_star.gif" style="width: 200px;height: auto;" />
 </p>
 <p><span class="figure-number">Figure 1: </span>Demo</p>
@@ -96,15 +96,15 @@ In this blog post, I'll walk through my implementation of the A* path planning a
 <div id="grid-container"></div>
 </div>
 
-<div id="outline-container-org93cce4a" class="outline-3">
-<h3 id="org93cce4a">Breadth First Search</h3>
-<div class="outline-text-3" id="text-org93cce4a">
+<div id="outline-container-org5717bf2" class="outline-3">
+<h3 id="org5717bf2">Breadth First Search</h3>
+<div class="outline-text-3" id="text-org5717bf2">
 <p>
 Let's start with a very basic search algorithm: Breadth-First Search (BFS). Given a tree of nodes, we could search for a specific node by first visiting the root node, and then adding its children to a queue. From there, we would visit each node added to the queue, and for each, add its children to the queue.
 </p>
 
 
-<div id="org926c44e" class="figure">
+<div id="orga1cca18" class="figure">
 <p><img src="./bfs.gif" alt="bfs.gif" style="max-width: 500px; height: auto;" />
 </p>
 <p><span class="figure-number">Figure 2: </span>Breadth First Search</p>
@@ -112,9 +112,9 @@ Let's start with a very basic search algorithm: Breadth-First Search (BFS). Give
 </div>
 </div>
 
-<div id="outline-container-org5a81a6e" class="outline-3">
-<h3 id="org5a81a6e">Dijkstra's Shortest Path</h3>
-<div class="outline-text-3" id="text-org5a81a6e">
+<div id="outline-container-org15782e3" class="outline-3">
+<h3 id="org15782e3">Dijkstra's Shortest Path</h3>
+<div class="outline-text-3" id="text-org15782e3">
 <p>
 Dijkstra's famous algorithm improves upon BFS by using a priority queue, in which the elements are ordered based on the cost associated with arriving at each node. You could imagine a graph in which each node is a destination, and the edges are the roads between destinations. Associated with each edge is a cost which could represent the time it would take to traverse the road.
 </p>
@@ -124,7 +124,7 @@ This time, our queue will not contain individual nodes, but paths.
 </p>
 
 
-<div id="org1af55fe" class="figure">
+<div id="orgb56dabe" class="figure">
 <p><img src="./dijkstra.gif" alt="dijkstra.gif" style="max-width: 500px; height: auto;" />
 </p>
 <p><span class="figure-number">Figure 3: </span>Dijkstra's Shortest Path Algorithm</p>
@@ -132,17 +132,17 @@ This time, our queue will not contain individual nodes, but paths.
 </div>
 </div>
 
-<div id="outline-container-orgb2695ca" class="outline-3">
-<h3 id="orgb2695ca">A*</h3>
-<div class="outline-text-3" id="text-orgb2695ca">
+<div id="outline-container-org99f8473" class="outline-3">
+<h3 id="org99f8473">A*</h3>
+<div class="outline-text-3" id="text-org99f8473">
 <p>
 The A* search algorithm builds upon Dijkstra's algorithm by considering not only the cost associated with reaching a node, but also an estimate of the cost to reach the goal. Imagine every node in the previous graph contained a number which was the distance, as the crow flies, to the goal. This number would be weighed equally with the cost to reach a node when ordering the priority queue.
 </p>
 </div>
 
-<div id="outline-container-orge22de66" class="outline-4">
-<h4 id="orge22de66">Grid Implementation</h4>
-<div class="outline-text-4" id="text-orge22de66">
+<div id="outline-container-orgbe6a259" class="outline-4">
+<h4 id="orgbe6a259">Grid Implementation</h4>
+<div class="outline-text-4" id="text-orgbe6a259">
 <p>
 In this demonstration, I'm going to show you how I used A* in the context of an occupancy grid to find the shortest path between the two red squares in the grid, while avoiding obstacles. To start, we'll need a way to represent our grid. For convenience, we should have a human readable way to initialize our grid. I've made it so the grid can be initialized from a string.
 </p>
@@ -247,9 +247,9 @@ At this point, we're ready to dive into our path planning.
 </div>
 </div>
 
-<div id="outline-container-org4c3a735" class="outline-4">
-<h4 id="org4c3a735">Plotting A Course</h4>
-<div class="outline-text-4" id="text-org4c3a735">
+<div id="outline-container-orgfe7c468" class="outline-4">
+<h4 id="orgfe7c468">Plotting A Course</h4>
+<div class="outline-text-4" id="text-orgfe7c468">
 <div class="org-src-container">
 <pre class="src src-javascript"><span class="linenr">69: </span>plot_course() {
 <span class="linenr">70: </span>  <span class="org-keyword">const</span> <span class="org-variable-name">pq_max_size</span> = 10000;
@@ -440,15 +440,15 @@ Next up, the PathNodes used in <code>plot_course</code> need to be implemented:
 </div>
 </div>
 
-<div id="outline-container-org5fd9199" class="outline-4">
-<h4 id="org5fd9199">Priority Queue</h4>
-<div class="outline-text-4" id="text-org5fd9199">
+<div id="outline-container-org42be6dd" class="outline-4">
+<h4 id="org42be6dd">Priority Queue</h4>
+<div class="outline-text-4" id="text-org42be6dd">
 <p>
 We still need to implement the functionality associated with our priority queue. In order for A* to be efficient, the priority queue must be efficient, so I'ved used a min-heap.
 </p>
 
 
-<div id="org23cbf4a" class="figure">
+<div id="org2a39929" class="figure">
 <p><img src="./min-heap.png" alt="min-heap.png" style="max-width: 400px; height: auto;" />
 </p>
 <p><span class="figure-number">Figure 4: </span>Min Heap Example</p>
@@ -536,9 +536,9 @@ When we dequeue a node from our priority queue, we'll need to move things around
 </div>
 </div>
 
-<div id="outline-container-org3b1dd89" class="outline-4">
-<h4 id="org3b1dd89">Rendering</h4>
-<div class="outline-text-4" id="text-org3b1dd89">
+<div id="outline-container-org3f7a108" class="outline-4">
+<h4 id="org3f7a108">Rendering</h4>
+<div class="outline-text-4" id="text-org3f7a108">
 <p>
 Finally, all that's left is to render our completed grid and path. This post is about path planning, so I won't go into too much detail, but below you can see how I've used an HTML canvas element to display the grid and draw the path. In addition, there are event handlers which allow you to interact with the grid, dragging the end points, are drawing/erasing obstacles.
 </p>
