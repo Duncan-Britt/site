@@ -60,16 +60,16 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#orga439611">Program Overview</a></li>
-<li><a href="#org657435e">Path Planning</a></li>
-<li><a href="#org442541b">Grid Implementation</a></li>
-<li><a href="#org2223174">PID Control</a>
+<li><a href="#orgc4b7bd9">Program Overview</a></li>
+<li><a href="#orgf23089c">Path Planning</a></li>
+<li><a href="#org76a7e7e">Grid Implementation</a></li>
+<li><a href="#org414da28">PID Control</a>
 <ul>
-<li><a href="#org53f1c7f">Motor control</a></li>
+<li><a href="#orgeb17272">Motor control</a></li>
 </ul>
 </li>
-<li><a href="#org02ea48b">Perception &amp; Localization</a></li>
-<li><a href="#org184d3f2">UPDATE: The challenge at the sand dunes.</a></li>
+<li><a href="#org8e588ab">Perception &amp; Localization</a></li>
+<li><a href="#orgc2781f0">UPDATE: The challenge at the sand dunes.</a></li>
 </ul>
 </div>
 </div>
@@ -78,7 +78,7 @@
 </ul>
 
 
-<div id="org9bf520c" class="figure">
+<div id="orgd7ebb7f" class="figure">
 <p><img src="./images/board.jpg" alt="board.jpg" />
 </p>
 <p><span class="figure-number">Figure 1: </span>My Arduino Due with magnetometer</p>
@@ -88,11 +88,11 @@
 I'm the lead programmer on the robotics team at school and where working on an autonomous mobile robot. The project is sponsored by NASA's Colorado Space Grants Consortium and our robot will participate in their challenge in April. The involves traversing a variety of outdoor obstacle courses without the use of GPS. What follows is an overview of our in progress program.
 </p>
 
-<div id="outline-container-orga439611" class="outline-2">
-<h2 id="orga439611">Program Overview</h2>
-<div class="outline-text-2" id="text-orga439611">
+<div id="outline-container-orgc4b7bd9" class="outline-2">
+<h2 id="orgc4b7bd9">Program Overview</h2>
+<div class="outline-text-2" id="text-orgc4b7bd9">
 
-<div id="orgd35a3f4" class="figure">
+<div id="org5c62f9d" class="figure">
 <p><img src="./images/loops.svg" alt="loops.svg" class="org-svg" />
 </p>
 </div>
@@ -170,9 +170,9 @@ In the following sections I attempt to describe the components of the program in
 </p>
 </div>
 </div>
-<div id="outline-container-org657435e" class="outline-2">
-<h2 id="org657435e">Path Planning</h2>
-<div class="outline-text-2" id="text-org657435e">
+<div id="outline-container-orgf23089c" class="outline-2">
+<h2 id="orgf23089c">Path Planning</h2>
+<div class="outline-text-2" id="text-orgf23089c">
 <p>
 We need to figure out how to decide whether an obstacle has been detected and whether it interrupts our path forward, as well as where we believe the obstacle is. We also need to figure out how to persist this knowledge in a way that will consume the least amount of memory.
 </p>
@@ -182,7 +182,7 @@ Equipped with knowledge of where obstacles lie, we can model the landscape surro
 </p>
 
 
-<div id="orgba9acdf" class="figure">
+<div id="org80dccfc" class="figure">
 <p><img src="./images/occupancy-map.png" alt="occupancy-map.png" />
 </p>
 <p><span class="figure-number">Figure 2: </span>This image found <a href="https://iis-projects.ee.ethz.ch/index.php?title=Autonomous_Obstacle_Avoidance_with_Nano-Drones_and_Novel_Depth_Sensors">online</a> shows an example of an occupancy grid.</p>
@@ -249,9 +249,9 @@ Based on the memory available to us, we'll have to decide how large to make the 
 </p>
 </div>
 </div>
-<div id="outline-container-org442541b" class="outline-2">
-<h2 id="org442541b">Grid Implementation</h2>
-<div class="outline-text-2" id="text-org442541b">
+<div id="outline-container-org76a7e7e" class="outline-2">
+<h2 id="org76a7e7e">Grid Implementation</h2>
+<div class="outline-text-2" id="text-org76a7e7e">
 <p>
 The grid is implemented as an array of bits. 0's are open spaces and 1's are obstacles:
 </p>
@@ -288,15 +288,15 @@ One of the things to consider is perhaps having a <a href="https://ieeexplore.ie
 </p>
 
 
-<div id="org112f87a" class="figure">
+<div id="orgaa8e429" class="figure">
 <p><img src="./images/non-uniform-grid.jpeg" alt="non-uniform-grid.jpeg" />
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-org2223174" class="outline-2">
-<h2 id="org2223174">PID Control</h2>
-<div class="outline-text-2" id="text-org2223174">
+<div id="outline-container-org414da28" class="outline-2">
+<h2 id="org414da28">PID Control</h2>
+<div class="outline-text-2" id="text-org414da28">
 <p>
 The PID algorithm can be used to deal with the low level motor control of our robot. We can adjust the speed and direction of the motors using a function of the magnitude and direction of the discrepancy between where the robot is and where it wants to be at any given time, typically referred to as the <b>error value</b> in the context of PID. In addition to the error value \(e(t)\), PID also uses the accumulation of these error values over time \(\int{e(t)dt}\), and the rate at which the discrepancy is changing \(\frac{de}{dt}\).
 </p>
@@ -324,9 +324,9 @@ We still need to implement all of this. These two videos do a good job of explai
 </ul>
 </div>
 
-<div id="outline-container-org53f1c7f" class="outline-3">
-<h3 id="org53f1c7f">Motor control</h3>
-<div class="outline-text-3" id="text-org53f1c7f">
+<div id="outline-container-orgeb17272" class="outline-3">
+<h3 id="orgeb17272">Motor control</h3>
+<div class="outline-text-3" id="text-orgeb17272">
 <p>
 What I have implemented so far is an interface for controlling the motors. First, allow me to try and motivate the need for such an interface.
 </p>
@@ -386,9 +386,9 @@ This is the interface that I expect to be used along with PID. PID tells us how 
 </div>
 </div>
 
-<div id="outline-container-org02ea48b" class="outline-2">
-<h2 id="org02ea48b">Perception &amp; Localization</h2>
-<div class="outline-text-2" id="text-org02ea48b">
+<div id="outline-container-org8e588ab" class="outline-2">
+<h2 id="org8e588ab">Perception &amp; Localization</h2>
+<div class="outline-text-2" id="text-org8e588ab">
 <p>
 For any of the sensors we end up using, we'll need to write code that we can use to query the sensor for data. Currently we have a third party library for the Sharp IR sensor which makes getting distance data as easy as <code class="src src-sh"><span class="org-function-name">sensor_IR.distance</span>()</code>.
 </p>
@@ -399,15 +399,15 @@ There's a very real possibility that our estimate of our current position relati
 </div>
 </div>
 
-<div id="outline-container-org184d3f2" class="outline-2">
-<h2 id="org184d3f2">UPDATE: The challenge at the sand dunes.</h2>
-<div class="outline-text-2" id="text-org184d3f2">
+<div id="outline-container-orgc2781f0" class="outline-2">
+<h2 id="orgc2781f0">UPDATE: The challenge at the sand dunes.</h2>
+<div class="outline-text-2" id="text-orgc2781f0">
 <p>
 We didn't end up having time to implement all the feature I had planned for. A week before the challenge in April, we discovered the robot lacked sufficient torque to be able to turn in place. There wasn't enough time left to fix the hardware, but I could make the robot do wide turns by applying more power to either side. The plan became to have the robot do many-point turns.
 </p>
 
 
-<div id="orgda18abb" class="figure">
+<div id="orgff65481" class="figure">
 <p><img src="./images/wide_turns.gif" alt="wide_turns.gif" width="300px" />
 </p>
 <p><span class="figure-number">Figure 3: </span>Testing out many-point turns</p>
@@ -418,7 +418,7 @@ We also had yet to attach wheel encoders to the robot, so without the ability to
 </p>
 
 
-<div id="org7cd4d80" class="figure">
+<div id="orgf75f1d5" class="figure">
 <p><img src="./images/state-diagram.png" alt="state-diagram.png" />
 </p>
 <p><span class="figure-number">Figure 4: </span>State diagram</p>
@@ -479,7 +479,7 @@ We were able to clear 3 of 5 obstacle courses, and we won an award for my naviga
 </p>
 
 
-<div id="org96dbd25" class="figure">
+<div id="orgd3246ca" class="figure">
 <p><img src="./images/ida-star.gif" alt="ida-star.gif" />
 </p>
 <p><span class="figure-number">Figure 5: </span>IDA* algorithm test, ran on my Arduino Uno.</p>
