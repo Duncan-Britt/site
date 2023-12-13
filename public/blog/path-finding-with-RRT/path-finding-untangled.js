@@ -11,7 +11,7 @@ Promise.config({
   // asyncHooks: true,
 });
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", () => {  
   CanvasRRT({
     canvas_container: document.querySelector('#grid-container'),
     width: 400,
@@ -38,6 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
       new Circle({ center: { x: 375, y: 322 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
     ],
     speed_slider: document.querySelector('input#speed'),
+    instant_checkbox: document.getElementById('instant'),
   });
 });
 
@@ -86,7 +87,7 @@ function calc_waypoints(a, b, n) {
 
 const sleep = async ms => new Promise(r => setTimeout(r, ms));
 
-async function CanvasRRT ({ canvas_container, width, height, objects, speed_slider }) {
+async function CanvasRRT ({ canvas_container, width, height, objects, speed_slider, instant_checkbox }) {
   let canvas = document.createElement('canvas');
   canvas.style.border = "6px solid black";
   canvas.style.touchAction = 'none'; // Prevent scroll on touch screen devices.
@@ -122,7 +123,7 @@ async function CanvasRRT ({ canvas_container, width, height, objects, speed_slid
       cx.beginPath();
       // center=(x,y) radius=r angle=0 to 7
       cx.arc(object.center.x, object.center.y, object.radius - object.border_width / 2, 0, 7);
-      cx.fillStyle = object.fill_color;    
+      cx.fillStyle = object.fill_color;
       cx.fill();
       
       cx.lineWidth = object.border_width;
@@ -131,7 +132,7 @@ async function CanvasRRT ({ canvas_container, width, height, objects, speed_slid
       
       cx.closePath();
     });
-  }
+  };
 
   let object_grabbed_idx = -1;
   let object_hovered_idx = -1;
@@ -160,9 +161,9 @@ async function CanvasRRT ({ canvas_container, width, height, objects, speed_slid
         return object.within(e.offsetX, e.offsetY) ?  current_idx : res;
       }, -1); // -1 indicates no object hovered over
       if (object_hovered_idx == -1) {
-        layer2.style.cursor = "crosshair"
+        layer2.style.cursor = "crosshair";
       } else {
-        layer2.style.cursor = "grab"
+        layer2.style.cursor = "grab";
       }
 
       return;
@@ -206,7 +207,10 @@ async function CanvasRRT ({ canvas_container, width, height, objects, speed_slid
           cx2.fillStyle = sample_circle.fill_color;
           cx2.fill();
           cx2.closePath();
-          await sleep(timestep());
+          // await sleep(timestep());
+          // if (iterations % speed_slider.value == 0) {            
+            // await sleep(1);
+          // }
         }
         
         // Find the nearest node in the tree
@@ -267,13 +271,16 @@ async function CanvasRRT ({ canvas_container, width, height, objects, speed_slid
           const new_node = new PathNode(...r(tn), nearest_node);
           path_nodes.push(new_node);
 
-          if (timestep() != 0) {
-            const waypoints = calc_waypoints(nearest_node, new_node, 100);
+          // if (timestep() != 0) {
+          if (!instant_checkbox.checked) {
+            const n_waypoints = 2**(10-speed_slider.value);
+            const waypoints = calc_waypoints(nearest_node, new_node, n_waypoints);
             for (let t = 1; t < waypoints.length; t++) {
               const a = waypoints[t-1];
               const b = waypoints[t];
 
-              await sleep(timestep() / 100);
+              // await sleep(timestep() / 100);
+              await sleep(0);
               requestAnimationFrame(_ => {
                 if (unfulfilled_promise) {
                   cx.strokeStyle = TREE_COLOR;

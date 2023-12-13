@@ -19,9 +19,12 @@ In my last blog post, I demonstrated the A* path planning algorithm. In this blo
 [[./RRT.gif]]
 
 #+BEGIN_EXPORT html
-<div>
-  <input type="range" id="speed" name="volume" min="0" max="1000" value="5000">
-  <label for="speed">Speed</label>
+<div>    
+    <label for="instant" style="float: left;">Instant?</label>
+    <input type="checkbox" id="instant" name="instant"/>
+    <br/>    
+    <input type="range" id="speed" name="volume" min="2" max="8" value="5" style="display: block;"/>
+    <label for="speed">Speed</label>    
 </div>
 <div id="grid-container" style="position: relative; height: 420px"></div>
 #+END_EXPORT
@@ -29,9 +32,9 @@ In my last blog post, I demonstrated the A* path planning algorithm. In this blo
 * Overview
 Given a desired end position and starting position, RRT allows us to find a path connecting those two points. We start by randomly sampling a point on the plane. From there, we find the node in our tree which is closest to our sampled node. (At first, this is just the starting point). Then, having found that node, we move from it a short distance in the direction of the sampled node, until we either run into an obstacle or reach a maximum branch length. There, we'll place a child node. As you can see in the above demonstration, this has the effect of drawing out our tree to cover the space. We keep doing this until we are able to place a node within a certain threshold of distance to our desired destination.
 
-* Implementation
+* Canvas
 
-We're going to implement the following interface: which allows us to render the above demo of RRT in a given HTML container.
+We're going to implement the following interface which allows us to render the above demo of RRT in a given HTML container.
 #+NAME: interface
 #+BEGIN_SRC js -n 14 -r -i  
   document.addEventListener("DOMContentLoaded", () => {
@@ -62,6 +65,7 @@ We're going to implement the following interface: which allows us to render the 
         new Circle({ center: { x: 325, y: 322 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
       ],
       speed_slider: document.querySelector('input#speed'),
+      instant_checkbox: document.getElementById('instant'),
     });
   });
 #+END_SRC
@@ -91,7 +95,7 @@ We specified the DOM elements for our container and speed slider, as well as the
 First, we're going to set up our HTML canvases. The second canvas acts as a top layer for placing temporary drawings. This way, when we animate the algorithm, we can erase the sampled points by clearing ~layer2~.
 #+NAME: CanvasRRT-def-start
 #+BEGIN_SRC js -n 89 -r -i
-async function CanvasRRT ({ canvas_container, width, height, objects, speed_slider }) {
+async function CanvasRRT ({ canvas_container, width, height, objects, speed_slider, instant_checkbox }) {
   let canvas = document.createElement('canvas');
   canvas.style.border = "6px solid black";
   canvas.style.touchAction = 'none'; // Prevent scroll on touch screen devices.
@@ -119,7 +123,7 @@ async function CanvasRRT ({ canvas_container, width, height, objects, speed_slid
 #+END_SRC
 The ~cx~ (and ~cx2~) object is what we will manipulate to draw on our canvas.
 
-** Event Handling
+* Event Handling
 Next up, we're going to need a way to respond to user events.
 
 #+NAME: register-event-handlers
@@ -203,14 +207,14 @@ The path should be [[(RRT-call)][recalculated]] when the user releases the mouse
     RRT_promise = RRT(); (ref:RRT-call)
     RRT_promise.then(err => {
       if (err == 0) {
-        cx.strokeStyle = "#d63230"; 
-        cx.lineWidth = 3;           
-        cx.lineJoin = "round";      
-        cx.beginPath();             
-        cx.moveTo(path[0].x, path[0].y); 
-        path.forEach(node => { 
-          cx.lineTo(node.x, node.y);          
-        }); 
+        cx.strokeStyle = "#d63230";
+        cx.lineWidth = 3; 
+        cx.lineJoin = "round";
+        cx.beginPath();
+        cx.moveTo(path[0].x, path[0].y);
+        path.forEach(node => {
+          cx.lineTo(node.x, node.y);
+        });
         cx.stroke(); (ref:draw-path)
       }
     });
@@ -246,11 +250,10 @@ Here's the code used to render the grid whenever we reset it.
 #+END_SRC
 At this point, we're ready to dive into the algorithm.
 
-** Path Planning
+* Path Planning
 We begin by [[(sample)][sampling]] a random spot from the grid.
 #+NAME: RRT0
 #+BEGIN_SRC js -n 181 -r -i
-const timestep = () => 1000 - speed_slider.value;
 let path;
 const RRT = () => {
   return new Promise(async (resolve, reject, onCancel) => {
@@ -269,7 +272,7 @@ const RRT = () => {
       // randomly sample a point, (xs, ys) 
       let [xs, ys] = [Math.random() * canvas.width, Math.random() * canvas.height]; (ref:sample)
 
-      if (timestep() != 0 && unfulfilled_promise) {
+      if (!instant_checkbox.checked && unfulfilled_promise) {
         // display sample spot
         let sample_circle = new Circle({ center: {x: xs, y: ys}, radius: 3, fill: true, border_color: "red"});
         cx2.beginPath(); 
@@ -278,7 +281,6 @@ const RRT = () => {
         cx2.fillStyle = sample_circle.fill_color;
         cx2.fill(); (ref:draw-sample)
         cx2.closePath();
-        await sleep(timestep());
       }
 
       // Find the nearest node in the tree
@@ -288,7 +290,7 @@ const RRT = () => {
 #+END_SRC
 If the user sets the speed to anything less than 100%, we also [[(draw-sample)][draw the point]] on the second layer of our canvas. Then we then we need to [[(find-nearest-node)][find the nearest node]] in the tree.
 
-*** Dealing With Obstacles
+** Dealing With Obstacles
 We now turn our attention to the task of deciding where to place our new node. We're going to put it in the direction of the sampled point, from our ~nearest_node~. But we don't want to go very far at any given time. And we also don't want to place it within an obstacle, but we can go right up to the edge of an obstacle. We'll need a way to travel in the direction of the sampled point from our ~nearest_node~. But we also need to be able to determine whether and where that line intersects with an obstacle. 
 
 A line through points $P$ and $Q$ can be described parametrically as
@@ -394,13 +396,15 @@ if (objects.slice(2).every(circle => !circle.within(...r(tn)))) {
 We'll also animate the branch joining the node. and draw the node on the canvas.
 #+NAME: math-5
 #+BEGIN_SRC js -n 265 -r -i
-if (timestep() != 0) {
-  const waypoints = calc_waypoints(nearest_node, new_node, 100);
+if (!instant_checkbox.checked) {
+  const n_waypoints = 2**(10-speed_slider.value);
+  const waypoints = calc_waypoints(nearest_node, new_node, n_waypoints);
   for (let t = 1; t < waypoints.length; t++) {
     const a = waypoints[t-1];
     const b = waypoints[t];
 
-    await sleep(timestep() / 100);
+    await sleep(0);
+    
     requestAnimationFrame(_ => {
       if (unfulfilled_promise) {
         cx.strokeStyle = TREE_COLOR;
@@ -521,7 +525,7 @@ const sleep = async ms => new Promise(r => setTimeout(r, ms));
   <<math-5>>
 
   <<end-loop>>
-reject(new Error("Iteration limit reached"));
+  reject(new Error("Iteration limit reached"));
 unfulfilled_promise = false;
 });
 };
@@ -579,6 +583,7 @@ Below is the whole thing put together.
         new Circle({ center: { x: 325, y: 322 }, radius: 30, border_color: "black", fill_color: "#79a5a5", }),
       ],
       speed_slider: document.querySelector('input#speed'),
+      instant_checkbox: document.getElementById('instant'),
     });
   });
 
@@ -627,7 +632,7 @@ Below is the whole thing put together.
 
   const sleep = async ms => new Promise(r => setTimeout(r, ms));
 
-  async function CanvasRRT ({ canvas_container, width, height, objects, speed_slider }) {
+  async function CanvasRRT ({ canvas_container, width, height, objects, speed_slider, instant_checkbox }) {
     let canvas = document.createElement('canvas');
     canvas.style.border = "6px solid black";
     canvas.style.touchAction = 'none'; // Prevent scroll on touch screen devices.
@@ -719,7 +724,6 @@ Below is the whole thing put together.
       render_grid();
     };
 
-    const timestep = () => 1000 - speed_slider.value;
     let path;
     const RRT = () => {
       return new Promise(async (resolve, reject, onCancel) => {
@@ -738,7 +742,7 @@ Below is the whole thing put together.
           // randomly sample a point, (xs, ys) 
           let [xs, ys] = [Math.random() * canvas.width, Math.random() * canvas.height];
         
-          if (timestep() != 0 && unfulfilled_promise) {
+          if (!instant_checkbox.checked && unfulfilled_promise) {
             // display sample spot
             let sample_circle = new Circle({ center: {x: xs, y: ys}, radius: 3, fill: true, border_color: "red"});
             cx2.beginPath(); 
@@ -747,7 +751,6 @@ Below is the whole thing put together.
             cx2.fillStyle = sample_circle.fill_color;
             cx2.fill();
             cx2.closePath();
-            await sleep(timestep());
           }
         
           // Find the nearest node in the tree
@@ -803,13 +806,15 @@ Below is the whole thing put together.
             const new_node = new PathNode(...r(tn), nearest_node);
             path_nodes.push(new_node);
 
-            if (timestep() != 0) {
-              const waypoints = calc_waypoints(nearest_node, new_node, 100);
+            if (!instant_checkbox.checked) {
+              const n_waypoints = 2**(10-speed_slider.value);
+              const waypoints = calc_waypoints(nearest_node, new_node, n_waypoints);
               for (let t = 1; t < waypoints.length; t++) {
                 const a = waypoints[t-1];
                 const b = waypoints[t];
               
-                await sleep(timestep() / 100);
+                await sleep(0);
+              
                 requestAnimationFrame(_ => {
                   if (unfulfilled_promise) {
                     cx.strokeStyle = TREE_COLOR;
@@ -884,14 +889,14 @@ Below is the whole thing put together.
       RRT_promise = RRT();
       RRT_promise.then(err => {
         if (err == 0) {
-          cx.strokeStyle = "#d63230"; 
-          cx.lineWidth = 3;           
-          cx.lineJoin = "round";      
-          cx.beginPath();             
-          cx.moveTo(path[0].x, path[0].y); 
-          path.forEach(node => { 
-            cx.lineTo(node.x, node.y);          
-          }); 
+          cx.strokeStyle = "#d63230";
+          cx.lineWidth = 3; 
+          cx.lineJoin = "round";
+          cx.beginPath();
+          cx.moveTo(path[0].x, path[0].y);
+          path.forEach(node => {
+            cx.lineTo(node.x, node.y);
+          });
           cx.stroke();
         }
       });
