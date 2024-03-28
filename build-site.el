@@ -1,3 +1,4 @@
+;;; My website -- Build script
 (require 'package)
 (setq package-user-dir (expand-file-name "./.pakages"))
 (setq package-archives '(("melpa" . "https://melpa.org/packages/")
