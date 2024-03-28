@@ -1,0 +1,243 @@
+#+TITLE: SBOL JS Documentation
+#+SETUPFILE: ../../../setup/blog-post.setup
+#+DATE: <2023-10-25>
+#+FILETAGS: :synthetic-biology:
+
+* SBOL3 Spec Notes
+srructural terms vs functional terms
+
+** Naming Conventions
+classes are named using upper "camel case"
+properties are named in lower camel case
+** TopLevel URI
+- [namespace]/[local]/[displayId]
+  Only [local] is optional
+  For example, a Component might have the URL https://synbiohub.org/public/igem/BBa_J23070, where 13 namespace is https://synbiohub.org, local is public/igem, and displayId is BBa_J23070
+
+- A TopLevel object’s URL MUST NOT be included as prefix for any other TopLevel object
+- The URL of any child or nested object MUST use the following pattern:[parent]/[displayId], where 19
+parent is the URL of its parent object.
+  Multiple layers of child objects are allowed using the same [parent]/[displayId] pattern recursively.
+  For example, a SequenceFeature object owned by the BBa_J23070 Component and having a displayId of 22
+SequenceFeature1 will have a URL of https://synbiohub.org/public/igem/BBa_J23070/SequenceFeature1.23
+Similarly, if the SequenceFeature1 object has a Location child object with a displayId of Location1, then 24
+that object will have the URL https://synbiohub.org/public/igem/BBa_J23070/SequenceFeature1/ 25
+Location1. 
+
+** SBOL URLs
+The SBOL namespace, which is http://sbols.org/v3#, is used to indicate which entities and properties in an SBOL 28
+document are defined by SBOL. For example, the URL of the type Component is http://sbols.org/v3#Component. 29
+This convention is assumed throughout the specification.  The SBOL namespace MUST NOT be used for any entities 30
+or properties not defined in this specification.
+** Primitive Data Types
+■ String: http://www.w3.org/2001/XMLSchema#string 40
+Section 5 Identifiers and Types Page 12 of 81
+Section 5.4 SBOL Types
+Example: “LacI coding sequence” 1
+■ Integer: http://www.w3.org/2001/XMLSchema#integer 2
+Example: 3 3
+■ Long: http://www.w3.org/2001/XMLSchema#long 4
+Example: 9223372036854775806 5
+■ Double: http://www.w3.org/2001/XMLSchema#double 6
+Example: 3.14159 7
+■ Boolean: http://www.w3.org/2001/XMLSchema#boolean 8
+Example: true 9
+The term literal is used to denote an objec
+** SBOL Types 15
+All SBOL objects are given the most specific rdfType in the SBOL 3 namespace (“http://sbols.org/v3#”) that 16
+defines the type of the object. Likewise, properties in the SBOL 3 namespace should only be used by objects with an 17
+SBOL 3 rdfType. 18
+SBOL does not use multiple inheritance: all SBOL classes are disjoint except with respect to their abstract parent 19
+classes. Accordingly, an object MUST NOT be given two rdfType properties referring to disjoint classes in the 20
+SBOL 3 namespace. An object MAY have redundant rdfType properties for its parent types, but this is NOT 21
+RECOMMENDED. 22
+For example, an object cannot have both the rdfType of Collection and Component. A Component could also have 23
+an rdfType for TopLevel and Identified, but this is discouraged
+
+** Object Closure and Document Composition 25
+In RDF, there is no requirement that all of the information about an object be stored in one location. Instead, there 26
+is a “open world” assumption that additional triples describing the object may be acquired at any time. Documents 27
+are allowed to be fragmented and composed in an arbitrary manner, down to their underlying atomic triples, with 28
+no consideration for object structure. 29
+This limits the ability to reason about properties of objects and validate the correctness of a model. For example, it 30
+would not be possible to validate that an Identified object has no more than one value for its displayId property, 31
+because it would not be possible to determine whether some other document somewhere in the world holds a 32
+second value for the property. 33
+SBOL addresses this by adding an object closure assumption that allows stronger reasoning about individual objects 34
+and their children. For any given SBOL document, if the document contains an rdfType statement regarding an 35
+Identified object X, then it is assumed that the document also contains all other property statements about object 36
+X as well. This enables strong validation rules, since any statement of the form “X predicate Y ” that is not present 37
+can be assumed to be false. For example, if a document has one value for an object’s displayId, then it is valid to 38
+conclude that there are no other displayId values, and thus its "zero or one" cardinality requirement is satisfied. 39
+We further assume that any document containing an object also contains all of its child objects. In other words, 40
+the fundamental unit of SBOL documents is the TopLevel object, and any document containing a TopLevel 41
+also contains the complete set of information necessary to describe that TopLevel—but not necessarily any 42
+Section 5 Identifiers and Types Page 13 of 81
+Section 5.5 Object Closure and Document Composition
+other TopLevel objects that it refers to. For example, a document containing a Component describing a plasmid is 1
+guaranteed to contain every Feature of the plasmid as well as every Interaction and Constraint that relates those 2
+features, but the document might not contain the Sequence for the plasmid or the definitions for the Component 3
+objects linked from its SubComponent parts. 4
+An SBOL document thus cleaves naturally along the boundaries of TopLevel objects, implying the following set of 5
+rules of fragmentation and composition of documents: 6
+■ Any subset of TopLevel objects in a valid SBOL document is also a valid SBOL document. 7
+■ Any disjoint set of TopLevel objects from different SBOL documents MAY be composed to form a new SBOL 8
+document. The result is not guaranteed to be valid, however, since the composition may expose problems 9
+due to the relationships between TopLevel objects from different documents. 10
+■ If two TopLevel objects in different SBOL documents have the same identity and and both they and their 11
+child objects contain equivalent sets of property assertions, then they MAY be treated as identical and freely 12
+merged. 13
+■ If two TopLevel objects in different SBOL documents have the same identity but different property values, 14
+then they MUST be considered different (possibly conflicting) versions, and any merger managed through 15
+some version control process. 
+** SBOL Data Model
+*** Attachment
+Extends [[TopLevel]]
+*** Collection
+Extends [[TopLevel]]
+*** CombinatorialDerivation
+Extends [[TopLevel]]
+*** Component
+Extends [[TopLevel]]
+
+- type[1..*] : IRI
+  Specifies category of biochemical or physical entity, e.g. DNA, protein, simple chemical.
+  In the case of DNA & RNA entities, additional type proprerties may be used to describe nucleic acid topology (circular/linear) and strandedness (double/single).
+  Partial list:
+  #+NAME: Table 2
+  | Component Type              | URL for SBO Term                    |
+  |-----------------------------+-------------------------------------|
+  | DNA (Deoxyribonucleic acid) | https://identifiers.org/SBO:0000251 |
+  | RNA (Ribonucleic acid)      | https://identifiers.org/SBO:0000250 |
+  | Protein (Polypeptide chain) | https://identifiers.org/SBO:0000252 |
+  | Simple Chemical             | https://identifiers.org/SBO:0000247 |
+  | Non-covalent complex        | https://identifiers.org/SBO:0000253 |
+  | Functional Entity           | https://identifiers.org/SBO:0000241 |
+  SO terms for DNA or RNA topology infromation:
+  | Nucleic Acid Topology | URL for Nucleic Acid Topology Term in SO |
+  |-----------------------+------------------------------------------|
+  | linear                | http://identifiers.org/SO:0000987        |
+  | circular              | http://identifiers.org/SO:0000988        |
+  | single-stranded       | http://identifiers.org/SO:0000984        |
+  | double-stranded       | http://identifiers.org/SO:0000985        |
+
+- role[0..*] : IRI
+  Must identify terms from ontologies that are consistent with the type property of the [[Component]].
+  Partial list:
+  | Component Role       | URL for Ontology Term              | Component Type |
+  |----------------------+------------------------------------+----------------|
+  | Promoter             | http://identifiers.org/SO:0000167  | DNA            |
+  | RBS                  | http://identifiers.org/SO:0000139  | DNA            |
+  | CDS                  | http://identifiers.org/SO:0000316  | DNA            |
+  | Terminator           | http://identifiers.org/SO:0000141  | DNA            |
+  | Gene                 | http://identifiers.org/SO:0000704  | DNA            |
+  | Operator             | http://identifiers.org/SO:0000057  | DNA            |
+  | Engineered Region    | http://identifiers.org/SO:0000804  | DNA            |
+  | mRNA                 | http://identifiers.org/SO:0000234  | RNA            |
+  | Effector             | http://identifiers.org/CHEBI:35224 | Small Molecule |
+  | Transcription Factor | http://identifiers.org/GO:0003700  | Protein        |
+
+References:
+- hasSequence[0..*] : IRI -> [[Sequence]]
+  - If a [[Feature]] of a [[Component]] refers to a [[Location]], and this [[Location]] refers to a [[Sequence]], then the [[Component]] MUST also include a hasSequence property that refers to this Sequence.
+  - If the Component object has exactly one hasSequence property.... If it has a type from [[Table 2]] and there is an encoding that is cross-listed in [[Table 1]] then the [[Sequence]] objects must have this encoding (e.g., a [[Component]] of type DNA must have a [[Sequence]] with an IUPAC DNA encoding). This sequence is implicitly the entire sequence from this [[Component]].
+  
+- hasModel[0..*] : IRI -> [[Model]]
+  
+Owns:  
+- hasFeature[0..*] : IRI -> [[Feature]]
+- hasInterface[0..1] : IRI -> [[Interface]]
+- hasConstraint[0..*] : IRI -> [[Constraint]]  
+- hasInteraction[0..*] : IRI -> [[Interaction]] 
+*** Constraint
+*** ExperimentalData
+Extends [[TopLevel]]
+*** Feature
+*** Identified
+All SBOL-defined classes are directly or indirectly derived from the Identified abstract class. This inheritance means that all SBOL objects are uniquely identified using IRIs that uniquely refer to these objects within an SBOL document or at locations on the World wide Web.
+- display[0..1] : String
+  only alphanumeric or underscore characters and MUST NOT begin with a digit
+  Displayed to humans when an identified object lacks the name property or IRI.
+- name[0..1] : String
+  Intended to be displayed to a human when visualizing an Identified object
+- description[0..1] : String
+  More thorough text description
+- prov:wasDerivedFrom[0..*] : IRI
+  Defined by the PROV-O ontology
+  located in the https://www.w3.org/ns/prov# namespace
+  Refers to non SBOL resources or SBOL Identified objects from which this object was derived.
+  Cannot refer to itself.
+  Cannot form a cyclical chain of references.
+Owns:
+- hasMeasure[0..*] : [[om:Measure]]
+  describes measured paramaters for this object.
+  om:Measure objects are defined by the OM ontology and is located in the http://www.ontology-of-units-of-measure.org/resource/om-2/ namespace
+References:
+- prov:wasGeneratedBy : [[prov:Activity]]
+  each of type IRI.
+  This property is defined by the PROV-O ontology and is located in the https://www.w3.org/ns/prov# namespace.
+  Refers to [[prov:Activity]] objects that describe how this object was generated.
+  Provenance history formed by prob:wasGeneratedby properties of Identified objects and entity references in [[prov:Usage]] objecst MUST NOT form circular reference chains.
+*** Implementation
+Extends [[TopLevel]]
+*** Interaction
+Each [[Interaction]] contains [[Participation]] objects that indicate the roels of the [[Feature]] objects involved in the [[Interaction]].
+*** Interface
+An [[Interface]] object indicates the inputs, outputs, and non directional points of connection to a Component.
+*** Participation
+*** Model
+Extends [[TopLevel]]
+*** om:Measure
+*** prov:Activity
+Extends [[TopLevel]]
+*** prov:Agent
+Extends [[TopLevel]]
+*** prov:Plan
+Extends [[TopLevel]]
+*** prov:Usage
+*** Sequence
+Extends [[TopLevel]]
+
+- elements[0..1] : String
+  Represents the constiuetnts of a molecule. Could represent the nucleotide bases of a molecule of DNA, the amino acid residues of a protein, or the atoms and chemical bonds of a small molecule.
+- encoding[0..1] : IRI
+  Not optional IF elements is set. Defines the character set of the sequence, e.g. 'atcg', or 'CNO=' for SMILES encoding.
+  #+NAME: Table 1
+  | Encoding       | URL                                      | Component Type  |
+  |----------------+------------------------------------------+-----------------|
+  | IUPAC DNA, RNA | https://identifiers.org/edam:format_1207 | DNA, RNA        |
+  | IUPAC Protein  | https://identifiers.org/edam:format_1208 | Protein         |
+  | InChI          | https://identifiers.org/edam:format_1197 | Simple Chemical |
+  | SMILES         | https://identifiers.org/edam:format_1196 | Simple Chemical |
+
+*** SubComponent
+*** TopLevel
+Extends [[Identified]]
+Abstract class extended by any Identified class that can be found at the top level of an SBOL document or file. TopLevel objects are not nested inside any other object vai composite aggregation.
+
+Top Level Classes:
+- [[Sequence]]
+- [[Component]]
+- [[Model]]
+- [[Collection]]
+- [[CombinatorialDerivation]]
+- [[Implementation]]
+- [[Attachment]]
+- [[ExperimentalData]]
+- [[prov:Activity]]
+- [[prov:Agent]]
+- [[prov:Plan]]
+
+Properties
+- hasNamespace[1] : URL
+  URL that defines the namespace portion of URLs for this object and any child objects. If the IRI for the [[TopLevel]] object is a URI, then the URI of the hasNamespace property MUST prefix match that URL.
+- hasAttachment[0..*] : IRI
+  IRI specifying an [[Attachment]] object.  
+*** Location
+*** SequenceFeature
+*** EntireSequenceLocation
+
+
+
+
+

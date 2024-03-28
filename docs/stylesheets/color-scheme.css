@@ -1,0 +1,23 @@
+/* @media (prefers-color-scheme: dark) { */
+/*   :root { */
+/*     --textcolor: red; */
+/*     --bgcolor: #f9f5d7; */
+/*     /\* --link: #00b3b3; *\/ */
+/*     /\* --visited: #80796f; *\/ */
+/*     /\* --highlight: #bdfcff; *\/ */
+/*     /\* --header: #000; *\/ */
+/*     /\* --bg-code: rgba(0, 0, 0, 7%); *\/ */
+/*   } */
+/* } */
+
+:root {
+  /* Color scheme */
+  --textcolor: rgba(51, 51, 51, 1);
+  --bgcolor: #1d2021;
+  /* --link: #9ae6db; */
+  /* --visited: #c1b7a9; */
+  /* --highlight: #79b2a8; */
+  /* --header: #fac50e; */
+  /* --bg-code: rgba(255, 255, 255, 17%); */
+}
+

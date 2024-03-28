@@ -1,0 +1,116 @@
+#+TITLE: Huffman Encoding Explainer
+#+SETUPFILE: ../../../setup/blog-post.setup
+#+DATE: <2023-09-24>
+#+FILETAGS: :algorithms:
+
+In this post I'll describe what Huffman Encoding is and walk you through the process of implementing it in Scala.
+
+* Fixed Length Encoding
+Suppose you have a string, such as ~peter piper picked a peck of pickled peppers~, and you want to represent the string with as few bits as you can. There are 14 distinct characters in the string, namely $\{\text{ },a,c,d,e,f,i,k,l,o,p,r,s,t\}$, which means that in order to represent this string with fixed length encoding, meaning that every character uses the same number of bits, you would need 4 bits per character, since $2^4 = 16 \geq 14$ and $2^3 = 8 < 14$, e.g.
+|      |    a |    c |    d |    e |    f |    i |
+|------+------+------+------+------+------+------|
+| 0000 | 0001 | 0010 | 0011 | 0100 | 0101 | 0110 |
+
+|    k |    l |    o |    p |    r |    s |    t |
+|------+------+------+------+------+------+------|
+| 0111 | 1000 | 1001 | 1010 | 1011 | 1100 | 1101 |
+
+With 4 bits per character and 44 characters in our string, that gives us 176 bits needed to represent the string, as follows:
+#+BEGIN_EXPORT html
+<div style="overflow-wrap: break-word;">10100100110101001011000010100110101001001011000010100110001001110100001100000001000010100100001001110000100101010000101001100010011110000100001100001010010010101010010010111100.</div>
+#+END_EXPORT
+
+But we can do better than that.
+
+* Huffman Encoding
+Huffman encoding works by using variable length encoding and assigning the shortest bit strings to the least frequently used characters in the string. In order to ensure that there is no ambiguity about which character is being represented, the digits assigned to each character are built from a tree in which each character is at a leaf node, such that if you follow the tree down from the root node, you can be sure there is no other path on the tree which begins with the same digits. This will make more sense after seeing an example. We'll take the same string as before, ~peter piper picked a peck of pickled peppers~, but find the huffman encoding of the string.
+
+To start, we need to measure the frequency with which each character in $\{\text{ },a,c,d,e,f,i,k,l,o,p,r,s,t\}$ appears.
+#+BEGIN_SRC scala :results value :exports src
+  val s = "peter piper picked a peck of pickled peppers"
+  val chars_freq_assoc = s.toSet.map { c:Char =>
+    (c, s.count(x => x == c).toDouble / s.length.toDouble)
+  }
+  chars_freq_assoc
+#+END_SRC
+
+#+BEGIN_SRC ruby :results value :exports results
+  s = "peter piper picked a peck of pickled peppers"
+  chars_freq_assoc = s.chars.uniq.map do |c|
+    [c, s.count(c).to_f / s.length.to_f]
+  end.sort_by do |_, b|
+    b
+  end
+#+END_SRC
+
+#+RESULTS:
+| f | 0.022727272727272728 |
+| a | 0.022727272727272728 |
+| o | 0.022727272727272728 |
+| l | 0.022727272727272728 |
+| t | 0.022727272727272728 |
+| s | 0.022727272727272728 |
+| d | 0.045454545454545456 |
+| k |  0.06818181818181818 |
+| r |  0.06818181818181818 |
+| i |  0.06818181818181818 |
+| c |  0.06818181818181818 |
+|   |   0.1590909090909091 |
+| e |  0.18181818181818182 |
+| p |  0.20454545454545456 |
+
+We're going to build up a tree that represents our Huffman encoding, where edges going to the left represent 0's and edges going to the right represent 1's. We define the tree type as follows.
+
+#+BEGIN_SRC scala
+  // Define a tree type for the huffman encoding. Leaf nodes are Chr (characters), else Frq (frequencies)
+  sealed trait Tree
+  case class Chr(c: Char) extends Tree
+  case class Frq(f: Double, children: (Option[Tree], Option[Tree])) extends Tree
+#+END_SRC
+
+Next we make subtrees of each character/frequency combo, and enqueue them all into a priority queue.
+
+#+BEGIN_SRC scala
+  import scala.collection.mutable.PriorityQueue
+
+  // This is necessary for Scala's std. lib PriorityQueue type,
+  // Without this, our Priority Queue would be a max heap
+  // We define our Ordering to make it be a min heap
+  object OrderFrq extends Ordering[Frq] {
+    def compare(x:Frq, y:Frq) = y.f compare x.f
+  }
+
+  val pq = new PriorityQueue[Frq]()(OrderFrq)
+
+  // Enqueue each member of the char_freq_assoc into the priority queue as Tree's.
+  // e.g. pq: {(0.06, a), (0.12, h), ...}
+  for (x <- chars_freq_assoc) {
+    pq.enqueue(Frq(x._2, (Some(Chr(x._1)), None)))
+  }
+#+END_SRC
+
+At this point, we can dequeue two subtrees at a time from the priority queue, merge them into a subtree, and then enqueue the result back into our priority queue until there is only one subtree left in our priority queue, at which point that is our huffman tree.
+
+#+BEGIN_SRC scala
+  while (pq.size > 1) {
+    val a:Frq = pq.dequeue
+    val b:Frq = pq.dequeue
+    // merge a and b into a subtree with frq of a + b, and enqueue it.
+    pq.enqueue(Frq(a.f + b.f, (Some(a), Some(b))))
+  }
+
+  val huffman_tree = pq.dequeue
+#+END_SRC
+
+To understand, let's walk through the steps of this algorithm.
+
+** Stepping through the algorithm
+1. priority queue: $\left((f, 0.023), (t, 0.023), (l, 0.023), (o, 0.023), (s, 0.023), (a, 0.023), (d, 0.045), (r, 0.068), (i, 0.068), (k, 0.068), (c, 0.068), ( , 0.159), (e, 0.182), (p, 0.205)\right)$
+
+2. $\left((l, 0.023), (o, 0.023), (s, 0.023), (a, 0.023), (d, 0.045), (r, 0.068), (i, 0.068), (k, 0.068), (c, 0.068), ( , 0.159), (e, 0.182), (p, 0.205)\right)$
+
+* notes                                                            :noexport:
+* Footnotes
+
+
+
