@@ -120,7 +120,7 @@
              :recursive nil
              :base-directory "./content"
              :base-extension "org"             
-             :publishing-directory "./public"
+             :publishing-directory "./docs"
              :publishing-function 'org-html-publish-to-html
              :exclude ".*\~\\|.*\.draft\.org"
              :with-author nil         ;; Don't include author name
@@ -134,7 +134,7 @@
              :recursive t
              :base-directory "./content/blog"
              :base-extension "org\\|html"
-             :publishing-directory "./public/blog"
+             :publishing-directory "./docs/blog"
              :publishing-function 'org-html-publish-to-html
              :exclude ".*\~\\|.*\.draft\.org"
              :with-author nil         ;; Don't include author name
@@ -156,13 +156,13 @@
              :base-directory "./content"
              :exclude ".*\~\\|.*node_modules\/.*" ;; Using CDN, excluding local node modules
              :base-extension "css\\|js\\|html\\|png\\|jpg\\|jpeg\\|svg\\|webp\\|gif\\|pdf\\|mp3\\|ogg\\|swf\\|stl\\|obj\\|wasm"
-             :publishing-directory "./public"
+             :publishing-directory "./docs"
              :publishing-function 'org-publish-attachment)
        ))
 
 ;; (defun create-nojekyll-file ()
-;;   "Create a .nojekyll file in the ./public directory if it doesn't already exist."
-;;   (let ((file-path "./public/.nojekyll"))
+;;   "Create a .nojekyll file in the ./docs directory if it doesn't already exist."
+;;   (let ((file-path "./docs/.nojekyll"))
 ;;     (unless (file-exists-p file-path)
 ;;       (with-temp-buffer
 ;;         (write-file file-path)))))
