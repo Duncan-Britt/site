@@ -56,16 +56,42 @@
 <header>
     <nav>
         <a target="_self" href="/">About</a> -
-        <a target="_self" href="/blog-posts.html">Blog</a> |
+        <a target="_self" href="/blog-posts.html">Blog</a>
         <!-- <a target="_self" href="/portfolio.html">Portfolio</a> -         -->
         <!-- <a target="_self" href="/contact.html">Contact</a> - -->
         <!-- <a target="_self" href="/resume.html">Resume</a> | -->
-        <a target="_blank" rel="noopener noreferrer" href="https://duncan-britt.github.io/splice-docs">Splice</a> -
-        <a target="_blank" rel="noopener noreferrer" href="https://word-ladders.herokuapp.com/">Word Ladders</a>
+        <!-- <a target="_blank" rel="noopener noreferrer" href="https://duncan-britt.github.io/splice-docs">Splice</a> - -->
+        <!-- <a target="_blank" rel="noopener noreferrer" href="https://word-ladders.herokuapp.com/">Word Ladders</a> -->
         <!-- <a target="_blank" rel="noopener noreferrer" href="https://github.com/Duncan-Britt/">GitHub</a> -
              <a target="_blank" rel="noopener noreferrer" href="https://www.codewars.com/users/Duncan-Britt">Code Wars</a> -->
     </nav>
 </header>
+<script>
+ document.addEventListener('DOMContentLoaded', () => {
+     // To fix Github pages broken links:
+     const GITHUB_PAGES_ORIGIN = 'https://duncan-britt.github.io';
+     const GITHUB_REPO_NAME = 'site';
+     const NEW_BASE_URI = GITHUB_PAGES_ORIGIN + '/' + GITHUB_REPO_NAME;
+     const HOME_PAGE = 'https://duncan-britt.github.io/site/';
+     
+     if (window.location.origin == GITHUB_PAGES_ORIGIN) { // <-- Don't do anything in when running locally.
+         const links = (window.location.href == HOME_PAGE ? document.querySelectorAll('a') : document.querySelectorAll('#preamble a'));
+         
+         links.forEach(link => {
+             if (link.origin == GITHUB_PAGES_ORIGIN) {
+                 link.href = NEW_BASE_URI + link.href.slice(link.origin.length);
+             }
+         });
+
+         const links_css = document.querySelectorAll('link');
+         links_css.forEach(link => {
+             if (link.rel == 'stylesheet') {
+                 link.href = NEW_BASE_URI + link.href.slice(GITHUB_PAGES_ORIGIN.length);
+             }
+         });
+     }
+ });
+</script>
 </div>
 <div id="content" class="content">
 <h1 class="title">Path Planning With A*</h1>
@@ -73,16 +99,16 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#orgb4e921c">The A* Search Algorithm</a>
+<li><a href="#org5763bd0">The A* Search Algorithm</a>
 <ul>
-<li><a href="#org6b32611">Breadth First Search</a></li>
-<li><a href="#org0d6fc58">Dijkstra's Shortest Path</a></li>
-<li><a href="#org8e44d3e">A*</a>
+<li><a href="#orgbcdd632">Breadth First Search</a></li>
+<li><a href="#org974f916">Dijkstra's Shortest Path</a></li>
+<li><a href="#orgec32a11">A*</a>
 <ul>
-<li><a href="#org89cd6d0">Grid Implementation</a></li>
-<li><a href="#orgfe5caa5">Plotting A Course</a></li>
-<li><a href="#org11b6b32">Priority Queue</a></li>
-<li><a href="#orge70e9b9">Rendering</a></li>
+<li><a href="#org0f56d66">Grid Implementation</a></li>
+<li><a href="#orgd61c397">Plotting A Course</a></li>
+<li><a href="#orge7b0a19">Priority Queue</a></li>
+<li><a href="#org6d2b4b5">Rendering</a></li>
 </ul>
 </li>
 </ul>
@@ -94,11 +120,11 @@
 In this blog post, I'll walk through my implementation of the A* path planning algorithm, including all of the source code used in the demos. <a href="/blog/autonomous-mobile-robot/autonomous-mobile-robot.html">I originally wrote this program in C++, to run on an Arduino,</a> and then translated it line by line to JavaScript. So, this probably isn't the most idiomatic JavaScript code, but its nice in that it would be very straightforward to use this guide to implement this in a non-garbage-collected language.
 </p>
 
-<div id="outline-container-orgb4e921c" class="outline-2">
-<h2 id="orgb4e921c">The A* Search Algorithm</h2>
-<div class="outline-text-2" id="text-orgb4e921c">
+<div id="outline-container-org5763bd0" class="outline-2">
+<h2 id="org5763bd0">The A* Search Algorithm</h2>
+<div class="outline-text-2" id="text-org5763bd0">
 
-<div id="orgc2bdf86" class="figure">
+<div id="orgadc1ac5" class="figure">
 <p><img src="./A_star.gif" alt="A_star.gif" style="width: 200px;height: auto;" />
 </p>
 <p><span class="figure-number">Figure 1: </span>Demo</p>
@@ -107,15 +133,15 @@ In this blog post, I'll walk through my implementation of the A* path planning a
 <div id="grid-container"></div>
 </div>
 
-<div id="outline-container-org6b32611" class="outline-3">
-<h3 id="org6b32611">Breadth First Search</h3>
-<div class="outline-text-3" id="text-org6b32611">
+<div id="outline-container-orgbcdd632" class="outline-3">
+<h3 id="orgbcdd632">Breadth First Search</h3>
+<div class="outline-text-3" id="text-orgbcdd632">
 <p>
 Let's start with a very basic search algorithm: Breadth-First Search (BFS). Given a tree of nodes, we could search for a specific node by first visiting the root node, and then adding its children to a queue. From there, we would visit each node added to the queue, and for each, add its children to the queue.
 </p>
 
 
-<div id="org2dba529" class="figure">
+<div id="org31e170c" class="figure">
 <p><img src="./bfs.gif" alt="bfs.gif" style="max-width: 500px; height: auto;" />
 </p>
 <p><span class="figure-number">Figure 2: </span>Breadth First Search</p>
@@ -123,9 +149,9 @@ Let's start with a very basic search algorithm: Breadth-First Search (BFS). Give
 </div>
 </div>
 
-<div id="outline-container-org0d6fc58" class="outline-3">
-<h3 id="org0d6fc58">Dijkstra's Shortest Path</h3>
-<div class="outline-text-3" id="text-org0d6fc58">
+<div id="outline-container-org974f916" class="outline-3">
+<h3 id="org974f916">Dijkstra's Shortest Path</h3>
+<div class="outline-text-3" id="text-org974f916">
 <p>
 Dijkstra's famous algorithm improves upon BFS by using a priority queue, in which the elements are ordered based on the cost associated with arriving at each node. You could imagine a graph in which each node is a destination, and the edges are the roads between destinations. Associated with each edge is a cost which could represent the time it would take to traverse the road.
 </p>
@@ -135,7 +161,7 @@ This time, our queue will not contain individual nodes, but paths.
 </p>
 
 
-<div id="org0ad4087" class="figure">
+<div id="org7b65c84" class="figure">
 <p><img src="./dijkstra.gif" alt="dijkstra.gif" style="max-width: 500px; height: auto;" />
 </p>
 <p><span class="figure-number">Figure 3: </span>Dijkstra's Shortest Path Algorithm</p>
@@ -143,17 +169,17 @@ This time, our queue will not contain individual nodes, but paths.
 </div>
 </div>
 
-<div id="outline-container-org8e44d3e" class="outline-3">
-<h3 id="org8e44d3e">A*</h3>
-<div class="outline-text-3" id="text-org8e44d3e">
+<div id="outline-container-orgec32a11" class="outline-3">
+<h3 id="orgec32a11">A*</h3>
+<div class="outline-text-3" id="text-orgec32a11">
 <p>
 The A* search algorithm builds upon Dijkstra's algorithm by considering not only the cost associated with reaching a node, but also an estimate of the cost to reach the goal. Imagine every node in the previous graph contained a number which was the distance, as the crow flies, to the goal. This number would be weighed equally with the cost to reach a node when ordering the priority queue.
 </p>
 </div>
 
-<div id="outline-container-org89cd6d0" class="outline-4">
-<h4 id="org89cd6d0">Grid Implementation</h4>
-<div class="outline-text-4" id="text-org89cd6d0">
+<div id="outline-container-org0f56d66" class="outline-4">
+<h4 id="org0f56d66">Grid Implementation</h4>
+<div class="outline-text-4" id="text-org0f56d66">
 <p>
 In this demonstration, I'm going to show you how I used A* in the context of an occupancy grid to find the shortest path between the two red squares in the grid, while avoiding obstacles. To start, we'll need a way to represent our grid. For convenience, we should have a human readable way to initialize our grid. I've made it so the grid can be initialized from a string.
 </p>
@@ -258,9 +284,9 @@ At this point, we're ready to dive into our path planning.
 </div>
 </div>
 
-<div id="outline-container-orgfe5caa5" class="outline-4">
-<h4 id="orgfe5caa5">Plotting A Course</h4>
-<div class="outline-text-4" id="text-orgfe5caa5">
+<div id="outline-container-orgd61c397" class="outline-4">
+<h4 id="orgd61c397">Plotting A Course</h4>
+<div class="outline-text-4" id="text-orgd61c397">
 <div class="org-src-container">
 <pre class="src src-javascript"><span class="linenr">69: </span>plot_course() {
 <span class="linenr">70: </span>  <span class="org-keyword">const</span> <span class="org-variable-name">pq_max_size</span> = 10000;
@@ -451,15 +477,15 @@ Next up, the PathNodes used in <code>plot_course</code> need to be implemented:
 </div>
 </div>
 
-<div id="outline-container-org11b6b32" class="outline-4">
-<h4 id="org11b6b32">Priority Queue</h4>
-<div class="outline-text-4" id="text-org11b6b32">
+<div id="outline-container-orge7b0a19" class="outline-4">
+<h4 id="orge7b0a19">Priority Queue</h4>
+<div class="outline-text-4" id="text-orge7b0a19">
 <p>
 We still need to implement the functionality associated with our priority queue. In order for A* to be efficient, the priority queue must be efficient, so I'ved used a min-heap.
 </p>
 
 
-<div id="orge35a144" class="figure">
+<div id="org595118d" class="figure">
 <p><img src="./min-heap.png" alt="min-heap.png" style="max-width: 400px; height: auto;" />
 </p>
 <p><span class="figure-number">Figure 4: </span>Min Heap Example</p>
@@ -547,9 +573,9 @@ When we dequeue a node from our priority queue, we'll need to move things around
 </div>
 </div>
 
-<div id="outline-container-orge70e9b9" class="outline-4">
-<h4 id="orge70e9b9">Rendering</h4>
-<div class="outline-text-4" id="text-orge70e9b9">
+<div id="outline-container-org6d2b4b5" class="outline-4">
+<h4 id="org6d2b4b5">Rendering</h4>
+<div class="outline-text-4" id="text-org6d2b4b5">
 <p>
 Finally, all that's left is to render our completed grid and path. This post is about path planning, so I won't go into too much detail, but below you can see how I've used an HTML canvas element to display the grid and draw the path. In addition, there are event handlers which allow you to interact with the grid, dragging the end points, are drawing/erasing obstacles.
 </p>

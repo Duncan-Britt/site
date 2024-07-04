@@ -22,16 +22,42 @@
 <header>
     <nav>
         <a target="_self" href="/">About</a> -
-        <a target="_self" href="/blog-posts.html">Blog</a> |
+        <a target="_self" href="/blog-posts.html">Blog</a>
         <!-- <a target="_self" href="/portfolio.html">Portfolio</a> -         -->
         <!-- <a target="_self" href="/contact.html">Contact</a> - -->
         <!-- <a target="_self" href="/resume.html">Resume</a> | -->
-        <a target="_blank" rel="noopener noreferrer" href="https://duncan-britt.github.io/splice-docs">Splice</a> -
-        <a target="_blank" rel="noopener noreferrer" href="https://word-ladders.herokuapp.com/">Word Ladders</a>
+        <!-- <a target="_blank" rel="noopener noreferrer" href="https://duncan-britt.github.io/splice-docs">Splice</a> - -->
+        <!-- <a target="_blank" rel="noopener noreferrer" href="https://word-ladders.herokuapp.com/">Word Ladders</a> -->
         <!-- <a target="_blank" rel="noopener noreferrer" href="https://github.com/Duncan-Britt/">GitHub</a> -
              <a target="_blank" rel="noopener noreferrer" href="https://www.codewars.com/users/Duncan-Britt">Code Wars</a> -->
     </nav>
 </header>
+<script>
+ document.addEventListener('DOMContentLoaded', () => {
+     // To fix Github pages broken links:
+     const GITHUB_PAGES_ORIGIN = 'https://duncan-britt.github.io';
+     const GITHUB_REPO_NAME = 'site';
+     const NEW_BASE_URI = GITHUB_PAGES_ORIGIN + '/' + GITHUB_REPO_NAME;
+     const HOME_PAGE = 'https://duncan-britt.github.io/site/';
+     
+     if (window.location.origin == GITHUB_PAGES_ORIGIN) { // <-- Don't do anything in when running locally.
+         const links = (window.location.href == HOME_PAGE ? document.querySelectorAll('a') : document.querySelectorAll('#preamble a'));
+         
+         links.forEach(link => {
+             if (link.origin == GITHUB_PAGES_ORIGIN) {
+                 link.href = NEW_BASE_URI + link.href.slice(link.origin.length);
+             }
+         });
+
+         const links_css = document.querySelectorAll('link');
+         links_css.forEach(link => {
+             if (link.rel == 'stylesheet') {
+                 link.href = NEW_BASE_URI + link.href.slice(GITHUB_PAGES_ORIGIN.length);
+             }
+         });
+     }
+ });
+</script>
 </div>
 <div id="content" class="content">
 <h1 class="title">Splice: An HTML templating language</h1>
@@ -39,13 +65,13 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#orgcb594ba">Overview</a></li>
-<li><a href="#orgec0e121">Abstract Syntax Tree (AST)</a></li>
-<li><a href="#orgdccfab5">Lexer &amp; Parser</a></li>
-<li><a href="#orgfe0c097">Generator</a></li>
-<li><a href="#org46694d1">My Process</a></li>
-<li><a href="#org02df7ac">Challenges</a></li>
-<li><a href="#orgc26c48c">Open issues</a></li>
+<li><a href="#orgba4e967">Overview</a></li>
+<li><a href="#orge0eff15">Abstract Syntax Tree (AST)</a></li>
+<li><a href="#orgeef8c9b">Lexer &amp; Parser</a></li>
+<li><a href="#org840e08c">Generator</a></li>
+<li><a href="#org3b28c00">My Process</a></li>
+<li><a href="#org9dedcff">Challenges</a></li>
+<li><a href="#org8058e63">Open issues</a></li>
 </ul>
 </div>
 </div>
@@ -54,9 +80,9 @@
 <li><a href="https://github.com/Duncan-Britt/Splice-Lang" target="_blank">Repo</a></li>
 </ul>
 
-<div id="outline-container-orgcb594ba" class="outline-2">
-<h2 id="orgcb594ba">Overview</h2>
-<div class="outline-text-2" id="text-orgcb594ba">
+<div id="outline-container-orgba4e967" class="outline-2">
+<h2 id="orgba4e967">Overview</h2>
+<div class="outline-text-2" id="text-orgba4e967">
 <p>
 I made an HTML templating language that I call Splice. It was a fun and educational exercise. Splice supports nesting, partial templates, iterators, conditionals, variable assignment, local scope, comments, escape characters, and escapes HTML by default. In its minified form, it is only 3.06 KB uncompressed, and has no dependencies.
 </p>
@@ -65,9 +91,9 @@ I made an HTML templating language that I call Splice. It was a fun and educatio
 </div>
 </div>
 
-<div id="outline-container-orgec0e121" class="outline-2">
-<h2 id="orgec0e121">Abstract Syntax Tree (AST)</h2>
-<div class="outline-text-2" id="text-orgec0e121">
+<div id="outline-container-orge0eff15" class="outline-2">
+<h2 id="orge0eff15">Abstract Syntax Tree (AST)</h2>
+<div class="outline-text-2" id="text-orge0eff15">
 <p>
 The AST for Splice begins not with a single root node, but with a collection of its children - the root node is imaginary. There are three types of nodes in the AST:
 </p>
@@ -100,7 +126,7 @@ would look something like this:
 </p>
 
 
-<div id="org91054a6" class="figure">
+<div id="orgb6695cc" class="figure">
 <p><img src="./images/ast.svg" alt="ast.svg" class="org-svg" width="60%" />
 </p>
 <p><span class="figure-number">Figure 1: </span>An example Splice AST</p>
@@ -108,9 +134,9 @@ would look something like this:
 </div>
 </div>
 
-<div id="outline-container-orgdccfab5" class="outline-2">
-<h2 id="orgdccfab5">Lexer &amp; Parser</h2>
-<div class="outline-text-2" id="text-orgdccfab5">
+<div id="outline-container-orgeef8c9b" class="outline-2">
+<h2 id="orgeef8c9b">Lexer &amp; Parser</h2>
+<div class="outline-text-2" id="text-orgeef8c9b">
 <p>
 The lexer and parser work together to turn the former template into the latter AST. The job of a lexer is to split up the text of a program into relevant tokens, and the job of a parser is to create the AST from those tokens. In my program, these roles are intertwined- tokens are parsed as soon as they are identified. My lexing/parsing function takes the template and returns an AST. Within, it runs a loop which invokes a function that identifies a single token, parses it, and returns the remaining template.
 </p>
@@ -158,9 +184,9 @@ When an operator body token is identified, the parser simply creates an AST from
 </div>
 </div>
 
-<div id="outline-container-orgfe0c097" class="outline-2">
-<h2 id="orgfe0c097">Generator</h2>
-<div class="outline-text-2" id="text-orgfe0c097">
+<div id="outline-container-org840e08c" class="outline-2">
+<h2 id="org840e08c">Generator</h2>
+<div class="outline-text-2" id="text-org840e08c">
 <p>
 Now the hard work is done! All thats left is to turn the tree into text again. A reminder, when someone uses the compiler, they pass an object with the data to be filled into the template. That object can be thought of as the global scope for the Splice program. The job of the generator is to use the scope and the AST to render the final text output.
 </p>
@@ -200,9 +226,9 @@ Valid bindings refer to some property of the scope object, so all generator has 
 </div>
 </div>
 
-<div id="outline-container-org46694d1" class="outline-2">
-<h2 id="org46694d1">My Process</h2>
-<div class="outline-text-2" id="text-org46694d1">
+<div id="outline-container-org3b28c00" class="outline-2">
+<h2 id="org3b28c00">My Process</h2>
+<div class="outline-text-2" id="text-org3b28c00">
 <p>
 My original design for the syntax didn't stick. It looked like this:
 </p>
@@ -223,9 +249,9 @@ For the implementation, I started by hardcoding a prototype AST as well as a tes
 </div>
 </div>
 
-<div id="outline-container-org02df7ac" class="outline-2">
-<h2 id="org02df7ac">Challenges</h2>
-<div class="outline-text-2" id="text-org02df7ac">
+<div id="outline-container-org9dedcff" class="outline-2">
+<h2 id="org9dedcff">Challenges</h2>
+<div class="outline-text-2" id="text-org9dedcff">
 <p>
 After creating the documentation website using Splice and thinking that it was good to go, I ventured to try opening the website in Safari, and lo and behold, the site crashed immediately. I learned the hard way that not all browsers support look-behinds in regular expressions, because I had 49 of them in my Splice compiler.
 </p>
@@ -271,9 +297,9 @@ To get a token and the remaining template it can be used like this:
 </div>
 
 
-<div id="outline-container-orgc26c48c" class="outline-2">
-<h2 id="orgc26c48c">Open issues</h2>
-<div class="outline-text-2" id="text-orgc26c48c">
+<div id="outline-container-org8058e63" class="outline-2">
+<h2 id="org8058e63">Open issues</h2>
+<div class="outline-text-2" id="text-org8058e63">
 <p>
 It would be good to enable pre-compilation of the templates to enable faster performance. My idea is to have an executable that will parse the template(s) within an html file and compile the syntax tree into javascript code, and then write it to a file. The resulting js file would contain a function which contains the syntax tree written as object/array/string literals. That way there is no parsing client-side, only compilation to html.
 </p>
