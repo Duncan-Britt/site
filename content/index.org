@@ -49,5 +49,5 @@
 * *Contact*
 Email: My initials + ru997 at gmail
 
-* *Resume*
+* *Resume*                                                          :noexport:
 [[file:documents/Duncan_Britt_Resume.pdf][PDF Download]]

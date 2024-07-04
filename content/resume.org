@@ -1,4 +1,0 @@
-#+TITLE: Resume
-#+SETUPFILE: ../setup/page.setup
-
-[[file:documents/Duncan_Britt_Resume.pdf][PDF Download]]
