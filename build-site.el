@@ -160,16 +160,8 @@
              :publishing-function 'org-publish-attachment)
        ))
 
-;; (defun create-nojekyll-file ()
-;;   "Create a .nojekyll file in the ./docs directory if it doesn't already exist."
-;;   (let ((file-path "./docs/.nojekyll"))
-;;     (unless (file-exists-p file-path)
-;;       (with-temp-buffer
-;;         (write-file file-path)))))
-
 ;; Generate the site output
 (org-publish-all t)
-;; (create-nojekyll-file)
 
 (message "Build complete!")
 
