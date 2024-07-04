@@ -65,7 +65,7 @@
     </nav>
 </header>
 <script>
- document.addEventListner('DOMContentLoaded', () => {
+ document.addEventListener('DOMContentLoaded', () => {
      // To fix Github pages broken links:
      const GITHUB_PAGES_ORIGIN = 'https://duncan-britt.github.io';
      const GITHUB_REPO_NAME = 'site';
@@ -97,16 +97,16 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#orgdc6b38d">Program Overview</a></li>
-<li><a href="#org28b8311">Path Planning</a></li>
-<li><a href="#org5fb6dc7">Grid Implementation</a></li>
-<li><a href="#org97235ff">PID Control</a>
+<li><a href="#org510f921">Program Overview</a></li>
+<li><a href="#org3d742eb">Path Planning</a></li>
+<li><a href="#orgb070578">Grid Implementation</a></li>
+<li><a href="#org3587d40">PID Control</a>
 <ul>
-<li><a href="#orga980c13">Motor control</a></li>
+<li><a href="#orgf368824">Motor control</a></li>
 </ul>
 </li>
-<li><a href="#org6a099cf">Perception &amp; Localization</a></li>
-<li><a href="#org1bcf90f">UPDATE: The challenge at the sand dunes.</a></li>
+<li><a href="#org30f83aa">Perception &amp; Localization</a></li>
+<li><a href="#orgd48389c">UPDATE: The challenge at the sand dunes.</a></li>
 </ul>
 </div>
 </div>
@@ -115,7 +115,7 @@
 </ul>
 
 
-<div id="org26a9267" class="figure">
+<div id="orgd5a9d44" class="figure">
 <p><img src="./images/board.jpg" alt="board.jpg" />
 </p>
 <p><span class="figure-number">Figure 1: </span>My Arduino Due with magnetometer</p>
@@ -125,11 +125,11 @@
 I'm the lead programmer on the robotics team at school and where working on an autonomous mobile robot. The project is sponsored by NASA's Colorado Space Grants Consortium and our robot will participate in their challenge in April. The involves traversing a variety of outdoor obstacle courses without the use of GPS. What follows is an overview of our in progress program.
 </p>
 
-<div id="outline-container-orgdc6b38d" class="outline-2">
-<h2 id="orgdc6b38d">Program Overview</h2>
-<div class="outline-text-2" id="text-orgdc6b38d">
+<div id="outline-container-org510f921" class="outline-2">
+<h2 id="org510f921">Program Overview</h2>
+<div class="outline-text-2" id="text-org510f921">
 
-<div id="org644b721" class="figure">
+<div id="org7f2aa4f" class="figure">
 <p><img src="./images/loops.svg" alt="loops.svg" class="org-svg" />
 </p>
 </div>
@@ -207,9 +207,9 @@ In the following sections I attempt to describe the components of the program in
 </p>
 </div>
 </div>
-<div id="outline-container-org28b8311" class="outline-2">
-<h2 id="org28b8311">Path Planning</h2>
-<div class="outline-text-2" id="text-org28b8311">
+<div id="outline-container-org3d742eb" class="outline-2">
+<h2 id="org3d742eb">Path Planning</h2>
+<div class="outline-text-2" id="text-org3d742eb">
 <p>
 We need to figure out how to decide whether an obstacle has been detected and whether it interrupts our path forward, as well as where we believe the obstacle is. We also need to figure out how to persist this knowledge in a way that will consume the least amount of memory.
 </p>
@@ -219,7 +219,7 @@ Equipped with knowledge of where obstacles lie, we can model the landscape surro
 </p>
 
 
-<div id="orgaeaa715" class="figure">
+<div id="org4dd57b0" class="figure">
 <p><img src="./images/occupancy-map.png" alt="occupancy-map.png" />
 </p>
 <p><span class="figure-number">Figure 2: </span>This image found <a href="https://iis-projects.ee.ethz.ch/index.php?title=Autonomous_Obstacle_Avoidance_with_Nano-Drones_and_Novel_Depth_Sensors">online</a> shows an example of an occupancy grid.</p>
@@ -286,9 +286,9 @@ Based on the memory available to us, we'll have to decide how large to make the 
 </p>
 </div>
 </div>
-<div id="outline-container-org5fb6dc7" class="outline-2">
-<h2 id="org5fb6dc7">Grid Implementation</h2>
-<div class="outline-text-2" id="text-org5fb6dc7">
+<div id="outline-container-orgb070578" class="outline-2">
+<h2 id="orgb070578">Grid Implementation</h2>
+<div class="outline-text-2" id="text-orgb070578">
 <p>
 The grid is implemented as an array of bits. 0's are open spaces and 1's are obstacles:
 </p>
@@ -325,15 +325,15 @@ One of the things to consider is perhaps having a <a href="https://ieeexplore.ie
 </p>
 
 
-<div id="org4c1c363" class="figure">
+<div id="org75d4f4d" class="figure">
 <p><img src="./images/non-uniform-grid.jpeg" alt="non-uniform-grid.jpeg" />
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-org97235ff" class="outline-2">
-<h2 id="org97235ff">PID Control</h2>
-<div class="outline-text-2" id="text-org97235ff">
+<div id="outline-container-org3587d40" class="outline-2">
+<h2 id="org3587d40">PID Control</h2>
+<div class="outline-text-2" id="text-org3587d40">
 <p>
 The PID algorithm can be used to deal with the low level motor control of our robot. We can adjust the speed and direction of the motors using a function of the magnitude and direction of the discrepancy between where the robot is and where it wants to be at any given time, typically referred to as the <b>error value</b> in the context of PID. In addition to the error value \(e(t)\), PID also uses the accumulation of these error values over time \(\int{e(t)dt}\), and the rate at which the discrepancy is changing \(\frac{de}{dt}\).
 </p>
@@ -361,9 +361,9 @@ We still need to implement all of this. These two videos do a good job of explai
 </ul>
 </div>
 
-<div id="outline-container-orga980c13" class="outline-3">
-<h3 id="orga980c13">Motor control</h3>
-<div class="outline-text-3" id="text-orga980c13">
+<div id="outline-container-orgf368824" class="outline-3">
+<h3 id="orgf368824">Motor control</h3>
+<div class="outline-text-3" id="text-orgf368824">
 <p>
 What I have implemented so far is an interface for controlling the motors. First, allow me to try and motivate the need for such an interface.
 </p>
@@ -423,9 +423,9 @@ This is the interface that I expect to be used along with PID. PID tells us how 
 </div>
 </div>
 
-<div id="outline-container-org6a099cf" class="outline-2">
-<h2 id="org6a099cf">Perception &amp; Localization</h2>
-<div class="outline-text-2" id="text-org6a099cf">
+<div id="outline-container-org30f83aa" class="outline-2">
+<h2 id="org30f83aa">Perception &amp; Localization</h2>
+<div class="outline-text-2" id="text-org30f83aa">
 <p>
 For any of the sensors we end up using, we'll need to write code that we can use to query the sensor for data. Currently we have a third party library for the Sharp IR sensor which makes getting distance data as easy as <code class="src src-sh"><span class="org-function-name">sensor_IR.distance</span>()</code>.
 </p>
@@ -436,15 +436,15 @@ There's a very real possibility that our estimate of our current position relati
 </div>
 </div>
 
-<div id="outline-container-org1bcf90f" class="outline-2">
-<h2 id="org1bcf90f">UPDATE: The challenge at the sand dunes.</h2>
-<div class="outline-text-2" id="text-org1bcf90f">
+<div id="outline-container-orgd48389c" class="outline-2">
+<h2 id="orgd48389c">UPDATE: The challenge at the sand dunes.</h2>
+<div class="outline-text-2" id="text-orgd48389c">
 <p>
 We didn't end up having time to implement all the feature I had planned for. A week before the challenge in April, we discovered the robot lacked sufficient torque to be able to turn in place. There wasn't enough time left to fix the hardware, but I could make the robot do wide turns by applying more power to either side. The plan became to have the robot do many-point turns.
 </p>
 
 
-<div id="org7b68bea" class="figure">
+<div id="orgf07b702" class="figure">
 <p><img src="./images/wide_turns.gif" alt="wide_turns.gif" width="300px" />
 </p>
 <p><span class="figure-number">Figure 3: </span>Testing out many-point turns</p>
@@ -455,7 +455,7 @@ We also had yet to attach wheel encoders to the robot, so without the ability to
 </p>
 
 
-<div id="org830c145" class="figure">
+<div id="orgeec442a" class="figure">
 <p><img src="./images/state-diagram.png" alt="state-diagram.png" />
 </p>
 <p><span class="figure-number">Figure 4: </span>State diagram</p>
@@ -516,7 +516,7 @@ We were able to clear 3 of 5 obstacle courses, and we won an award for my naviga
 </p>
 
 
-<div id="orgda362b7" class="figure">
+<div id="orgc848f6e" class="figure">
 <p><img src="./images/ida-star.gif" alt="ida-star.gif" />
 </p>
 <p><span class="figure-number">Figure 5: </span>IDA* algorithm test, ran on my Arduino Uno.</p>
